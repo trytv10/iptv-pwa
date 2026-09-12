@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1418">
+<title>Guia de Canales</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== Pantalla: Guia de canales ===== -->
+  <section id="pantalla-guia" class="pantalla activa">
+    <header class="encabezado">
+      <div class="marca">
+        <span class="marca__numero">00</span>
+        <span class="marca__texto">Guia de Canales</span>
+      </div>
+      <div class="buscador">
+        <input type="text" id="campo-busqueda" placeholder="Buscar canal..." autocomplete="off">
+      </div>
+      <button class="boton-icono" id="boton-config" aria-label="Cargar lista de canales">Cargar lista</button>
+    </header>
+
+    <nav class="filtros" id="filtros" aria-label="Filtrar por categoria">
+      <!-- se completa dinamicamente -->
+    </nav>
+
+    <main class="guia" id="guia" tabindex="-1">
+      <!-- filas de canales o estado vacio, generado por app.js -->
+    </main>
+  </section>
+
+  <!-- ===== Pantalla: Cargar lista de canales ===== -->
+  <section id="pantalla-config" class="pantalla">
+    <div class="config">
+      <div class="config__panel">
+        <button class="config__volver" id="boton-volver">&larr; Volver a la guia</button>
+        <h1 class="config__titulo">Cargar lista de canales</h1>
+        <p class="config__subtitulo">
+          Sumá tu listado por URL remota, subiendo un archivo .m3u/.m3u8/.json, o pegando el texto directamente.
+          Se guarda en este dispositivo y se puede actualizar cuando quieras.
+        </p>
+
+        <div class="config__tabs">
+          <button class="config__tab activo" data-tab="url">URL remota</button>
+          <button class="config__tab" data-tab="archivo">Archivo</button>
+          <button class="config__tab" data-tab="texto">Pegar texto</button>
+        </div>
+
+        <div class="config__campo activo" data-campo="url">
+          <label for="campo-url">URL del listado (.m3u, .m3u8 o .json)</label>
+          <input type="url" id="campo-url" placeholder="https://tu-servidor.com/lista.m3u8">
+        </div>
+
+        <div class="config__campo" data-campo="archivo">
+          <label>Archivo del listado</label>
+          <div class="config__archivo">
+            Arrastrá un archivo o <label for="campo-archivo">elegilo manualmente</label>
+            <input type="file" id="campo-archivo" accept=".m3u,.m3u8,.json,text/plain,application/json">
+            <div id="nombre-archivo" style="margin-top:8px;font-size:12.5px;"></div>
+          </div>
+        </div>
+
+        <div class="config__campo" data-campo="texto">
+          <label for="campo-texto">Contenido M3U o JSON</label>
+          <textarea id="campo-texto" placeholder="#EXTM3U
+#EXTINF:-1 tvg-logo=&quot;&quot; group-title=&quot;General&quot;,Nombre del canal
+https://ejemplo.com/canal/index.m3u8"></textarea>
+        </div>
+
+        <div class="config__acciones">
+          <button class="boton-primario" id="boton-cargar">Cargar lista</button>
+          <button class="boton-secundario" id="boton-limpiar">Borrar lista guardada</button>
+        </div>
+
+        <div class="config__mensaje" id="config-mensaje"></div>
+
+        <div class="config__info">
+          Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" group-title="Categoria",Nombre del canal</code>
+          seguido de la URL del stream .m3u8 en la linea siguiente.<br>
+          Formato JSON alternativo: una lista de objetos <code>{ "nombre": "", "url": "", "logo": "", "grupo": "" }</code>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Reproductor a pantalla completa ===== -->
+  <section id="reproductor" class="reproductor">
+    <video id="video" playsinline autoplay></video>
+    <div class="reproductor__capa">
+      <div class="reproductor__superior">
+        <button class="boton-icono" id="boton-cerrar-reproductor" aria-label="Volver a la guia">&larr; Guia</button>
+        <div class="reproductor__titulo">
+          <span class="numero" id="rp-numero"></span>
+          <span class="nombre" id="rp-nombre"></span>
+        </div>
+        <span class="reproductor__estado" id="rp-estado"></span>
+      </div>
+      <div class="reproductor__inferior">
+        <button class="boton-icono" id="boton-canal-anterior" aria-label="Canal anterior">&uarr; Anterior</button>
+        <button class="boton-icono" id="boton-canal-siguiente" aria-label="Canal siguiente">&darr; Siguiente</button>
+      </div>
+    </div>
+    <div class="reproductor__error">
+      <div class="reproductor__error__titulo">No se pudo reproducir esta senal</div>
+      <div>Revisa la URL del canal o probá con otro. Podés volver a la guia y elegir otro canal.</div>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
