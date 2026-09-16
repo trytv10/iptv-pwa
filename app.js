@@ -7,6 +7,12 @@
 const CLAVE_LISTA = 'iptv:lista-canales';
 const CLAVE_ORIGEN = 'iptv:origen-lista';
 
+// Listado central: vive en el propio repositorio. Al actualizarlo y subirlo
+// a GitHub, todos los dispositivos lo ven automaticamente sin cargar nada
+// a mano (a menos que ese dispositivo tenga una lista cargada manualmente,
+// que siempre tiene prioridad).
+const URL_LISTA_PREDETERMINADA = './canales.m3u8';
+
 const estado = {
   canales: [],       // [{ id, numero, nombre, url, logo, grupo }]
   filtro: 'Todos',
@@ -461,8 +467,25 @@ if ('serviceWorker' in navigator) {
    Arranque
    ======================================================= */
 
-(function iniciar() {
-  estado.canales = cargarListaGuardada();
+async function iniciar() {
+  const guardadaManualmente = cargarListaGuardada();
+
+  if (guardadaManualmente.length > 0) {
+    estado.canales = guardadaManualmente;
+  } else {
+    try {
+      const resp = await fetch(URL_LISTA_PREDETERMINADA, { cache: 'no-store' });
+      if (resp.ok) {
+        const texto = await resp.text();
+        estado.canales = normalizarCanales(parsearContenido(texto));
+      }
+    } catch (e) {
+      console.warn('No se encontro listado central (canales.m3u8) o no se pudo leer.', e);
+    }
+  }
+
   renderFiltros();
   renderGuia();
-})();
+}
+
+iniciar();
