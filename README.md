@@ -86,10 +86,34 @@ Usa **hls.js** (via CDN) en navegadores que lo necesitan, y el soporte nativo
 de HLS en Safari/iOS. No requiere backend propio para reproducir — cada
 dispositivo se conecta directo a la URL .m3u8 de cada canal.
 
+## Funciones agregadas
+
+- **Favoritos**: estrella en cada fila y en el reproductor. Se guardan por
+  dispositivo y hay un filtro "★ Favoritos" en la guia.
+- **Continuar viendo**: banner arriba de la guia que recuerda el ultimo canal
+  visto en ese dispositivo, con boton de reanudar directo.
+- **Agrupar por pais**: si tu listado incluye el atributo `tvg-country`
+  (M3U) o el campo `"pais"` (JSON) con un codigo ISO de 2 letras (AR, MX, ES,
+  US, etc.), aparece un selector "Categoria / Pais" arriba de los filtros,
+  con bandera y nombre de cada pais. Si ningun canal trae ese dato, el
+  selector queda oculto y todo sigue agrupado por categoria como antes.
+- **Idioma**: boton ES/EN arriba a la derecha, cambia toda la interfaz.
+  Se puede sumar mas idiomas ampliando el objeto `IDIOMAS` en `app.js`.
+- **Subtitulos**: si el stream trae pistas de subtitulos, aparece el boton
+  correspondiente en el reproductor con la lista de pistas disponibles.
+- **Calidad**: si el stream ofrece multiples resoluciones (HLS adaptativo),
+  aparece un selector de calidad manual ademas del modo automatico.
+- **Picture-in-Picture**: boton dedicado, disponible en navegadores que lo
+  soportan.
+- **AirPlay**: boton dedicado, visible solo en Safari/iOS/macOS.
+- **Chromecast**: boton dedicado; envia el canal actual a cualquier
+  dispositivo Chromecast en la misma red.
+
 ## Siguientes pasos posibles (no incluidos todavia)
 
 - EPG / guia de programación con horarios (formato XMLTV).
-- Favoritos persistentes.
+- Multiples fuentes de listado combinadas automaticamente.
+- Chequeo automatico de disponibilidad de canales (ej. via GitHub Actions).
 - Empaquetado nativo para Play Store (Android TV) con Media3/ExoPlayer,
   reutilizando este mismo listado.
 - App para Tizen/webOS empaquetando esta misma base con su SDK correspondiente.
