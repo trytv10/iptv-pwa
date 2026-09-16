@@ -1,4 +1,4 @@
-const CACHE = 'iptv-shell-v1';
+const CACHE = 'iptv-shell-v2';
 const ARCHIVOS_SHELL = [
   './',
   './index.html',
@@ -32,18 +32,18 @@ self.addEventListener('fetch', (evento) => {
     return;
   }
 
+  // Red primero para el shell de la app (HTML/CSS/JS/manifest): asi las
+  // actualizaciones se ven de inmediato. Si no hay conexion, usa la copia
+  // en cache como respaldo para que la app siga abriendo offline.
   evento.respondWith(
-    caches.match(evento.request).then((enCache) => {
-      return (
-        enCache ||
-        fetch(evento.request).then((respuesta) => {
-          if (respuesta.ok && evento.request.method === 'GET') {
-            const copia = respuesta.clone();
-            caches.open(CACHE).then((cache) => cache.put(evento.request, copia));
-          }
-          return respuesta;
-        }).catch(() => enCache)
-      );
-    })
+    fetch(evento.request)
+      .then((respuesta) => {
+        if (respuesta.ok && evento.request.method === 'GET') {
+          const copia = respuesta.clone();
+          caches.open(CACHE).then((cache) => cache.put(evento.request, copia));
+        }
+        return respuesta;
+      })
+      .catch(() => caches.match(evento.request))
   );
 });
