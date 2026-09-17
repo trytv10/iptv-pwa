@@ -163,6 +163,12 @@ const CLAVE_AGRUPACION = 'iptv:agrupacion';
 // que siempre tiene prioridad).
 const URL_LISTA_PREDETERMINADA = './canales.m3u8';
 
+// Indice de multiples fuentes a combinar en una sola guia. Formato:
+// ["https://.../lista1.m3u8", "https://.../lista2.json", ...]
+// o [{ "url": "...", "tipo": "m3u8" }, ...]. Si no existe o esta vacio,
+// se usa URL_LISTA_PREDETERMINADA como unica fuente (retrocompatible).
+const URL_FUENTES = './fuentes.json';
+
 const estado = {
   canales: [],
   filtro: 'Todos',
@@ -225,6 +231,70 @@ function leerUltimoVisto() {
 /* =======================================================
    Parsers: M3U/M3U8 y JSON
    ======================================================= */
+
+function esFuenteM3U(entrada) {
+  const ref = ((entrada.tipo || '') + ' ' + (entrada.url || '')).toLowerCase();
+  return ref.includes('m3u');
+}
+
+async function obtenerListaCombinadaDesdeFuentes() {
+  let fuentes = [];
+  try {
+    const resp = await fetch(URL_FUENTES, { cache: 'no-store' });
+    if (resp.ok) {
+      const datos = await resp.json();
+      fuentes = Array.isArray(datos) ? datos : (datos.fuentes || []);
+    }
+  } catch (e) {
+    console.warn('No se encontro fuentes.json o no se pudo leer.', e);
+  }
+
+  // Retrocompatibilidad: sin fuentes.json (o vacio), se usa el listado
+  // central unico como antes.
+  if (fuentes.length === 0) {
+    try {
+      const resp = await fetch(URL_LISTA_PREDETERMINADA, { cache: 'no-store' });
+      if (resp.ok) {
+        const texto = await resp.text();
+        return normalizarCanales(parsearContenido(texto));
+      }
+    } catch (e) {
+      console.warn('No se encontro listado central (canales.m3u8) o no se pudo leer.', e);
+    }
+    return [];
+  }
+
+  const entradas = fuentes.map((f) => (typeof f === 'string' ? { url: f } : f));
+
+  // Las fuentes .m3u/.m3u8 se combinan primero: ante un canal duplicado
+  // (misma URL de stream) en otra fuente, la version m3u8 es la que queda.
+  const ordenadas = [
+    ...entradas.filter(esFuenteM3U),
+    ...entradas.filter((e) => !esFuenteM3U(e)),
+  ];
+
+  const combinados = [];
+  const urlsVistas = new Set();
+
+  for (const entrada of ordenadas) {
+    if (!entrada.url) continue;
+    try {
+      const resp = await fetch(entrada.url, { cache: 'no-store' });
+      if (!resp.ok) continue;
+      const texto = await resp.text();
+      const crudos = parsearContenido(texto);
+      for (const c of crudos) {
+        if (!c.url || urlsVistas.has(c.url)) continue;
+        urlsVistas.add(c.url);
+        combinados.push(c);
+      }
+    } catch (e) {
+      console.warn('No se pudo cargar la fuente', entrada.url, e);
+    }
+  }
+
+  return normalizarCanales(combinados);
+}
 
 function extraerAtributo(linea, clave) {
   const m = linea.match(new RegExp(clave + '="([^"]*)"'));
@@ -922,15 +992,7 @@ async function iniciar() {
   if (guardadaManualmente.length > 0) {
     estado.canales = guardadaManualmente;
   } else {
-    try {
-      const resp = await fetch(URL_LISTA_PREDETERMINADA, { cache: 'no-store' });
-      if (resp.ok) {
-        const texto = await resp.text();
-        estado.canales = normalizarCanales(parsearContenido(texto));
-      }
-    } catch (e) {
-      console.warn('No se encontro listado central (canales.m3u8) o no se pudo leer.', e);
-    }
+    estado.canales = await obtenerListaCombinadaDesdeFuentes();
   }
 
   aplicarIdioma();
