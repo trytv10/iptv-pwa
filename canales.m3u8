@@ -37,10 +37,10 @@ http://hithd.camsh.orsk.ru/hls/hithd.m3u8
 #EXTINF:-1 tvg-name="Vitebsk Telekanal" tvg-logo="https://i.imgur.com/FXAqELU.jpg" tvg-id="Vitebsk.by" tvg-chno="12" tvg-country="BY" group-title="Belarus",Vitebsk Telekanal
 https://flu.vtv.by/tvt-non-by/tracks-v1a1/mono.m3u8
 
-#EXTINF:-1 tvg-logo="" tvg-country="KP" group-title="Corea del Norte (senal de prueba, no real)",Corea del Norte - Canal de prueba 1
-https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
-#EXTINF:-1 tvg-logo="" tvg-country="KP" group-title="Corea del Norte (senal de prueba, no real)",Corea del Norte - Canal de prueba 2
-https://test-streams.mux.dev/pts_shift/master.m3u8
+#EXTINF:-1 tvg-logo="" tvg-country="KP" group-title="Corea del Norte",Corea del Norte
+https://kctv.koryofront.org/stream/index.m3u8
+#EXTINF:-1 tvg-logo="" tvg-country="KP" group-title="Corea del Norte 2",Corea del Norte 2
+https://kctv.koryofront.org/stream/ryongnamsan/index.m3u8
 
 #EXTINF:-1 tvg-name="KVF Sjónvarp" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Kringvarp_F%C3%B8roya_2018.svg/500px-Kringvarp_F%C3%B8roya_2018.svg.png" tvg-id="KVFSjonvarp.fo" tvg-chno="1" tvg-country="FO" group-title="Faroe Islands",KVF Sjónvarp
 https://w-live-edge1.kringvarp.fo/uttanlands/_definst_/smil:uttanlands.smil/playlist.m3u8
