@@ -80,6 +80,30 @@ Se puede subir tal cual a cualquier hosting estatico:
   contemplada (flechas arriba/abajo cambian de canal dentro del reproductor,
   foco visible en toda la interfaz).
 
+## Multiples fuentes combinadas
+
+En vez de un solo `canales.m3u8`, la app lee `fuentes.json` en la raiz del
+repo: un indice con tantas URLs de listas como quieras (por pais, region o
+proveedor), y las combina todas en una sola guia.
+
+```json
+[
+  "./canales.m3u8",
+  "https://otro-servidor.com/lista-mexico.m3u8",
+  "https://otro-servidor.com/lista-espana.json"
+]
+```
+
+- Si el mismo canal (misma URL de stream) aparece en mas de una fuente,
+  **siempre gana la version que vino de una fuente .m3u8** sobre una JSON,
+  sin importar el orden en que esten listadas.
+- Si una fuente falla (esta caida o tarda), la app sigue con el resto —
+  no se cae toda la guia por una sola fuente rota.
+- Si `fuentes.json` no existe o esta vacio, la app usa `canales.m3u8` como
+  unica fuente (retrocompatible con como funcionaba antes).
+- El boton "Cargar lista" (carga manual en un dispositivo puntual) sigue
+  teniendo prioridad por sobre `fuentes.json` cuando esta presente.
+
 ## Reproduccion HLS
 
 Usa **hls.js** (via CDN) en navegadores que lo necesitan, y el soporte nativo
@@ -111,9 +135,12 @@ dispositivo se conecta directo a la URL .m3u8 de cada canal.
 
 ## Siguientes pasos posibles (no incluidos todavia)
 
+- Chequeo automatico de disponibilidad de canales (ej. via GitHub Actions),
+  para quitar de `fuentes.json`/canales caidos sin intervencion manual.
+- Registro de fuentes confiables con su origen y estabilidad.
+- Proxy para streams bloqueados por CORS.
+- Cuentas de usuario con sincronizacion de favoritos entre dispositivos.
 - EPG / guia de programación con horarios (formato XMLTV).
-- Multiples fuentes de listado combinadas automaticamente.
-- Chequeo automatico de disponibilidad de canales (ej. via GitHub Actions).
 - Empaquetado nativo para Play Store (Android TV) con Media3/ExoPlayer,
   reutilizando este mismo listado.
 - App para Tizen/webOS empaquetando esta misma base con su SDK correspondiente.
