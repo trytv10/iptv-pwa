@@ -169,6 +169,12 @@ const URL_LISTA_PREDETERMINADA = './canales.m3u8';
 // se usa URL_LISTA_PREDETERMINADA como unica fuente (retrocompatible).
 const URL_FUENTES = './fuentes.json';
 
+// Proxy CORS opcional (ver carpeta /proxy). Cuando un canal falla por un
+// error de red (tipico de bloqueo CORS), la app reintenta UNA vez a
+// traves de este proxy antes de mostrar el error. Dejar vacio ('') para
+// desactivar el reintento por proxy.
+const URL_PROXY = 'https://iptv-proxy.eolivera119600.workers.dev';
+
 const estado = {
   canales: [],
   filtro: 'Todos',
@@ -678,7 +684,7 @@ function construirMenuCalidadHls(hls) {
     });
 }
 
-function cargarStream(canal) {
+function cargarStream(canal, intentarProxy) {
   detenerStream();
   ocultarMenusFlotantes();
   rp.seccion.classList.remove('con-error');
@@ -689,13 +695,24 @@ function cargarStream(canal) {
   rp.botonCalidad.hidden = true;
   actualizarBotonFavoritoReproductor(canal.id);
 
+  const urlEfectiva = (intentarProxy && URL_PROXY)
+    ? URL_PROXY + (URL_PROXY.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(canal.url)
+    : canal.url;
+
   const marcarEnVivo = () => { rp.estadoTexto.textContent = t('en_vivo'); };
   const marcarError = () => { rp.seccion.classList.add('con-error'); };
+  const reintentarConProxySiCorresponde = () => {
+    if (!intentarProxy && URL_PROXY) {
+      cargarStream(canal, true);
+      return true;
+    }
+    return false;
+  };
 
   if (window.Hls && Hls.isSupported()) {
     const hls = new Hls({ enableWorker: true });
     estado.hls = hls;
-    hls.loadSource(canal.url);
+    hls.loadSource(urlEfectiva);
     hls.attachMedia(rp.video);
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       rp.video.play().catch(() => {});
@@ -707,24 +724,26 @@ function cargarStream(canal) {
       if (data.fatal) {
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
-            hls.startLoad();
+            if (!reintentarConProxySiCorresponde()) hls.startLoad();
             break;
           case Hls.ErrorTypes.MEDIA_ERROR:
             hls.recoverMediaError();
             break;
           default:
-            marcarError();
+            if (!reintentarConProxySiCorresponde()) marcarError();
             break;
         }
       }
     });
   } else if (rp.video.canPlayType('application/vnd.apple.mpegurl')) {
-    rp.video.src = canal.url;
+    rp.video.src = urlEfectiva;
     rp.video.addEventListener('loadedmetadata', () => {
       rp.video.play().catch(() => {});
       marcarEnVivo();
     }, { once: true });
-    rp.video.addEventListener('error', marcarError, { once: true });
+    rp.video.addEventListener('error', () => {
+      if (!reintentarConProxySiCorresponde()) marcarError();
+    }, { once: true });
   } else {
     marcarError();
   }
