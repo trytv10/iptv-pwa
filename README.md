@@ -104,6 +104,33 @@ proveedor), y las combina todas en una sola guia.
 - El boton "Cargar lista" (carga manual en un dispositivo puntual) sigue
   teniendo prioridad por sobre `fuentes.json` cuando esta presente.
 
+## Chequeo automatico de canales caidos
+
+Un workflow de GitHub Actions (`.github/workflows/check-channels.yml`) corre
+cada 6 horas y prueba cada URL de `canales.m3u8`:
+
+- Si un canal no responde, comenta sus 2 lineas con `# [CAIDO AAAA-MM-DD]`
+  al principio. Como quedan como comentario, la app deja de mostrarlo solo
+  (no hace falta borrar nada a mano).
+- Si un canal que estaba marcado como caido vuelve a responder en una
+  corrida posterior, se reactiva solo (le saca la marca).
+- Nada se borra nunca de forma permanente — todo queda revisable en el
+  archivo, y si queres eliminar un canal caido definitivamente, buscas la
+  linea con `# [CAIDO ...]` y la borras vos.
+
+Para activarlo (una sola vez):
+
+1. Subi las carpetas `.github/workflows/check-channels.yml` y
+   `scripts/check_channels.py` al repositorio (mismo metodo de "Add file"
+   que usaste para los demas archivos, respetando esas rutas con carpetas).
+2. En GitHub, pestana **Actions** del repo: si es la primera vez, puede
+   pedir que confirmes habilitarlas.
+3. Repo → **Settings** → **Actions** → **General** → en "Workflow
+   permissions" elegi **"Read and write permissions"** y guarda — sin esto,
+   el workflow no puede subir los cambios que detecta.
+4. Para probarlo ya sin esperar 6 horas: pestana **Actions** → click en
+   "Chequeo automatico de canales caidos" → **Run workflow**.
+
 ## Reproduccion HLS
 
 Usa **hls.js** (via CDN) en navegadores que lo necesitan, y el soporte nativo
