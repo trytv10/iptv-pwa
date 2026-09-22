@@ -49,6 +49,7 @@ const IDIOMAS = {
     sin_canales_validos: 'No se encontraron canales validos en ese contenido.',
     lista_borrada: 'Se borro la lista guardada en este dispositivo.',
     cargando: 'Cargando...',
+    a_continuacion: 'A continuacion',
   },
   en: {
     marca: 'Channel Guide',
@@ -94,6 +95,7 @@ const IDIOMAS = {
     sin_canales_validos: 'No valid channels were found in that content.',
     lista_borrada: 'The saved list on this device was deleted.',
     cargando: 'Loading...',
+    a_continuacion: 'Up next',
   },
 };
 
@@ -173,7 +175,7 @@ const URL_FUENTES = './fuentes.json';
 // error de red (tipico de bloqueo CORS), la app reintenta UNA vez a
 // traves de este proxy antes de mostrar el error. Dejar vacio ('') para
 // desactivar el reintento por proxy.
-const URL_PROXY = 'https://iptv-proxy.eolivera119600.workers.dev';
+const URL_PROXY = '';
 
 const estado = {
   canales: [],
@@ -184,6 +186,7 @@ const estado = {
   indiceActual: -1,
   hls: null,
   idioma: localStorage.getItem(CLAVE_IDIOMA) || ((navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'es'),
+  programacion: {}, // idCanal (tvg-id) -> [{inicio, fin, titulo, descripcion}, ...]
 };
 
 function cargarListaGuardada() {
@@ -322,13 +325,14 @@ function parsearM3U(texto) {
         logo: extraerAtributo(linea, 'tvg-logo'),
         grupo: extraerAtributo(linea, 'group-title') || 'General',
         pais: extraerAtributo(linea, 'tvg-country').toUpperCase(),
+        tvgId: extraerAtributo(linea, 'tvg-id'),
       };
     } else if (!linea.startsWith('#')) {
       if (pendiente) {
         canales.push({ ...pendiente, url: linea });
         pendiente = null;
       } else {
-        canales.push({ nombre: linea, logo: '', grupo: 'General', pais: '', url: linea });
+        canales.push({ nombre: linea, logo: '', grupo: 'General', pais: '', tvgId: '', url: linea });
       }
     }
   }
@@ -344,6 +348,7 @@ function parsearJSON(texto) {
     logo: c.logo || c.tvg_logo || '',
     grupo: c.grupo || c.group || 'General',
     pais: (c.pais || c.country || '').toUpperCase(),
+    tvgId: c.tvgId || c.tvg_id || c['tvg-id'] || '',
   })).filter((c) => c.url);
 }
 
@@ -370,7 +375,179 @@ function normalizarCanales(crudos) {
       logo: c.logo || '',
       grupo: c.grupo || 'General',
       pais: c.pais || '',
+      tvgId: c.tvgId || '',
     }));
+}
+
+/* =======================================================
+   EPG (guia de programacion, formato XMLTV)
+   ======================================================= */
+
+// Indice de fuentes XMLTV a combinar, mismo espiritu que fuentes.json:
+// ["https://.../guia-pais1.xml.gz", "https://.../guia-pais2.xml", ...]
+// Si no existe o esta vacio, la app funciona igual que siempre pero sin
+// horarios de programacion (los canales sin tvg-id o sin datos tampoco
+// muestran nada extra: la funcion se degrada de forma segura).
+const URL_EPG_FUENTES = './epg.json';
+
+const CLAVE_EPG_CACHE = 'iptv:epg-cache';
+const CLAVE_EPG_CACHE_FECHA = 'iptv:epg-cache-fecha';
+const EPG_CACHE_TTL_MS = 3 * 60 * 60 * 1000; // 3 horas
+
+function limpiarEntidadesXml(texto) {
+  return texto
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+// Convierte una fecha XMLTV ("20260921120000 +0000") a ISO 8601. Devuelve
+// null si el formato no matchea (fuente con datos raros: se ignora ese
+// programa puntual en vez de romper el resto del parseo).
+function parsearFechaXmltv(cadena) {
+  const m = (cadena || '').trim().match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\s*([+-]\d{4})?$/);
+  if (!m) return null;
+  const [, anio, mes, dia, hora, min, seg, offset] = m;
+  let iso = `${anio}-${mes}-${dia}T${hora}:${min}:${seg}`;
+  iso += offset ? `${offset.slice(0, 3)}:${offset.slice(3)}` : 'Z';
+  const fecha = new Date(iso);
+  return Number.isNaN(fecha.getTime()) ? null : fecha.toISOString();
+}
+
+// Parser XMLTV liviano basado en expresiones regulares (no DOMParser):
+// mas tolerante con archivos grandes o levemente mal formados, y permite
+// probarlo fuera del navegador. Devuelve { idCanal: [{inicio, fin,
+// titulo, descripcion}, ...] } con cada lista ordenada por inicio.
+function parsearXMLTV(texto) {
+  const porCanal = {};
+  const regexPrograma = /<programme\b([^>]*)>([\s\S]*?)<\/programme>/g;
+  let coincidencia;
+
+  while ((coincidencia = regexPrograma.exec(texto))) {
+    const atributos = coincidencia[1];
+    const contenido = coincidencia[2];
+
+    const idCanal = (atributos.match(/\bchannel="([^"]*)"/) || [])[1];
+    const inicioStr = (atributos.match(/\bstart="([^"]*)"/) || [])[1];
+    const finStr = (atributos.match(/\bstop="([^"]*)"/) || [])[1];
+    if (!idCanal || !inicioStr || !finStr) continue;
+
+    const inicio = parsearFechaXmltv(inicioStr);
+    const fin = parsearFechaXmltv(finStr);
+    if (!inicio || !fin) continue;
+
+    const tituloMatch = contenido.match(/<title\b[^>]*>([\s\S]*?)<\/title>/);
+    const descMatch = contenido.match(/<desc\b[^>]*>([\s\S]*?)<\/desc>/);
+
+    if (!porCanal[idCanal]) porCanal[idCanal] = [];
+    porCanal[idCanal].push({
+      inicio,
+      fin,
+      titulo: limpiarEntidadesXml((tituloMatch && tituloMatch[1] || '').trim()) || 'Sin titulo',
+      descripcion: limpiarEntidadesXml((descMatch && descMatch[1] || '').trim()),
+    });
+  }
+
+  Object.values(porCanal).forEach((lista) => lista.sort((a, b) => a.inicio.localeCompare(b.inicio)));
+  return porCanal;
+}
+
+async function obtenerTextoXMLTV(url) {
+  let resp;
+  try {
+    resp = await fetch(url, { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  } catch (e) {
+    // Reintento via proxy CORS, igual que con los streams.
+    if (!URL_PROXY) throw e;
+    resp = await fetch(URL_PROXY + (URL_PROXY.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(url), { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  }
+
+  if (url.toLowerCase().endsWith('.gz')) {
+    if (!window.pako) throw new Error('Falta la libreria de descompresion (pako)');
+    const buffer = await resp.arrayBuffer();
+    const descomprimido = window.pako.ungzip(new Uint8Array(buffer));
+    return new TextDecoder('utf-8').decode(descomprimido);
+  }
+  return resp.text();
+}
+
+function cargarProgramacionDeCache() {
+  try {
+    const fecha = Number(localStorage.getItem(CLAVE_EPG_CACHE_FECHA) || 0);
+    if (!fecha || (Date.now() - fecha) > EPG_CACHE_TTL_MS) return null;
+    const crudo = localStorage.getItem(CLAVE_EPG_CACHE);
+    return crudo ? JSON.parse(crudo) : null;
+  } catch {
+    return null;
+  }
+}
+
+function guardarProgramacionEnCache(programacion) {
+  try {
+    localStorage.setItem(CLAVE_EPG_CACHE, JSON.stringify(programacion));
+    localStorage.setItem(CLAVE_EPG_CACHE_FECHA, String(Date.now()));
+  } catch (e) {
+    console.warn('No se pudo guardar la cache de EPG (puede ser por espacio)', e);
+  }
+}
+
+async function cargarProgramacion() {
+  const enCache = cargarProgramacionDeCache();
+  if (enCache) return enCache;
+
+  let fuentes = [];
+  try {
+    const resp = await fetch(URL_EPG_FUENTES, { cache: 'no-store' });
+    if (resp.ok) {
+      const datos = await resp.json();
+      fuentes = Array.isArray(datos) ? datos : (datos.fuentes || []);
+    }
+  } catch (e) {
+    console.warn('No se encontro epg.json o no se pudo leer; la app sigue sin horarios.', e);
+  }
+
+  if (fuentes.length === 0) return {};
+
+  const combinado = {};
+  for (const url of fuentes) {
+    try {
+      const texto = await obtenerTextoXMLTV(url);
+      Object.assign(combinado, parsearXMLTV(texto));
+    } catch (e) {
+      console.warn('No se pudo cargar la guia de programacion de', url, e);
+    }
+  }
+
+  guardarProgramacionEnCache(combinado);
+  return combinado;
+}
+
+function programaActual(tvgId) {
+  if (!tvgId || !estado.programacion[tvgId]) return null;
+  const ahora = Date.now();
+  return estado.programacion[tvgId].find((p) => {
+    const inicio = new Date(p.inicio).getTime();
+    const fin = new Date(p.fin).getTime();
+    return inicio <= ahora && ahora < fin;
+  }) || null;
+}
+
+function programaSiguiente(tvgId) {
+  if (!tvgId || !estado.programacion[tvgId]) return null;
+  const ahora = Date.now();
+  return estado.programacion[tvgId].find((p) => new Date(p.inicio).getTime() > ahora) || null;
+}
+
+function formatoHora(iso) {
+  try {
+    return new Date(iso).toLocaleTimeString(estado.idioma === 'en' ? 'en-US' : 'es-AR', { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
 }
 
 /* =======================================================
@@ -519,12 +696,27 @@ function filaCanal(canal) {
 
   const banderaHtml = canal.pais ? `<span class="fila-canal__bandera">${bandera(canal.pais)}</span>` : '';
 
+  const enCurso = programaActual(canal.tvgId);
+  let programaHtml = '';
+  if (enCurso) {
+    const inicioMs = new Date(enCurso.inicio).getTime();
+    const finMs = new Date(enCurso.fin).getTime();
+    const pct = Math.min(100, Math.max(0, ((Date.now() - inicioMs) / (finMs - inicioMs)) * 100));
+    programaHtml = `
+      <span class="fila-canal__programa">
+        <span class="fila-canal__programa-texto">${enCurso.titulo}</span>
+        <span class="fila-canal__programa-barra"><span style="width:${pct.toFixed(1)}%"></span></span>
+      </span>
+    `;
+  }
+
   fila.innerHTML = `
     <span class="fila-canal__numero">${canal.numero}</span>
     <span class="fila-canal__logo">${logoHtml}</span>
     <span class="fila-canal__info">
       <span class="fila-canal__nombre">${canal.nombre}</span>
       <span class="fila-canal__grupo">${banderaHtml}${canal.grupo}</span>
+      ${programaHtml}
     </span>
     <button class="fila-canal__favorito ${esFavorito(canal.id) ? 'activo' : ''}" aria-label="Favorito" data-id="${canal.id}">${esFavorito(canal.id) ? '\u2605' : '\u2606'}</button>
     <span class="fila-canal__estado" aria-hidden="true"></span>
@@ -571,6 +763,7 @@ const rp = {
   video: document.getElementById('video'),
   numero: document.getElementById('rp-numero'),
   nombre: document.getElementById('rp-nombre'),
+  programa: document.getElementById('rp-programa'),
   estadoTexto: document.getElementById('rp-estado'),
   botonFavorito: document.getElementById('boton-favorito'),
   botonSubtitulos: document.getElementById('boton-subtitulos'),
@@ -581,6 +774,21 @@ const rp = {
   botonAirplay: document.getElementById('boton-airplay'),
   botonCast: document.getElementById('boton-cast'),
 };
+
+let temporizadorPrograma = null;
+
+function actualizarProgramaReproductor(tvgId) {
+  const actual = programaActual(tvgId);
+  if (!actual) {
+    rp.programa.hidden = true;
+    rp.programa.innerHTML = '';
+    return;
+  }
+  const siguiente = programaSiguiente(tvgId);
+  rp.programa.hidden = false;
+  rp.programa.innerHTML = `<strong>${actual.titulo}</strong> (${formatoHora(actual.inicio)}\u2013${formatoHora(actual.fin)})`
+    + (siguiente ? ` \u00b7 ${t('a_continuacion')}: ${siguiente.titulo}` : '');
+}
 
 function reproducirCanalPorId(id) {
   const canal = estado.canales.find((c) => c.id === id);
@@ -604,6 +812,10 @@ function cerrarReproductor() {
 }
 
 function detenerStream() {
+  if (temporizadorPrograma) {
+    clearInterval(temporizadorPrograma);
+    temporizadorPrograma = null;
+  }
   if (estado.hls) {
     estado.hls.destroy();
     estado.hls = null;
@@ -694,6 +906,9 @@ function cargarStream(canal, intentarProxy) {
   rp.botonSubtitulos.hidden = true;
   rp.botonCalidad.hidden = true;
   actualizarBotonFavoritoReproductor(canal.id);
+  actualizarProgramaReproductor(canal.tvgId);
+  if (temporizadorPrograma) clearInterval(temporizadorPrograma);
+  temporizadorPrograma = setInterval(() => actualizarProgramaReproductor(canal.tvgId), 30000);
 
   const urlEfectiva = (intentarProxy && URL_PROXY)
     ? URL_PROXY + (URL_PROXY.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(canal.url)
@@ -1016,6 +1231,19 @@ async function iniciar() {
 
   aplicarIdioma();
   actualizarBannerContinuar();
+
+  // La EPG se carga aparte y no bloquea el arranque: los canales y la guia
+  // ya se ven aunque la programacion tarde o falle.
+  cargarProgramacion()
+    .then((programacion) => {
+      estado.programacion = programacion;
+      renderGuia();
+      if (rp.seccion.classList.contains('activo')) {
+        const canalActual = estado.canales[estado.indiceActual];
+        if (canalActual) actualizarProgramaReproductor(canalActual.tvgId);
+      }
+    })
+    .catch((e) => console.warn('No se pudo cargar la EPG', e));
 }
 
 iniciar();
