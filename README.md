@@ -131,6 +131,72 @@ Para activarlo (una sola vez):
 4. Para probarlo ya sin esperar 6 horas: pestana **Actions** → click en
    "Chequeo automatico de canales caidos" → **Run workflow**.
 
+## Proxy CORS (opcional)
+
+Algunos servidores de streaming bloquean los pedidos del navegador por
+politicas CORS: el manifiesto `.m3u8` puede cargar bien pero los segmentos
+de video quedan bloqueados, y el canal no reproduce. `/proxy/worker.js` es
+un proxy que reenvia el stream agregando las cabeceras necesarias, y ademas
+reescribe el manifiesto para que los segmentos y sub-listas de calidad
+tambien pasen por el proxy (un proxy que solo reenvia el .m3u8 sin hacer
+esto no resuelve el problema).
+
+La app lo usa como **respaldo automatico**: intenta reproducir directo
+primero, y solo si falla por un error de red, reintenta una vez a traves
+del proxy antes de mostrar el error. No hace falta marcar canales a mano.
+
+Para activarlo (gratis, con Cloudflare Workers):
+
+1. Cuenta gratis en https://dash.cloudflare.com/sign-up (si no tenes una).
+2. En el dashboard: **Workers & Pages** → **Create** → **Create Worker**.
+   Le podes poner el nombre que quieras (ej. `iptv-proxy`).
+3. Una vez creado, **Edit code** → borra el codigo de ejemplo que trae →
+   pega el contenido completo de `proxy/worker.js` → **Deploy**.
+4. Copia la URL que te da (algo como `https://iptv-proxy.tu-usuario.workers.dev`).
+5. En `app.js`, cambia la linea `const URL_PROXY = '';` poniendo esa URL
+   entre las comillas, y subi el archivo actualizado al repo.
+
+Mientras `URL_PROXY` quede vacio (`''`), el proxy esta desactivado y la
+app funciona exactamente igual que antes.
+
+## Guia de programacion (EPG)
+
+La app puede mostrar que programa esta dando cada canal ahora (con barra de
+progreso) y que sigue despues, tanto en la guia como en el reproductor.
+Usa el formato estandar **XMLTV**.
+
+Como funciona:
+
+- `epg.json` en la raiz del repo lista las fuentes XMLTV a combinar (mismo
+  espiritu que `fuentes.json`), por ejemplo:
+  ```json
+  ["https://epgshare01.online/epgshare01/epg_ripper_AR1.xml.gz"]
+  ```
+- Acepta URLs `.xml` o `.xml.gz` (comprimidas; se descomprimen en el
+  navegador). Si `epg.json` esta vacio (`[]`), la app funciona exactamente
+  igual que siempre, solo que sin horarios.
+- La vinculacion es por `tvg-id`: un canal en `canales.m3u8` con
+  `tvg-id="Belarus1.by"` muestra la programacion del `<channel
+  id="Belarus1.by">` correspondiente en el XMLTV. **Un canal sin
+  `tvg-id`, o cuya fuente XMLTV no lo incluya, simplemente no muestra
+  programacion** — no rompe nada, se degrada solo.
+- Los datos se guardan en cache 3 horas en el dispositivo para no
+  descargar la guia entera en cada visita.
+- Si una fuente XMLTV falla por CORS, reintenta automaticamente a traves
+  del proxy (mismo mecanismo que los streams, ver seccion de arriba).
+
+**Importante sobre disponibilidad**: no todos los paises tienen EPG
+publico. Los canales de paises chicos o con TV estatal cerrada (Corea del
+Norte, Bielorrusia, Islas Feroe, Macao, Chad, Turkmenistan, Mongolia,
+entre los que ya sumaste) probablemente no van a tener programacion
+disponible en ninguna fuente XMLTV publica — no es un problema de la app,
+es que esa informacion no existe publicada. Para los paises que si tienen
+EPG (la mayoria de America, Europa y varios de Asia), un buen punto de
+partida gratis es https://epgshare01.online/ — cada archivo
+`epg_ripper_{CODIGO_PAIS}1.xml.gz` corresponde a un pais (ej. `AR1` para
+Argentina, `MX1` para Mexico, `ES1` para Espana, `US1` para Estados
+Unidos). Sumalo a `epg.json` solo si tenes canales de ese pais cargados.
+
 ## Reproduccion HLS
 
 Usa **hls.js** (via CDN) en navegadores que lo necesitan, y el soporte nativo
@@ -162,12 +228,9 @@ dispositivo se conecta directo a la URL .m3u8 de cada canal.
 
 ## Siguientes pasos posibles (no incluidos todavia)
 
-- Chequeo automatico de disponibilidad de canales (ej. via GitHub Actions),
-  para quitar de `fuentes.json`/canales caidos sin intervencion manual.
 - Registro de fuentes confiables con su origen y estabilidad.
-- Proxy para streams bloqueados por CORS.
-- Cuentas de usuario con sincronizacion de favoritos entre dispositivos.
-- EPG / guia de programación con horarios (formato XMLTV).
+- Cuentas de usuario con sincronizacion de favoritos entre dispositivos
+  (requiere backend propio).
 - Empaquetado nativo para Play Store (Android TV) con Media3/ExoPlayer,
   reutilizando este mismo listado.
 - App para Tizen/webOS empaquetando esta misma base con su SDK correspondiente.
