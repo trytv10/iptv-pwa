@@ -114,9 +114,12 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
     <div class="reproductor__capa">
       <div class="reproductor__superior">
         <button class="boton-icono" id="boton-cerrar-reproductor" data-i18n="volver_guia_corto">&larr; Guia</button>
-        <div class="reproductor__titulo">
-          <span class="numero" id="rp-numero"></span>
-          <span class="nombre" id="rp-nombre"></span>
+        <div class="reproductor__titulo-bloque">
+          <div class="reproductor__titulo">
+            <span class="numero" id="rp-numero"></span>
+            <span class="nombre" id="rp-nombre"></span>
+          </div>
+          <div class="reproductor__programa" id="rp-programa" hidden></div>
         </div>
         <span class="reproductor__estado" id="rp-estado"></span>
       </div>
@@ -152,6 +155,7 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
 <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
