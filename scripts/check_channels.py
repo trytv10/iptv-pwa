@@ -1,22 +1,28 @@
 #!/usr/bin/env python3
 """
-Revisa cada senal de canales.m3u8 y marca las que no responden, en vez de
-borrarlas. Un canal marcado como caido no aparece en la app (el marcador
+Revisa cada señal de canales.m3u8 y marca las que no responden, en vez de
+borrarlas. Un canal marcado como caído no aparece en la app (el marcador
 lo convierte en comentario), pero el bloque queda en el archivo por si
-vuelve a andar: la proxima corrida lo reintenta solo y lo reactiva
-automaticamente si responde de nuevo.
+vuelve a andar: la próxima corrida lo reintenta solo y lo reactiva
+automáticamente si responde de nuevo.
 
 Uso: python scripts/check_channels.py [archivo.m3u8]
 """
 import re
 import sys
 from datetime import datetime, timezone
-
 import requests
 
 ARCHIVO = sys.argv[1] if len(sys.argv) > 1 else "canales.m3u8"
-TIMEOUT = 12
-USER_AGENT = "Mozilla/5.0 (compatible; IPTV-Guide-Checker/1.0)"
+TIMEOUT = 10
+
+HEADERS_NAVEGADOR = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+    "Accept": "*/*",
+    "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+    "Connection": "keep-alive",
+}
+
 MARCA_RE = re.compile(r"^# \[CAIDO \d{4}-\d{2}-\d{2}\] ")
 
 
@@ -34,22 +40,44 @@ def es_linea_url(linea):
 
 
 def revisar_url(url):
+    # Saltamos la validación en scripts de comandos o canales especiales (ej. YouTube)
+    if "youtube.com" in url or "youtu.be" in url:
+        return True
+
     try:
+        # Petición inicial ligera
         resp = requests.get(
             url,
-            headers={"User-Agent": USER_AGENT},
+            headers=HEADERS_NAVEGADOR,
             timeout=TIMEOUT,
             stream=True,
             allow_redirects=True,
+            verify=False
         )
         ok = resp.status_code < 400
         resp.close()
         return ok
     except requests.RequestException:
-        return False
+        # Reintento con fallback si falla la conexión SSL/HTTP inicial
+        try:
+            resp = requests.head(
+                url,
+                headers=HEADERS_NAVEGADOR,
+                timeout=TIMEOUT,
+                allow_redirects=True,
+                verify=False
+            )
+            ok = resp.status_code < 400
+            resp.close()
+            return ok
+        except requests.RequestException:
+            return False
 
 
 def main():
+    # Desactivar advertencias de SSL no verificado en el log del runner
+    requests.packages.urllib3.disable_warnings()
+
     with open(ARCHIVO, encoding="utf-8") as f:
         lineas = f.readlines()
 
