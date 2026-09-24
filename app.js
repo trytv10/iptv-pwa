@@ -21,7 +21,7 @@ const IDIOMAS = {
     volver_guia: '\u2190 Volver a la guia',
     volver_guia_corto: '\u2190 Guia',
     cargar_titulo: 'Cargar lista de canales',
-    cargar_subtitulo: 'Suma tu listado por URL remota, subiendo un archivo .m3u/.m3u8/.json, o pegando el texto directamente. Se guarda en este dispositivo y se puede actualizar cuando quieras.',
+    cargar_subtitulo: 'Suma tu listado por URL remota, subiendo un archivo .m3u/.m3u8/.json, o pegando el texto directamente.',
     tab_url: 'URL remota',
     tab_archivo: 'Archivo',
     tab_texto: 'Pegar texto',
@@ -31,12 +31,12 @@ const IDIOMAS = {
     archivo_elegir: 'elegilo manualmente',
     etiqueta_texto: 'Contenido M3U o JSON',
     borrar_lista: 'Restaurar lista predeterminada',
-    config_info: 'Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" tvg-country="AR" group-title="Categoria",Nombre del canal</code> seguido de la URL del stream .m3u8 en la linea siguiente.',
+    config_info: 'Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" group-title="Categoria",Nombre del canal</code> seguido de la URL .m3u8.',
     subtitulos: 'Subtitulos',
     calidad: 'Calidad',
     miniatura: 'Miniatura',
     error_titulo: 'No se pudo reproducir esta senal',
-    error_texto: 'Revisa la URL del canal o proba con otro. Podes volver a la guia y elegir otro canal.',
+    error_texto: 'Revisa la URL del canal o proba con otro.',
     guia_vacia_titulo: 'Todavia no hay canales cargados',
     guia_vacia_texto: 'Carga tu listado (.m3u, .m3u8 o .json) para empezar a ver la guia.',
     sin_resultados_titulo: 'Sin resultados',
@@ -48,7 +48,7 @@ const IDIOMAS = {
     ingresa_url: 'Ingresa una URL valida.',
     elegi_archivo: 'Elegi un archivo primero.',
     pega_contenido: 'Pega el contenido M3U o JSON.',
-    sin_canales_validos: 'No se encontraron canales validos en ese contenido.',
+    sin_canales_validos: 'No se encontraron canales validos.',
     lista_borrada: 'Se restauro la lista oficial predeterminada.',
     cargando: 'Cargando...',
     a_continuacion: 'A continuacion',
@@ -72,7 +72,7 @@ const IDIOMAS = {
     volver_guia: '\u2190 Back to guide',
     volver_guia_corto: '\u2190 Guide',
     cargar_titulo: 'Load channel list',
-    cargar_subtitulo: 'Add your list via remote URL, uploading a .m3u/.m3u8/.json file, or pasting the text directly.',
+    cargar_subtitulo: 'Add your list via remote URL, uploading a .m3u/.m3u8/.json file, or pasting text.',
     tab_url: 'Remote URL',
     tab_archivo: 'File',
     tab_texto: 'Paste text',
@@ -82,14 +82,14 @@ const IDIOMAS = {
     archivo_elegir: 'choose it manually',
     etiqueta_texto: 'M3U or JSON content',
     borrar_lista: 'Restore default list',
-    config_info: 'Expected M3U format per line: <code>#EXTINF:-1 tvg-logo="LOGO_URL" tvg-country="AR" group-title="Category",Channel name</code> followed by the .m3u8 stream URL.',
+    config_info: 'Expected M3U format per line: <code>#EXTINF:-1 tvg-logo="LOGO_URL" group-title="Category",Channel name</code>.',
     subtitulos: 'Subtitles',
     calidad: 'Quality',
     miniatura: 'PiP',
     error_titulo: 'This channel could not be played',
     error_texto: 'Check the channel URL or try another one.',
     guia_vacia_titulo: 'No channels loaded yet',
-    guia_vacia_texto: 'Load your list (.m3u, .m3u8 or .json) to start browsing the guide.',
+    guia_vacia_texto: 'Load your list (.m3u, .m3u8 or .json) to start browsing.',
     sin_resultados_titulo: 'No results',
     sin_resultados_texto: 'Try a different search or category.',
     conectando: 'Connecting...',
@@ -808,7 +808,7 @@ function actualizarBannerContinuar() {
 }
 
 /* =======================================================
-   Reproductor HLS + Fallback de Senales + Indicador Calidad
+   Reproductor HLS
    ======================================================= */
 
 const rp = {
@@ -1328,10 +1328,45 @@ if ('serviceWorker' in navigator) {
 }
 
 /* =======================================================
-   Arranque con Zap In Directo
+   Arranque con Splash Screen (Intro Netflix)
    ======================================================= */
 
+function mostrarIntroCarga() {
+  const splash = document.createElement('div');
+  splash.id = 'splash-screen';
+  splash.style.cssText = `
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: #0d0e12;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 99999;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  `;
+
+  splash.innerHTML = `
+    <div style="font-size: 3rem; font-weight: 800; color: #e50914; letter-spacing: 2px; text-transform: uppercase; animation: pulse 1.5s infinite;">
+      TV PWA
+    </div>
+    <div style="margin-top: 15px; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #e50914; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+    <style>
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    </style>
+  `;
+
+  document.body.appendChild(splash);
+
+  setTimeout(() => {
+    splash.style.opacity = '0';
+    splash.style.visibility = 'hidden';
+    setTimeout(() => splash.remove(), 600);
+  }, 1800);
+}
+
 async function iniciar() {
+  mostrarIntroCarga();
+
   document.querySelectorAll('.agrupar__opcion').forEach((b) => {
     b.classList.toggle('activo', b.dataset.agrupar === estado.agrupacion);
   });
@@ -1345,23 +1380,12 @@ async function iniciar() {
 
   aplicarIdioma();
   actualizarBannerContinuar();
-
-  if (estado.canales.length > 0) {
-    const idUltimo = leerUltimoVisto();
-    const canalInicial = estado.canales.find((c) => c.id === idUltimo) || estado.canales[0];
-    if (canalInicial) {
-      reproducirCanalPorId(canalInicial.id);
-    }
-  }
+  renderGuia();
 
   cargarProgramacion()
     .then((programacion) => {
       estado.programacion = programacion;
       renderGuia();
-      if (rp.seccion.classList.contains('activo')) {
-        const canalActual = estado.canales[estado.indiceActual];
-        if (canalActual) actualizarProgramaReproductor(canalActual.tvgId);
-      }
     })
     .catch((e) => console.warn('No se pudo cargar la EPG', e));
 }
