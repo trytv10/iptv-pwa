@@ -33,8 +33,8 @@ https://www.youtube.com/live/EKO4NOyPjPA
 # --- CHAD ---
 # [CAIDO 2026-09-24] #EXTINF:-1 tvg-name="Tchad 24" tvg-logo="https://www.lyngsat.com/logo/tv/tt/tchad-24-td.png" tvg-id="Tchad24.td" tvg-country="TD" group-title="Chad",Tchad 24
 # [CAIDO 2026-09-24] http://102.131.58.110/out_1/index.m3u8
-# [CAIDO 2026-09-24] #EXTINF:-1 tvg-name="Télé Tchad" tvg-logo="https://upload.wikimedia.org/wikipedia/fr/b/b6/Logo_T%C3%A9l%C3%A9_Tchad.png" tvg-id="TeleTchad.td" tvg-country="TD" group-title="Chad",Télé Tchad Ⓢ
-# [CAIDO 2026-09-24] https://strhlslb01.streamakaci.tv/str_tchad_tchad/str_tchad_multi/playlist.m3u8
+#EXTINF:-1 tvg-name="Télé Tchad" tvg-logo="https://upload.wikimedia.org/wikipedia/fr/b/b6/Logo_T%C3%A9l%C3%A9_Tchad.png" tvg-id="TeleTchad.td" tvg-country="TD" group-title="Chad",Télé Tchad Ⓢ
+https://strhlslb01.streamakaci.tv/str_tchad_tchad/str_tchad_multi/playlist.m3u8
 
 # --- MONGOLIA ---
 #EXTINF:-1 tvg-name="MNB HD" tvg-logo="" tvg-id="MNB.mn" tvg-chno="1" tvg-country="MN" group-title="Mongolia",MNB HD
