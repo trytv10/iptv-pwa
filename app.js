@@ -159,34 +159,20 @@ const CLAVE_ULTIMO = 'iptv:ultimo-canal';
 const CLAVE_IDIOMA = 'iptv:idioma';
 const CLAVE_AGRUPACION = 'iptv:agrupacion';
 
-// Listado central: vive en el propio repositorio. Al actualizarlo y subirlo
-// a GitHub, todos los dispositivos lo ven automaticamente sin cargar nada
-// a mano (a menos que ese dispositivo tenga una lista cargada manualmente,
-// que siempre tiene prioridad).
 const URL_LISTA_PREDETERMINADA = './canales.m3u8';
-
-// Indice de multiples fuentes a combinar en una sola guia. Formato:
-// ["https://.../lista1.m3u8", "https://.../lista2.json", ...]
-// o [{ "url": "...", "tipo": "m3u8" }, ...]. Si no existe o esta vacio,
-// se usa URL_LISTA_PREDETERMINADA como unica fuente (retrocompatible).
 const URL_FUENTES = './fuentes.json';
-
-// Proxy CORS opcional (ver carpeta /proxy). Cuando un canal falla por un
-// error de red (tipico de bloqueo CORS), la app reintenta UNA vez a
-// traves de este proxy antes de mostrar el error. Dejar vacio ('') para
-// desactivar el reintento por proxy.
 const URL_PROXY = '';
 
 const estado = {
   canales: [],
   filtro: 'Todos',
-  agrupacion: localStorage.getItem(CLAVE_AGRUPACION) || 'categoria', // 'categoria' | 'pais'
+  agrupacion: localStorage.getItem(CLAVE_AGRUPACION) || 'categoria',
   soloFavoritos: false,
   busqueda: '',
   indiceActual: -1,
   hls: null,
   idioma: localStorage.getItem(CLAVE_IDIOMA) || ((navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'es'),
-  programacion: {}, // idCanal (tvg-id) -> [{inicio, fin, titulo, descripcion}, ...]
+  programacion: {},
 };
 
 function cargarListaGuardada() {
@@ -258,8 +244,6 @@ async function obtenerListaCombinadaDesdeFuentes() {
     console.warn('No se encontro fuentes.json o no se pudo leer.', e);
   }
 
-  // Retrocompatibilidad: sin fuentes.json (o vacio), se usa el listado
-  // central unico como antes.
   if (fuentes.length === 0) {
     try {
       const resp = await fetch(URL_LISTA_PREDETERMINADA, { cache: 'no-store' });
@@ -275,8 +259,6 @@ async function obtenerListaCombinadaDesdeFuentes() {
 
   const entradas = fuentes.map((f) => (typeof f === 'string' ? { url: f } : f));
 
-  // Las fuentes .m3u/.m3u8 se combinan primero: ante un canal duplicado
-  // (misma URL de stream) en otra fuente, la version m3u8 es la que queda.
   const ordenadas = [
     ...entradas.filter(esFuenteM3U),
     ...entradas.filter((e) => !esFuenteM3U(e)),
@@ -380,19 +362,28 @@ function normalizarCanales(crudos) {
 }
 
 /* =======================================================
-   EPG (guia de programacion, formato XMLTV)
+   EPG (guia de programacion XMLTV con IndexedDB)
    ======================================================= */
 
-// Indice de fuentes XMLTV a combinar, mismo espiritu que fuentes.json:
-// ["https://.../guia-pais1.xml.gz", "https://.../guia-pais2.xml", ...]
-// Si no existe o esta vacio, la app funciona igual que siempre pero sin
-// horarios de programacion (los canales sin tvg-id o sin datos tampoco
-// muestran nada extra: la funcion se degrada de forma segura).
 const URL_EPG_FUENTES = './epg.json';
-
-const CLAVE_EPG_CACHE = 'iptv:epg-cache';
-const CLAVE_EPG_CACHE_FECHA = 'iptv:epg-cache-fecha';
+const DB_NAME = 'IPTV_EPG_DB';
+const DB_VERSION = 1;
+const STORE_NAME = 'epg_cache';
 const EPG_CACHE_TTL_MS = 3 * 60 * 60 * 1000; // 3 horas
+
+function abrirDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = (e) => resolve(e.target.result);
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
 
 function limpiarEntidadesXml(texto) {
   return texto
@@ -403,9 +394,6 @@ function limpiarEntidadesXml(texto) {
     .replace(/&amp;/g, '&');
 }
 
-// Convierte una fecha XMLTV ("20260921120000 +0000") a ISO 8601. Devuelve
-// null si el formato no matchea (fuente con datos raros: se ignora ese
-// programa puntual en vez de romper el resto del parseo).
 function parsearFechaXmltv(cadena) {
   const m = (cadena || '').trim().match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\s*([+-]\d{4})?$/);
   if (!m) return null;
@@ -416,10 +404,6 @@ function parsearFechaXmltv(cadena) {
   return Number.isNaN(fecha.getTime()) ? null : fecha.toISOString();
 }
 
-// Parser XMLTV liviano basado en expresiones regulares (no DOMParser):
-// mas tolerante con archivos grandes o levemente mal formados, y permite
-// probarlo fuera del navegador. Devuelve { idCanal: [{inicio, fin,
-// titulo, descripcion}, ...] } con cada lista ordenada por inicio.
 function parsearXMLTV(texto) {
   const porCanal = {};
   const regexPrograma = /<programme\b([^>]*)>([\s\S]*?)<\/programme>/g;
@@ -460,7 +444,6 @@ async function obtenerTextoXMLTV(url) {
     resp = await fetch(url, { cache: 'no-store' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
   } catch (e) {
-    // Reintento via proxy CORS, igual que con los streams.
     if (!URL_PROXY) throw e;
     resp = await fetch(URL_PROXY + (URL_PROXY.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(url), { cache: 'no-store' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
@@ -475,28 +458,44 @@ async function obtenerTextoXMLTV(url) {
   return resp.text();
 }
 
-function cargarProgramacionDeCache() {
+async function cargarProgramacionDeCache() {
   try {
-    const fecha = Number(localStorage.getItem(CLAVE_EPG_CACHE_FECHA) || 0);
-    if (!fecha || (Date.now() - fecha) > EPG_CACHE_TTL_MS) return null;
-    const crudo = localStorage.getItem(CLAVE_EPG_CACHE);
-    return crudo ? JSON.parse(crudo) : null;
+    const db = await abrirDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const reqFecha = store.get('fecha');
+      const reqDatos = store.get('programacion');
+
+      tx.oncomplete = () => {
+        const fecha = reqFecha.result || 0;
+        if (!fecha || (Date.now() - fecha) > EPG_CACHE_TTL_MS) {
+          resolve(null);
+        } else {
+          resolve(reqDatos.result || null);
+        }
+      };
+      tx.onerror = () => resolve(null);
+    });
   } catch {
     return null;
   }
 }
 
-function guardarProgramacionEnCache(programacion) {
+async function guardarProgramacionEnCache(programacion) {
   try {
-    localStorage.setItem(CLAVE_EPG_CACHE, JSON.stringify(programacion));
-    localStorage.setItem(CLAVE_EPG_CACHE_FECHA, String(Date.now()));
+    const db = await abrirDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put(Date.now(), 'fecha');
+    store.put(programacion, 'programacion');
   } catch (e) {
-    console.warn('No se pudo guardar la cache de EPG (puede ser por espacio)', e);
+    console.warn('No se pudo guardar la cache de EPG en IndexedDB', e);
   }
 }
 
 async function cargarProgramacion() {
-  const enCache = cargarProgramacionDeCache();
+  const enCache = await cargarProgramacionDeCache();
   if (enCache) return enCache;
 
   let fuentes = [];
@@ -522,7 +521,7 @@ async function cargarProgramacion() {
     }
   }
 
-  guardarProgramacionEnCache(combinado);
+  await guardarProgramacionEnCache(combinado);
   return combinado;
 }
 
@@ -1232,8 +1231,6 @@ async function iniciar() {
   aplicarIdioma();
   actualizarBannerContinuar();
 
-  // La EPG se carga aparte y no bloquea el arranque: los canales y la guia
-  // ya se ven aunque la programacion tarde o falle.
   cargarProgramacion()
     .then((programacion) => {
       estado.programacion = programacion;
