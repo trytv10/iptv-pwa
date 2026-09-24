@@ -30,7 +30,7 @@ const IDIOMAS = {
     archivo_arrastrar: 'Arrastra un archivo o',
     archivo_elegir: 'elegilo manualmente',
     etiqueta_texto: 'Contenido M3U o JSON',
-    borrar_lista: 'Restaurar predeterminadas (Actualizar Guia)',
+    borrar_lista: 'Restaurar predeterminadas',
     config_info: 'Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" group-title="Categoria",Nombre del canal</code> seguido de la URL .m3u8.',
     subtitulos: 'Subtitulos',
     calidad: 'Calidad',
@@ -49,7 +49,7 @@ const IDIOMAS = {
     elegi_archivo: 'Elegi un archivo primero.',
     pega_contenido: 'Pega el contenido M3U o JSON.',
     sin_canales_validos: 'No se encontraron canales validos.',
-    lista_borrada: 'Se recargo la guia con los canales actualizados.',
+    lista_borrada: 'Se restauraron las listas predeterminadas.',
     cargando: 'Cargando...',
     a_continuacion: 'A continuacion',
     voz_escuchando: 'Escuchando...',
@@ -64,6 +64,8 @@ const IDIOMAS = {
     guardar_pin: 'Guardar PIN y Bloqueos',
     pin_incorrecto: 'PIN incorrecto',
     ingrese_pin: 'Ingrese el PIN de control parental:',
+    actualizar_guia: 'Actualizar',
+    actualizar_toast: 'Guía actualizada correctamente desde el servidor.',
   },
   en: {
     marca: 'Channel Guide',
@@ -90,7 +92,7 @@ const IDIOMAS = {
     archivo_arrastrar: 'Drag a file or',
     archivo_elegir: 'choose it manually',
     etiqueta_texto: 'M3U or JSON content',
-    borrar_lista: 'Restore defaults (Update Guide)',
+    borrar_lista: 'Restore defaults',
     config_info: 'Expected M3U format per line: <code>#EXTINF:-1 tvg-logo="LOGO_URL" group-title="Category",Channel name</code>.',
     subtitulos: 'Subtitles',
     calidad: 'Quality',
@@ -109,7 +111,7 @@ const IDIOMAS = {
     elegi_archivo: 'Choose a file first.',
     pega_contenido: 'Paste the M3U or JSON content.',
     sin_canales_validos: 'No valid channels were found.',
-    lista_borrada: 'Guide reloaded with updated channels.',
+    lista_borrada: 'Restored to default official list.',
     cargando: 'Loading...',
     a_continuacion: 'Up next',
     voz_escuchando: 'Listening...',
@@ -124,6 +126,8 @@ const IDIOMAS = {
     guardar_pin: 'Save PIN & Blocks',
     pin_incorrecto: 'Incorrect PIN',
     ingrese_pin: 'Enter parental control PIN:',
+    actualizar_guia: 'Update',
+    actualizar_toast: 'Guide successfully updated from server.',
   },
 };
 
@@ -727,7 +731,6 @@ function esCanalDestacado(c) {
 function canalesFiltrados() {
   const q = estado.busqueda.trim().toLowerCase();
   return estado.canales.filter((c) => {
-    // Ocultar canales cuyas categorías estén bloqueadas por control parental
     if (estado.categoriasBloqueadas.includes(c.grupo)) return false;
 
     if (estado.soloFavoritos && !esFavorito(c.id)) return false;
@@ -1054,7 +1057,6 @@ function reproducirCanalPorId(id) {
   const canal = estado.canales.find((c) => c.id === id);
   if (!canal) return;
 
-  // Verificar si la categoría del canal está bloqueada por control parental
   if (estado.categoriasBloqueadas.includes(canal.grupo) && estado.parentalPin) {
     const pinIngresado = prompt(t('ingrese_pin'));
     if (pinIngresado !== estado.parentalPin) {
@@ -1481,6 +1483,50 @@ if (cfg.botonGuardarParental) {
     renderGuia();
     mostrarMensaje('Configuracion parental guardada \u2713', 'ok');
   });
+}
+
+/* =======================================================
+   Función de Actualización Rápida de la Guía
+   ======================================================= */
+
+async function forzarActualizacionServidor() {
+  const btnActualizar = document.getElementById('boton-actualizar-guia');
+  if (btnActualizar) {
+    btnActualizar.textContent = '⏳ Actualizando...';
+    btnActualizar.disabled = true;
+  }
+
+  try {
+    localStorage.removeItem(CLAVE_MULTIPLE_LISTAS);
+    localStorage.removeItem(CLAVE_LISTA_ACTIVA_ID);
+
+    const canalesOficiales = await obtenerListaCombinadaDesdeFuentes();
+    estado.listasGuardadas = [{ id: 'oficial', nombre: 'Oficial', canales: canalesOficiales }];
+    estado.listaActivaId = 'oficial';
+
+    guardarListasEnStorage();
+    cambiarListaActiva('oficial');
+
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+    }
+
+    alert(t('actualizar_toast'));
+  } catch (e) {
+    console.error('Error al actualizar la guía:', e);
+    alert('No se pudo actualizar. Revisa tu conexión a internet.');
+  } finally {
+    if (btnActualizar) {
+      btnActualizar.textContent = '🔄 ' + t('actualizar_guia');
+      btnActualizar.disabled = false;
+    }
+  }
+}
+
+const btnActualizarGuia = document.getElementById('boton-actualizar-guia');
+if (btnActualizarGuia) {
+  btnActualizarGuia.addEventListener('click', forzarActualizacionServidor);
 }
 
 /* =======================================================
