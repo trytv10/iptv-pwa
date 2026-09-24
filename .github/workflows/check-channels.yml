@@ -2,10 +2,9 @@ name: Chequeo automatico de canales caidos
 
 on:
   schedule:
-    # Corre cada 6 horas. La hora es UTC, no la tuya.
+    # Corre cada 6 horas
     - cron: "0 */6 * * *"
   workflow_dispatch: {}
-    # Permite tambien correrlo a mano desde la pestana "Actions" en GitHub.
 
 permissions:
   contents: write
@@ -23,7 +22,9 @@ jobs:
           python-version: "3.12"
 
       - name: Instalar dependencias
-        run: pip install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests urllib3
 
       - name: Revisar canales.m3u8
         run: python scripts/check_channels.py canales.m3u8
@@ -31,5 +32,5 @@ jobs:
       - name: Subir cambios si hubo canales que cambiaron de estado
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Chequeo automatico de canales caidos"
+          commit_message: "Chequeo automatico de canales caidos [skip ci]"
           file_pattern: canales.m3u8
