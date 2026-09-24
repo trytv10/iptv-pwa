@@ -8,7 +8,7 @@ const IDIOMAS = {
   es: {
     marca: 'Guia de Canales',
     buscar_placeholder: 'Buscar canal...',
-    cargar_lista: 'Cargar lista',
+    cargar_lista: 'Gestionar Listas',
     restaurar_oficial: 'Usar lista oficial',
     continuar_viendo: 'Continuar viendo',
     reanudar: 'Reanudar',
@@ -20,8 +20,8 @@ const IDIOMAS = {
     sin_pais: 'Sin pais',
     volver_guia: '\u2190 Volver a la guia',
     volver_guia_corto: '\u2190 Guia',
-    cargar_titulo: 'Cargar lista de canales',
-    cargar_subtitulo: 'Suma tu listado por URL remota, subiendo un archivo .m3u/.m3u8/.json, o pegando el texto directamente.',
+    cargar_titulo: 'Gestionar Listas de Canales',
+    cargar_subtitulo: 'Guarda múltiples fuentes (M3U, M3U8 o JSON) y alterna entre ellas fácilmente.',
     tab_url: 'URL remota',
     tab_archivo: 'Archivo',
     tab_texto: 'Pegar texto',
@@ -30,7 +30,7 @@ const IDIOMAS = {
     archivo_arrastrar: 'Arrastra un archivo o',
     archivo_elegir: 'elegilo manualmente',
     etiqueta_texto: 'Contenido M3U o JSON',
-    borrar_lista: 'Restaurar lista predeterminada',
+    borrar_lista: 'Restaurar listas predeterminadas',
     config_info: 'Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" group-title="Categoria",Nombre del canal</code> seguido de la URL .m3u8.',
     subtitulos: 'Subtitulos',
     calidad: 'Calidad',
@@ -49,7 +49,7 @@ const IDIOMAS = {
     elegi_archivo: 'Elegi un archivo primero.',
     pega_contenido: 'Pega el contenido M3U o JSON.',
     sin_canales_validos: 'No se encontraron canales validos.',
-    lista_borrada: 'Se restauro la lista oficial predeterminada.',
+    lista_borrada: 'Se restauraron las listas predeterminadas.',
     cargando: 'Cargando...',
     a_continuacion: 'A continuacion',
     voz_escuchando: 'Escuchando...',
@@ -57,11 +57,13 @@ const IDIOMAS = {
     reintentando: 'Reintentando senal...',
     vista_lista: '☰ Lista',
     vista_grilla: '▦ Grilla',
+    nombre_lista_placeholder: 'Nombre para esta lista (ej: Deportes, Argentina...)',
+    mis_listas: 'Mis Listas Guardadas',
   },
   en: {
     marca: 'Channel Guide',
     buscar_placeholder: 'Search channel...',
-    cargar_lista: 'Load list',
+    cargar_lista: 'Manage Lists',
     restaurar_oficial: 'Use official list',
     continuar_viendo: 'Continue watching',
     reanudar: 'Resume',
@@ -73,8 +75,8 @@ const IDIOMAS = {
     sin_pais: 'No country',
     volver_guia: '\u2190 Back to guide',
     volver_guia_corto: '\u2190 Guide',
-    cargar_titulo: 'Load channel list',
-    cargar_subtitulo: 'Add your list via remote URL, uploading a .m3u/.m3u8/.json file, or pasting text.',
+    cargar_titulo: 'Manage Channel Lists',
+    cargar_subtitulo: 'Save multiple sources (M3U, M3U8 or JSON) and switch between them easily.',
     tab_url: 'Remote URL',
     tab_archivo: 'File',
     tab_texto: 'Paste text',
@@ -83,7 +85,7 @@ const IDIOMAS = {
     archivo_arrastrar: 'Drag a file or',
     archivo_elegir: 'choose it manually',
     etiqueta_texto: 'M3U or JSON content',
-    borrar_lista: 'Restore default list',
+    borrar_lista: 'Restore default lists',
     config_info: 'Expected M3U format per line: <code>#EXTINF:-1 tvg-logo="LOGO_URL" group-title="Category",Channel name</code>.',
     subtitulos: 'Subtitles',
     calidad: 'Quality',
@@ -110,6 +112,8 @@ const IDIOMAS = {
     reintentando: 'Retrying stream...',
     vista_lista: '☰ List',
     vista_grilla: '▦ Grid',
+    nombre_lista_placeholder: 'List name (e.g. Sports, Local...)',
+    mis_listas: 'My Saved Lists',
   },
 };
 
@@ -131,6 +135,8 @@ function aplicarIdioma() {
   renderFiltros();
   renderGuia();
   actualizarBannerContinuar();
+  renderListasGuardadasUI();
+  actualizarSelectorListasHeader();
 }
 
 /* =======================================================
@@ -164,11 +170,11 @@ function nombrePais(codigoPais) {
 }
 
 /* =======================================================
-   Estado y almacenamiento
+   Estado y almacenamiento de Múltiples Listas
    ======================================================= */
 
-const CLAVE_LISTA = 'iptv:lista-canales';
-const CLAVE_ORIGEN = 'iptv:origen-lista';
+const CLAVE_MULTIPLE_LISTAS = 'iptv:multiple-listas';
+const CLAVE_LISTA_ACTIVA_ID = 'iptv:lista-activa-id';
 const CLAVE_FAVORITOS = 'iptv:favoritos';
 const CLAVE_ULTIMO = 'iptv:ultimo-canal';
 const CLAVE_IDIOMA = 'iptv:idioma';
@@ -180,6 +186,8 @@ const URL_FUENTES = './fuentes.json';
 const URL_PROXY = '';
 
 const estado = {
+  listasGuardadas: [], // [{ id, nombre, canales: [] }]
+  listaActivaId: localStorage.getItem(CLAVE_LISTA_ACTIVA_ID) || 'oficial',
   canales: [],
   filtro: 'Todos',
   agrupacion: localStorage.getItem(CLAVE_AGRUPACION) || 'categoria',
@@ -194,19 +202,37 @@ const estado = {
   reintentosCanalActual: 0,
 };
 
-function cargarListaGuardada() {
+function cargarListasDeStorage() {
   try {
-    const crudo = localStorage.getItem(CLAVE_LISTA);
+    const crudo = localStorage.getItem(CLAVE_MULTIPLE_LISTAS);
     return crudo ? JSON.parse(crudo) : [];
   } catch (e) {
-    console.error('No se pudo leer la lista guardada', e);
+    console.error('Error al cargar listas', e);
     return [];
   }
 }
 
-function guardarLista(canales, origen) {
-  localStorage.setItem(CLAVE_LISTA, JSON.stringify(canales));
-  if (origen) localStorage.setItem(CLAVE_ORIGEN, origen);
+function guardarListasEnStorage() {
+  localStorage.setItem(CLAVE_MULTIPLE_LISTAS, JSON.stringify(estado.listasGuardadas));
+  localStorage.setItem(CLAVE_LISTA_ACTIVA_ID, estado.listaActivaId);
+}
+
+function cambiarListaActiva(id) {
+  estado.listaActivaId = id;
+  const listaEncontrada = estado.listasGuardadas.find(l => l.id === id);
+  if (listaEncontrada) {
+    estado.canales = listaEncontrada.canales;
+  } else {
+    estado.canales = [];
+  }
+  localStorage.setItem(CLAVE_LISTA_ACTIVA_ID, id);
+  estado.filtro = 'Todos';
+  estado.soloFavoritos = false;
+  estado.soloDestacados = false;
+  renderFiltros();
+  renderGuia();
+  actualizarSelectorListasHeader();
+  renderListasGuardadasUI();
 }
 
 function cargarFavoritos() {
@@ -277,7 +303,6 @@ async function obtenerListaCombinadaDesdeFuentes() {
   }
 
   const entradas = fuentes.map((f) => (typeof f === 'string' ? { url: f } : f));
-
   const ordenadas = [
     ...entradas.filter(esFuenteM3U),
     ...entradas.filter((e) => !esFuenteM3U(e)),
@@ -569,7 +594,7 @@ function formatoHora(iso) {
 }
 
 /* =======================================================
-   Render: Guia de Canales (Lista vs Grilla)
+   Render: Guia de Canales
    ======================================================= */
 
 const el = {
@@ -731,7 +756,6 @@ function vistaVacia(titulo, texto, mostrarBoton) {
   return div;
 }
 
-// Vista 1: Modo Lista Limpia (Accesible)
 function filaCanalLista(canal) {
   const fila = document.createElement('div');
   fila.className = 'fila-canal modo-lista';
@@ -772,7 +796,6 @@ function filaCanalLista(canal) {
   return fila;
 }
 
-// Vista 2: Modo Grilla Horaria (Grid EPG)
 function filaCanalGrid(canal) {
   const fila = document.createElement('div');
   fila.className = 'fila-canal modo-grilla';
@@ -857,6 +880,67 @@ function alternarModoVista() {
   localStorage.setItem(CLAVE_MODO_VISTA, estado.modoVista);
   actualizarBotonVista();
   renderGuia();
+}
+
+/* =======================================================
+   Selector de Listas en la Cabecera y Administrador UI
+   ======================================================= */
+
+function actualizarSelectorListasHeader() {
+  const selectHeader = document.getElementById('select-lista-header');
+  if (!selectHeader) return;
+
+  selectHeader.innerHTML = '';
+  estado.listasGuardadas.forEach((l) => {
+    const opt = document.createElement('option');
+    opt.value = l.id;
+    opt.textContent = `${l.nombre} (${l.canales.length})`;
+    opt.selected = l.id === estado.listaActivaId;
+    selectHeader.appendChild(opt);
+  });
+
+  selectHeader.hidden = estado.listasGuardadas.length <= 1;
+}
+
+function renderListasGuardadasUI() {
+  const cont = document.getElementById('listas-guardadas-lista');
+  if (!cont) return;
+
+  cont.innerHTML = '';
+  if (estado.listasGuardadas.length === 0) return;
+
+  estado.listasGuardadas.forEach((l) => {
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px 14px; margin-top:8px; border-radius:6px;';
+    
+    item.innerHTML = `
+      <div>
+        <strong>${l.nombre}</strong> <span style="font-size:12px; opacity:0.7;">(${l.canales.length} canales)</span>
+      </div>
+      <div>
+        <button class="boton-secundario" style="margin-right:6px;" ${l.id === estado.listaActivaId ? 'disabled' : ''}>${l.id === estado.listaActivaId ? 'Activa' : 'Usar'}</button>
+        ${l.id !== 'oficial' ? '<button class="boton-secundario" style="color:#ff4d4d;">\u2715</button>' : ''}
+      </div>
+    `;
+
+    const btns = item.querySelectorAll('button');
+    if (l.id !== estado.listaActivaId) {
+      btns[0].addEventListener('click', () => cambiarListaActiva(l.id));
+    }
+    if (l.id !== 'oficial') {
+      const btnBorrar = btns[1] || btns[0];
+      btnBorrar.addEventListener('click', () => {
+        estado.listasGuardadas = estado.listasGuardadas.filter(itemL => itemL.id !== l.id);
+        if (estado.listaActivaId === l.id) {
+          estado.listaActivaId = estado.listasGuardadas[0]?.id || 'oficial';
+        }
+        guardarListasEnStorage();
+        cambiarListaActiva(estado.listaActivaId);
+      });
+    }
+
+    cont.appendChild(item);
+  });
 }
 
 /* =======================================================
@@ -1218,6 +1302,7 @@ const cfg = {
   archivo: document.getElementById('campo-archivo'),
   nombreArchivo: document.getElementById('nombre-archivo'),
   texto: document.getElementById('campo-texto'),
+  nombreLista: document.getElementById('campo-nombre-lista'),
   mensaje: document.getElementById('config-mensaje'),
   botonCargar: document.getElementById('boton-cargar'),
   botonLimpiar: document.getElementById('boton-limpiar'),
@@ -1254,8 +1339,6 @@ async function manejarCarga() {
   ocultarMensaje();
   try {
     let texto = '';
-    let origen = '';
-
     if (tabActiva === 'url') {
       const url = cfg.url.value.trim();
       if (!url) { mostrarMensaje(t('ingresa_url'), 'error'); return; }
@@ -1263,15 +1346,12 @@ async function manejarCarga() {
       const resp = await fetch(url);
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       texto = await resp.text();
-      origen = url;
     } else if (tabActiva === 'archivo') {
       if (!contenidoArchivo) { mostrarMensaje(t('elegi_archivo'), 'error'); return; }
       texto = contenidoArchivo;
-      origen = 'archivo:' + (cfg.archivo.files[0]?.name || '');
     } else {
       texto = cfg.texto.value.trim();
       if (!texto) { mostrarMensaje(t('pega_contenido'), 'error'); return; }
-      origen = 'texto-pegado';
     }
 
     const crudos = parsearContenido(texto);
@@ -1282,15 +1362,15 @@ async function manejarCarga() {
       return;
     }
 
-    guardarLista(canales, origen);
-    estado.canales = canales;
-    estado.filtro = 'Todos';
-    estado.soloFavoritos = false;
-    estado.soloDestacados = false;
-    renderFiltros();
-    renderGuia();
-    actualizarBannerContinuar();
-    mostrarMensaje(canales.length + ' \u2713', 'ok');
+    const idLista = 'lista_' + Date.now();
+    const nombrePers = (cfg.nombreLista && cfg.nombreLista.value.trim()) || (`Lista ${estado.listasGuardadas.length + 1}`);
+
+    estado.listasGuardadas.push({ id: idLista, nombre: nombrePers, canales });
+    guardarListasEnStorage();
+    cambiarListaActiva(idLista);
+
+    if (cfg.nombreLista) cfg.nombreLista.value = '';
+    mostrarMensaje(`${canales.length} canales guardados en "${nombrePers}" \u2713`, 'ok');
     setTimeout(irAGuia, 900);
   } catch (e) {
     console.error(e);
@@ -1303,12 +1383,15 @@ async function manejarCarga() {
 cfg.botonCargar.addEventListener('click', manejarCarga);
 
 cfg.botonLimpiar.addEventListener('click', async () => {
-  localStorage.removeItem(CLAVE_LISTA);
-  localStorage.removeItem(CLAVE_ORIGEN);
-  estado.canales = await obtenerListaCombinadaDesdeFuentes();
-  renderFiltros();
-  renderGuia();
-  actualizarBannerContinuar();
+  localStorage.removeItem(CLAVE_MULTIPLE_LISTAS);
+  localStorage.removeItem(CLAVE_LISTA_ACTIVA_ID);
+  
+  const oficiales = await obtenerListaCombinadaDesdeFuentes();
+  estado.listasGuardadas = [{ id: 'oficial', nombre: 'Oficial', canales: oficiales }];
+  estado.listaActivaId = 'oficial';
+  
+  guardarListasEnStorage();
+  cambiarListaActiva('oficial');
   mostrarMensaje(t('lista_borrada'), 'ok');
 });
 
@@ -1321,6 +1404,11 @@ document.getElementById('boton-volver').addEventListener('click', irAGuia);
 document.getElementById('boton-cerrar-reproductor').addEventListener('click', cerrarReproductor);
 document.getElementById('boton-canal-anterior').addEventListener('click', () => cambiarCanal(-1));
 document.getElementById('boton-canal-siguiente').addEventListener('click', () => cambiarCanal(1));
+
+const selectHeader = document.getElementById('select-lista-header');
+if (selectHeader) {
+  selectHeader.addEventListener('change', (e) => cambiarListaActiva(e.target.value));
+}
 
 const btnVista = document.getElementById('boton-vista');
 if (btnVista) btnVista.addEventListener('click', alternarModoVista);
@@ -1399,7 +1487,7 @@ if ('serviceWorker' in navigator) {
 }
 
 /* =======================================================
-   Arranque con Splash Screen
+   Arranque e Inicialización
    ======================================================= */
 
 function mostrarIntroCarga() {
@@ -1442,16 +1530,17 @@ async function iniciar() {
     b.classList.toggle('activo', b.dataset.agrupar === estado.agrupacion);
   });
 
-  const guardadaManualmente = cargarListaGuardada();
-  if (guardadaManualmente.length > 0) {
-    estado.canales = guardadaManualmente;
+  const listasLocales = cargarListasDeStorage();
+  if (listasLocales.length > 0) {
+    estado.listasGuardadas = listasLocales;
   } else {
-    estado.canales = await obtenerListaCombinadaDesdeFuentes();
+    const canalesOficiales = await obtenerListaCombinadaDesdeFuentes();
+    estado.listasGuardadas = [{ id: 'oficial', nombre: 'Oficial', canales: canalesOficiales }];
+    guardarListasEnStorage();
   }
 
+  cambiarListaActiva(estado.listaActivaId);
   aplicarIdioma();
-  actualizarBannerContinuar();
-  renderGuia();
 
   cargarProgramacion()
     .then((programacion) => {
