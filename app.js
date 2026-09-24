@@ -369,7 +369,7 @@ const URL_EPG_FUENTES = './epg.json';
 const DB_NAME = 'IPTV_EPG_DB';
 const DB_VERSION = 1;
 const STORE_NAME = 'epg_cache';
-const EPG_CACHE_TTL_MS = 3 * 60 * 60 * 1000; // 3 horas
+const EPG_CACHE_TTL_MS = 3 * 60 * 60 * 1000;
 
 function abrirDB() {
   return new Promise((resolve, reject) => {
@@ -594,6 +594,7 @@ function renderFiltros() {
   const chipFav = document.createElement('button');
   chipFav.className = 'filtro' + (estado.soloFavoritos ? ' activo' : '');
   chipFav.textContent = '\u2605 ' + t('favoritos');
+  chipFav.tabIndex = 0;
   chipFav.addEventListener('click', () => {
     estado.soloFavoritos = !estado.soloFavoritos;
     renderFiltros();
@@ -605,6 +606,7 @@ function renderFiltros() {
   const chipTodos = document.createElement('button');
   chipTodos.className = 'filtro' + (estado.filtro === 'Todos' ? ' activo' : '');
   chipTodos.textContent = t('todos');
+  chipTodos.tabIndex = 0;
   chipTodos.addEventListener('click', () => {
     estado.filtro = 'Todos';
     renderFiltros();
@@ -616,6 +618,7 @@ function renderFiltros() {
     const b = document.createElement('button');
     b.className = 'filtro' + (estado.filtro === g ? ' activo' : '');
     b.textContent = etiquetaGrupo(g);
+    b.tabIndex = 0;
     b.addEventListener('click', () => {
       estado.filtro = g;
       renderFiltros();
@@ -717,7 +720,7 @@ function filaCanal(canal) {
       <span class="fila-canal__grupo">${banderaHtml}${canal.grupo}</span>
       ${programaHtml}
     </span>
-    <button class="fila-canal__favorito ${esFavorito(canal.id) ? 'activo' : ''}" aria-label="Favorito" data-id="${canal.id}">${esFavorito(canal.id) ? '\u2605' : '\u2606'}</button>
+    <button class="fila-canal__favorito ${esFavorito(canal.id) ? 'activo' : ''}" aria-label="Favorito" data-id="${canal.id}" tabIndex="-1">${esFavorito(canal.id) ? '\u2605' : '\u2606'}</button>
     <span class="fila-canal__estado" aria-hidden="true"></span>
   `;
 
@@ -1168,7 +1171,7 @@ cfg.botonLimpiar.addEventListener('click', () => {
 });
 
 /* =======================================================
-   Eventos generales
+   Eventos generales y navegacion por Control Remoto / D-Pad
    ======================================================= */
 
 document.getElementById('boton-config').addEventListener('click', irAConfig);
@@ -1188,12 +1191,53 @@ el.busqueda.addEventListener('input', (e) => {
   renderGuia();
 });
 
+// Navegacion asistida por D-Pad / Teclado
 document.addEventListener('keydown', (e) => {
   const reproductorAbierto = rp.seccion.classList.contains('activo');
+
   if (reproductorAbierto) {
-    if (e.key === 'Escape' || e.key === 'Backspace') { cerrarReproductor(); }
-    if (e.key === 'ArrowUp') { cambiarCanal(-1); }
-    if (e.key === 'ArrowDown') { cambiarCanal(1); }
+    if (e.key === 'Escape' || e.key === 'Backspace' || e.key === 'GoBack') {
+      cerrarReproductor();
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      cambiarCanal(-1);
+      e.preventDefault();
+    } else if (e.key === 'ArrowDown') {
+      cambiarCanal(1);
+      e.preventDefault();
+    } else if (e.key === ' ' || e.key === 'MediaPlayPause') {
+      if (rp.video.paused) rp.video.play().catch(() => {});
+      else rp.video.pause();
+      e.preventDefault();
+    }
+    return;
+  }
+
+  // Navegacion en la Guia de Canales
+  if (el.pantallaGuia.classList.contains('activa')) {
+    const filas = Array.from(document.querySelectorAll('.fila-canal'));
+    if (filas.length === 0) return;
+
+    const actualFocus = document.activeElement;
+    let index = filas.indexOf(actualFocus);
+
+    if (e.key === 'ArrowDown') {
+      if (index === -1) {
+        filas[0].focus();
+      } else if (index < filas.length - 1) {
+        filas[index + 1].focus();
+        filas[index + 1].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      if (index > 0) {
+        filas[index - 1].focus();
+        filas[index - 1].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } else if (index === 0) {
+        document.getElementById('campo-busqueda').focus();
+      }
+      e.preventDefault();
+    }
   }
 });
 
