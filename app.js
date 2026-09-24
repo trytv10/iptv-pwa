@@ -7,7 +7,7 @@
 const IDIOMAS = {
   es: {
     marca: 'Guia de Canales',
-    buscar_placeholder: 'Buscar canal...',
+    buscar_placeholder: 'Buscar canal, evento o equipo...',
     cargar_lista: 'Gestionar Listas',
     restaurar_oficial: 'Usar lista oficial',
     continuar_viendo: 'Continuar viendo',
@@ -40,7 +40,7 @@ const IDIOMAS = {
     guia_vacia_titulo: 'Todavia no hay canales cargados',
     guia_vacia_texto: 'Carga tu listado (.m3u, .m3u8 o .json) para empezar a ver la guia.',
     sin_resultados_titulo: 'Sin resultados',
-    sin_resultados_texto: 'Proba con otra busqueda o categoria.',
+    sin_resultados_texto: 'Proba con otra busqueda, evento o categoria.',
     conectando: 'Conectando...',
     en_vivo: 'EN VIVO',
     subtitulos_off: 'Desactivados',
@@ -62,7 +62,7 @@ const IDIOMAS = {
   },
   en: {
     marca: 'Channel Guide',
-    buscar_placeholder: 'Search channel...',
+    buscar_placeholder: 'Search channel, event or team...',
     cargar_lista: 'Manage Lists',
     restaurar_oficial: 'Use official list',
     continuar_viendo: 'Continue watching',
@@ -95,7 +95,7 @@ const IDIOMAS = {
     guia_vacia_titulo: 'No channels loaded yet',
     guia_vacia_texto: 'Load your list (.m3u, .m3u8 or .json) to start browsing.',
     sin_resultados_titulo: 'No results',
-    sin_resultados_texto: 'Try a different search or category.',
+    sin_resultados_texto: 'Try a different search, event or category.',
     conectando: 'Connecting...',
     en_vivo: 'LIVE',
     subtitulos_off: 'Off',
@@ -170,7 +170,7 @@ function nombrePais(codigoPais) {
 }
 
 /* =======================================================
-   Estado y almacenamiento de Múltiples Listas
+   Estado y almacenamiento
    ======================================================= */
 
 const CLAVE_MULTIPLE_LISTAS = 'iptv:multiple-listas';
@@ -186,7 +186,7 @@ const URL_FUENTES = './fuentes.json';
 const URL_PROXY = '';
 
 const estado = {
-  listasGuardadas: [], // [{ id, nombre, canales: [] }]
+  listasGuardadas: [],
   listaActivaId: localStorage.getItem(CLAVE_LISTA_ACTIVA_ID) || 'oficial',
   canales: [],
   filtro: 'Todos',
@@ -715,8 +715,18 @@ function canalesFiltrados() {
     if (estado.soloDestacados && !esCanalDestacado(c)) return false;
     const valorGrupo = estado.agrupacion === 'pais' ? (c.pais || '') : c.grupo;
     const pasaGrupo = estado.filtro === 'Todos' || valorGrupo === estado.filtro || estado.soloFavoritos || estado.soloDestacados;
-    const pasaBusqueda = !q || c.nombre.toLowerCase().includes(q);
-    return pasaGrupo && pasaBusqueda;
+    
+    if (!q) return pasaGrupo;
+
+    // Buscador Inteligente integrado con EPG (Canal, Grupo, Programa Actual o Siguiente)
+    const coincideCanal = c.nombre.toLowerCase().includes(q) || c.grupo.toLowerCase().includes(q);
+    const actual = programaActual(c.tvgId);
+    const siguiente = programaSiguiente(c.tvgId);
+    
+    const coincidePrograma = (actual && (actual.titulo.toLowerCase().includes(q) || actual.descripcion.toLowerCase().includes(q))) ||
+                             (siguiente && (siguiente.titulo.toLowerCase().includes(q) || siguiente.descripcion.toLowerCase().includes(q)));
+
+    return pasaGrupo && (coincideCanal || coincidePrograma);
   });
 }
 
