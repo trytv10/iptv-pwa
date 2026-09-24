@@ -54,6 +54,7 @@ const IDIOMAS = {
     a_continuacion: 'A continuacion',
     voz_escuchando: 'Escuchando...',
     sin_epg: 'Sin informacion de programacion',
+    reintentando: 'Reintentando senal...',
   },
   en: {
     marca: 'Channel Guide',
@@ -104,6 +105,7 @@ const IDIOMAS = {
     a_continuacion: 'Up next',
     voz_escuchando: 'Listening...',
     sin_epg: 'No guide information',
+    reintentando: 'Retrying stream...',
   },
 };
 
@@ -182,6 +184,7 @@ const estado = {
   hls: null,
   idioma: localStorage.getItem(CLAVE_IDIOMA) || ((navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'es'),
   programacion: {},
+  reintentosCanalActual: 0,
 };
 
 function cargarListaGuardada() {
@@ -559,7 +562,7 @@ function formatoHora(iso) {
 }
 
 /* =======================================================
-   Render: guia de canales y EPG Grilla Horaria (Grid)
+   Render: guia de canales
    ======================================================= */
 
 const el = {
@@ -720,7 +723,6 @@ function vistaVacia(titulo, texto, mostrarBoton) {
   return div;
 }
 
-// Renderizado estilo Grid Horizontal para la Guia EPG
 function filaCanalGrid(canal) {
   const fila = document.createElement('div');
   fila.className = 'fila-canal';
@@ -734,7 +736,6 @@ function filaCanalGrid(canal) {
 
   const banderaHtml = canal.pais ? `<span class="fila-canal__bandera">${bandera(canal.pais)}</span>` : '';
 
-  const programas = (canal.tvgId && estado.programacion[canal.tvgId]) || [];
   const enCurso = programaActual(canal.tvgId);
   const siguiente = programaSiguiente(canal.tvgId);
 
@@ -807,7 +808,7 @@ function actualizarBannerContinuar() {
 }
 
 /* =======================================================
-   Reproductor HLS + Zap In Directo
+   Reproductor HLS + Fallback de Senales + Indicador Calidad
    ======================================================= */
 
 const rp = {
@@ -846,9 +847,15 @@ function reproducirCanalPorId(id) {
   const canal = estado.canales.find((c) => c.id === id);
   if (!canal) return;
   estado.indiceActual = estado.canales.findIndex((c) => c.id === id);
+  estado.reintentosCanalActual = 0;
   guardarUltimoVisto(id);
   abrirReproductor();
   cargarStream(canal);
+}
+
+function buscarCanalRespaldo(canalFallido) {
+  const nombreLimpio = canalFallido.nombre.replace(/Opci[oó]n\s*\d+/i, '').trim().toLowerCase();
+  return estado.canales.find((c) => c.id !== canalFallido.id && c.nombre.toLowerCase().includes(nombreLimpio));
 }
 
 function abrirReproductor() {
@@ -966,14 +973,19 @@ function cargarStream(canal, intentarProxy) {
     ? URL_PROXY + (URL_PROXY.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(canal.url)
     : canal.url;
 
-  const marcarEnVivo = () => { rp.estadoTexto.textContent = t('en_vivo'); };
-  const marcarError = () => { rp.seccion.classList.add('con-error'); };
-  const reintentarConProxySiCorresponde = () => {
-    if (!intentarProxy && URL_PROXY) {
-      cargarStream(canal, true);
-      return true;
+  const marcarEnVivo = (res) => { 
+    rp.estadoTexto.textContent = `${t('en_vivo')} ${res ? '\u00b7 ' + res + 'p' : ''}`; 
+  };
+
+  const manejarFalloStream = () => {
+    const canalRespaldo = buscarCanalRespaldo(canal);
+    if (canalRespaldo && estado.reintentosCanalActual === 0) {
+      estado.reintentosCanalActual++;
+      rp.estadoTexto.textContent = t('reintentando');
+      reproducirCanalPorId(canalRespaldo.id);
+    } else {
+      rp.seccion.classList.add('con-error');
     }
-    return false;
   };
 
   if (window.Hls && Hls.isSupported()) {
@@ -981,23 +993,34 @@ function cargarStream(canal, intentarProxy) {
     estado.hls = hls;
     hls.loadSource(urlEfectiva);
     hls.attachMedia(rp.video);
+
+    hls.on(Hls.Events.LEVEL_SWITCHED, (_evt, data) => {
+      const nivel = hls.levels[data.level];
+      if (nivel && nivel.height) marcarEnVivo(nivel.height);
+    });
+
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       rp.video.play().catch(() => {});
       marcarEnVivo();
       construirMenuSubtitulosHls(hls);
       construirMenuCalidadHls(hls);
     });
+
     hls.on(Hls.Events.ERROR, (_evt, data) => {
       if (data.fatal) {
         switch (data.type) {
           case Hls.ErrorTypes.NETWORK_ERROR:
-            if (!reintentarConProxySiCorresponde()) hls.startLoad();
+            if (!intentarProxy && URL_PROXY) {
+              cargarStream(canal, true);
+            } else {
+              manejarFalloStream();
+            }
             break;
           case Hls.ErrorTypes.MEDIA_ERROR:
             hls.recoverMediaError();
             break;
           default:
-            if (!reintentarConProxySiCorresponde()) marcarError();
+            manejarFalloStream();
             break;
         }
       }
@@ -1009,10 +1032,10 @@ function cargarStream(canal, intentarProxy) {
       marcarEnVivo();
     }, { once: true });
     rp.video.addEventListener('error', () => {
-      if (!reintentarConProxySiCorresponde()) marcarError();
+      manejarFalloStream();
     }, { once: true });
   } else {
-    marcarError();
+    manejarFalloStream();
   }
 }
 
