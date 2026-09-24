@@ -1,0 +1,27 @@
+name: Actualizar Canales M3U8
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # Se ejecuta automáticamente todos los días a las 4:00 AM
+  workflow_dispatch: # Permite ejecutarlo manualmente desde GitHub cuando quieras
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Ejecutar script de unificación
+        run: node unificar.js
+
+      - name: Guardar cambios en GitHub
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-actualización de canales M3U8"
+          branch: main
