@@ -30,7 +30,7 @@ const IDIOMAS = {
     archivo_arrastrar: 'Arrastra un archivo o',
     archivo_elegir: 'elegilo manualmente',
     etiqueta_texto: 'Contenido M3U o JSON',
-    borrar_lista: 'Restaurar listas predeterminadas',
+    borrar_lista: 'Restaurar predeterminadas (Actualizar Guia)',
     config_info: 'Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" group-title="Categoria",Nombre del canal</code> seguido de la URL .m3u8.',
     subtitulos: 'Subtitulos',
     calidad: 'Calidad',
@@ -49,7 +49,7 @@ const IDIOMAS = {
     elegi_archivo: 'Elegi un archivo primero.',
     pega_contenido: 'Pega el contenido M3U o JSON.',
     sin_canales_validos: 'No se encontraron canales validos.',
-    lista_borrada: 'Se restauraron las listas predeterminadas.',
+    lista_borrada: 'Se recargo la guia con los canales actualizados.',
     cargando: 'Cargando...',
     a_continuacion: 'A continuacion',
     voz_escuchando: 'Escuchando...',
@@ -59,6 +59,11 @@ const IDIOMAS = {
     vista_grilla: '▦ Grilla',
     nombre_lista_placeholder: 'Nombre para esta lista (ej: Deportes, Argentina...)',
     mis_listas: 'Mis Listas Guardadas',
+    control_parental: 'Control Parental (Bloqueo de Categorias)',
+    pin_placeholder: 'PIN de 4 digitos (ej: 1234)',
+    guardar_pin: 'Guardar PIN y Bloqueos',
+    pin_incorrecto: 'PIN incorrecto',
+    ingrese_pin: 'Ingrese el PIN de control parental:',
   },
   en: {
     marca: 'Channel Guide',
@@ -85,7 +90,7 @@ const IDIOMAS = {
     archivo_arrastrar: 'Drag a file or',
     archivo_elegir: 'choose it manually',
     etiqueta_texto: 'M3U or JSON content',
-    borrar_lista: 'Restore default lists',
+    borrar_lista: 'Restore defaults (Update Guide)',
     config_info: 'Expected M3U format per line: <code>#EXTINF:-1 tvg-logo="LOGO_URL" group-title="Category",Channel name</code>.',
     subtitulos: 'Subtitles',
     calidad: 'Quality',
@@ -104,7 +109,7 @@ const IDIOMAS = {
     elegi_archivo: 'Choose a file first.',
     pega_contenido: 'Paste the M3U or JSON content.',
     sin_canales_validos: 'No valid channels were found.',
-    lista_borrada: 'Restored to default official list.',
+    lista_borrada: 'Guide reloaded with updated channels.',
     cargando: 'Loading...',
     a_continuacion: 'Up next',
     voz_escuchando: 'Listening...',
@@ -114,6 +119,11 @@ const IDIOMAS = {
     vista_grilla: '▦ Grid',
     nombre_lista_placeholder: 'List name (e.g. Sports, Local...)',
     mis_listas: 'My Saved Lists',
+    control_parental: 'Parental Control (Block Categories)',
+    pin_placeholder: '4-digit PIN (e.g. 1234)',
+    guardar_pin: 'Save PIN & Blocks',
+    pin_incorrecto: 'Incorrect PIN',
+    ingrese_pin: 'Enter parental control PIN:',
   },
 };
 
@@ -137,6 +147,7 @@ function aplicarIdioma() {
   actualizarBannerContinuar();
   renderListasGuardadasUI();
   actualizarSelectorListasHeader();
+  renderControlParentalUI();
 }
 
 /* =======================================================
@@ -170,7 +181,7 @@ function nombrePais(codigoPais) {
 }
 
 /* =======================================================
-   Estado y almacenamiento
+   Estado, Listas y Control Parental
    ======================================================= */
 
 const CLAVE_MULTIPLE_LISTAS = 'iptv:multiple-listas';
@@ -180,6 +191,8 @@ const CLAVE_ULTIMO = 'iptv:ultimo-canal';
 const CLAVE_IDIOMA = 'iptv:idioma';
 const CLAVE_AGRUPACION = 'iptv:agrupacion';
 const CLAVE_MODO_VISTA = 'iptv:modo-vista';
+const CLAVE_PARENTAL_PIN = 'iptv:parental-pin';
+const CLAVE_PARENTAL_BLOQUEOS = 'iptv:parental-bloqueos';
 
 const URL_LISTA_PREDETERMINADA = './canales.m3u8';
 const URL_FUENTES = './fuentes.json';
@@ -200,6 +213,8 @@ const estado = {
   idioma: localStorage.getItem(CLAVE_IDIOMA) || ((navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'es'),
   programacion: {},
   reintentosCanalActual: 0,
+  parentalPin: localStorage.getItem(CLAVE_PARENTAL_PIN) || '',
+  categoriasBloqueadas: JSON.parse(localStorage.getItem(CLAVE_PARENTAL_BLOQUEOS) || '[]'),
 };
 
 function cargarListasDeStorage() {
@@ -233,6 +248,7 @@ function cambiarListaActiva(id) {
   renderGuia();
   actualizarSelectorListasHeader();
   renderListasGuardadasUI();
+  renderControlParentalUI();
 }
 
 function cargarFavoritos() {
@@ -594,7 +610,7 @@ function formatoHora(iso) {
 }
 
 /* =======================================================
-   Render: Guia de Canales
+   Render: Guia de Canales y Control Parental
    ======================================================= */
 
 const el = {
@@ -659,7 +675,7 @@ function renderFiltros() {
   });
   el.filtros.appendChild(chipDestacados);
 
-  const grupos = gruposDisponibles();
+  const grupos = gruposDisponibles().filter(g => !estado.categoriasBloqueadas.includes(g));
   const chipTodos = document.createElement('button');
   chipTodos.className = 'filtro' + (estado.filtro === 'Todos' && !estado.soloFavoritos && !estado.soloDestacados ? ' activo' : '');
   chipTodos.textContent = t('todos');
@@ -711,6 +727,9 @@ function esCanalDestacado(c) {
 function canalesFiltrados() {
   const q = estado.busqueda.trim().toLowerCase();
   return estado.canales.filter((c) => {
+    // Ocultar canales cuyas categorías estén bloqueadas por control parental
+    if (estado.categoriasBloqueadas.includes(c.grupo)) return false;
+
     if (estado.soloFavoritos && !esFavorito(c.id)) return false;
     if (estado.soloDestacados && !esCanalDestacado(c)) return false;
     const valorGrupo = estado.agrupacion === 'pais' ? (c.pais || '') : c.grupo;
@@ -718,7 +737,6 @@ function canalesFiltrados() {
     
     if (!q) return pasaGrupo;
 
-    // Buscador Inteligente integrado con EPG (Canal, Grupo, Programa Actual o Siguiente)
     const coincideCanal = c.nombre.toLowerCase().includes(q) || c.grupo.toLowerCase().includes(q);
     const actual = programaActual(c.tvgId);
     const siguiente = programaSiguiente(c.tvgId);
@@ -893,7 +911,7 @@ function alternarModoVista() {
 }
 
 /* =======================================================
-   Selector de Listas en la Cabecera y Administrador UI
+   Selector de Listas y Control Parental UI
    ======================================================= */
 
 function actualizarSelectorListasHeader() {
@@ -953,6 +971,33 @@ function renderListasGuardadasUI() {
   });
 }
 
+function renderControlParentalUI() {
+  const cont = document.getElementById('parental-categorias');
+  const inputPin = document.getElementById('campo-pin-parental');
+  if (!cont || !inputPin) return;
+
+  inputPin.value = estado.parentalPin;
+  cont.innerHTML = '';
+
+  const gruposUnicos = Array.from(new Set(estado.canales.map(c => c.grupo))).sort();
+  if (gruposUnicos.length === 0) {
+    cont.innerHTML = '<div style="font-size:12.5px; opacity:0.6;">Carga canales para configurar bloqueos.</div>';
+    return;
+  }
+
+  gruposUnicos.forEach(g => {
+    const block = document.createElement('label');
+    block.style.cssText = 'display:flex; align-items:center; gap:8px; margin-top:6px; font-size:13.5px; cursor:pointer;';
+    
+    const isChecked = estado.categoriasBloqueadas.includes(g);
+    block.innerHTML = `
+      <input type="checkbox" value="${g}" ${isChecked ? 'checked' : ''} style="width:16px; height:16px; accent-color:#e50914;">
+      <span>${g}</span>
+    `;
+    cont.appendChild(block);
+  });
+}
+
 /* =======================================================
    Banner: continuar viendo
    ======================================================= */
@@ -1008,6 +1053,16 @@ function actualizarProgramaReproductor(tvgId) {
 function reproducirCanalPorId(id) {
   const canal = estado.canales.find((c) => c.id === id);
   if (!canal) return;
+
+  // Verificar si la categoría del canal está bloqueada por control parental
+  if (estado.categoriasBloqueadas.includes(canal.grupo) && estado.parentalPin) {
+    const pinIngresado = prompt(t('ingrese_pin'));
+    if (pinIngresado !== estado.parentalPin) {
+      alert(t('pin_incorrecto'));
+      return;
+    }
+  }
+
   estado.indiceActual = estado.canales.findIndex((c) => c.id === id);
   estado.reintentosCanalActual = 0;
   guardarUltimoVisto(id);
@@ -1294,6 +1349,7 @@ rp.botonCast.addEventListener('click', enviarACast);
 function irAConfig() {
   el.pantallaGuia.classList.remove('activa');
   el.pantallaConfig.classList.add('activa');
+  renderControlParentalUI();
 }
 
 function irAGuia() {
@@ -1316,6 +1372,8 @@ const cfg = {
   mensaje: document.getElementById('config-mensaje'),
   botonCargar: document.getElementById('boton-cargar'),
   botonLimpiar: document.getElementById('boton-limpiar'),
+  campoPinParental: document.getElementById('campo-pin-parental'),
+  botonGuardarParental: document.getElementById('boton-guardar-parental'),
 };
 
 let tabActiva = 'url';
@@ -1404,6 +1462,26 @@ cfg.botonLimpiar.addEventListener('click', async () => {
   cambiarListaActiva('oficial');
   mostrarMensaje(t('lista_borrada'), 'ok');
 });
+
+if (cfg.botonGuardarParental) {
+  cfg.botonGuardarParental.addEventListener('click', () => {
+    estado.parentalPin = cfg.campoPinParental.value.trim();
+    localStorage.setItem(CLAVE_PARENTAL_PIN, estado.parentalPin);
+
+    const checkboxes = document.querySelectorAll('#parental-categorias input[type="checkbox"]');
+    const bloqueadas = [];
+    checkboxes.forEach(cb => {
+      if (cb.checked) bloqueadas.push(cb.value);
+    });
+
+    estado.categoriasBloqueadas = bloqueadas;
+    localStorage.setItem(CLAVE_PARENTAL_BLOQUEOS, JSON.stringify(bloqueadas));
+
+    renderFiltros();
+    renderGuia();
+    mostrarMensaje('Configuracion parental guardada \u2713', 'ok');
+  });
+}
 
 /* =======================================================
    Eventos generales y Control Remoto
