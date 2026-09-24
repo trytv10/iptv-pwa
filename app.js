@@ -53,6 +53,7 @@ const IDIOMAS = {
     cargando: 'Cargando...',
     a_continuacion: 'A continuacion',
     voz_escuchando: 'Escuchando...',
+    sin_epg: 'Sin informacion de programacion',
   },
   en: {
     marca: 'Channel Guide',
@@ -102,6 +103,7 @@ const IDIOMAS = {
     cargando: 'Loading...',
     a_continuacion: 'Up next',
     voz_escuchando: 'Listening...',
+    sin_epg: 'No guide information',
   },
 };
 
@@ -557,7 +559,7 @@ function formatoHora(iso) {
 }
 
 /* =======================================================
-   Render: guia de canales
+   Render: guia de canales y EPG Grilla Horaria (Grid)
    ======================================================= */
 
 const el = {
@@ -598,7 +600,6 @@ function renderFiltros() {
 
   if (estado.canales.length === 0) return;
 
-  // Filtro Favoritos
   const chipFav = document.createElement('button');
   chipFav.className = 'filtro' + (estado.soloFavoritos ? ' activo' : '');
   chipFav.textContent = '\u2605 ' + t('favoritos');
@@ -611,7 +612,6 @@ function renderFiltros() {
   });
   el.filtros.appendChild(chipFav);
 
-  // Filtro Deportes / Eventos Destacados
   const chipDestacados = document.createElement('button');
   chipDestacados.className = 'filtro' + (estado.soloDestacados ? ' activo' : '');
   chipDestacados.textContent = '\u26BD ' + t('destacados');
@@ -701,7 +701,7 @@ function renderGuia() {
 
   const frag = document.createDocumentFragment();
   for (const canal of lista) {
-    frag.appendChild(filaCanal(canal));
+    frag.appendChild(filaCanalGrid(canal));
   }
   el.guia.appendChild(frag);
 }
@@ -720,7 +720,8 @@ function vistaVacia(titulo, texto, mostrarBoton) {
   return div;
 }
 
-function filaCanal(canal) {
+// Renderizado estilo Grid Horizontal para la Guia EPG
+function filaCanalGrid(canal) {
   const fila = document.createElement('div');
   fila.className = 'fila-canal';
   fila.dataset.id = canal.id;
@@ -733,18 +734,33 @@ function filaCanal(canal) {
 
   const banderaHtml = canal.pais ? `<span class="fila-canal__bandera">${bandera(canal.pais)}</span>` : '';
 
+  const programas = (canal.tvgId && estado.programacion[canal.tvgId]) || [];
   const enCurso = programaActual(canal.tvgId);
-  let programaHtml = '';
+  const siguiente = programaSiguiente(canal.tvgId);
+
+  let epgGridHtml = '';
   if (enCurso) {
     const inicioMs = new Date(enCurso.inicio).getTime();
     const finMs = new Date(enCurso.fin).getTime();
     const pct = Math.min(100, Math.max(0, ((Date.now() - inicioMs) / (finMs - inicioMs)) * 100));
-    programaHtml = `
-      <span class="fila-canal__programa">
-        <span class="fila-canal__programa-texto">${enCurso.titulo}</span>
-        <span class="fila-canal__programa-barra"><span style="width:${pct.toFixed(1)}%"></span></span>
-      </span>
+
+    epgGridHtml = `
+      <div class="fila-canal__grid">
+        <div class="programa-bloque actual">
+          <span class="programa-titulo">${enCurso.titulo}</span>
+          <span class="programa-horario">${formatoHora(enCurso.inicio)} - ${formatoHora(enCurso.fin)}</span>
+          <span class="fila-canal__programa-barra"><span style="width:${pct.toFixed(1)}%"></span></span>
+        </div>
+        ${siguiente ? `
+          <div class="programa-bloque siguiente">
+            <span class="programa-titulo">${siguiente.titulo}</span>
+            <span class="programa-horario">${formatoHora(siguiente.inicio)}</span>
+          </div>
+        ` : ''}
+      </div>
     `;
+  } else {
+    epgGridHtml = `<span class="fila-canal__sin-epg">${t('sin_epg')}</span>`;
   }
 
   fila.innerHTML = `
@@ -753,10 +769,9 @@ function filaCanal(canal) {
     <span class="fila-canal__info">
       <span class="fila-canal__nombre">${canal.nombre}</span>
       <span class="fila-canal__grupo">${banderaHtml}${canal.grupo}</span>
-      ${programaHtml}
+      ${epgGridHtml}
     </span>
     <button class="fila-canal__favorito ${esFavorito(canal.id) ? 'activo' : ''}" aria-label="Favorito" data-id="${canal.id}" tabIndex="-1">${esFavorito(canal.id) ? '\u2605' : '\u2606'}</button>
-    <span class="fila-canal__estado" aria-hidden="true"></span>
   `;
 
   fila.addEventListener('click', (e) => {
@@ -1205,42 +1220,6 @@ cfg.botonLimpiar.addEventListener('click', async () => {
   actualizarBannerContinuar();
   mostrarMensaje(t('lista_borrada'), 'ok');
 });
-
-/* =======================================================
-   Búsqueda por Voz (Web Speech API)
-   ======================================================= */
-
-function iniciarBusquedaVoz() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert('Tu navegador no soporta búsqueda por voz.');
-    return;
-  }
-
-  const recognition = new SpeechRecognition();
-  recognition.lang = estado.idioma === 'en' ? 'en-US' : 'es-ES';
-  recognition.interimResults = false;
-
-  el.busqueda.placeholder = t('voz_escuchando');
-
-  recognition.onresult = (e) => {
-    const texto = e.results[0][0].transcript;
-    el.busqueda.value = texto;
-    estado.busqueda = texto;
-    renderGuia();
-    el.busqueda.placeholder = t('buscar_placeholder');
-  };
-
-  recognition.onerror = () => {
-    el.busqueda.placeholder = t('buscar_placeholder');
-  };
-
-  recognition.onend = () => {
-    el.busqueda.placeholder = t('buscar_placeholder');
-  };
-
-  recognition.start();
-}
 
 /* =======================================================
    Eventos generales y Control Remoto
