@@ -23,12 +23,18 @@
         <span class="marca__numero">00</span>
         <span class="marca__texto" data-i18n="marca">Guia de Canales</span>
       </div>
+
+      <select id="select-lista-header" class="boton-secundario" style="margin-right:8px;" hidden>
+        <!-- Opciones generadas dinámicamente -->
+      </select>
+
       <div class="buscador">
-        <input type="text" id="campo-busqueda" data-i18n-placeholder="buscar_placeholder" placeholder="Buscar canal..." autocomplete="off">
+        <input type="text" id="campo-busqueda" data-i18n-placeholder="buscar_placeholder" placeholder="Buscar canal, evento o equipo..." autocomplete="off">
       </div>
+      <button id="boton-actualizar-guia" class="boton-secundario" title="Actualizar canales desde el servidor" style="background: rgba(229, 9, 20, 0.2); border-color: #e50914;" data-i18n="actualizar_guia">🔄 Actualizar</button>
       <button id="boton-vista" class="boton-secundario">☰ Lista</button>
       <button class="boton-icono" id="boton-idioma" aria-label="Cambiar idioma / Change language">ES</button>
-      <button class="boton-icono" id="boton-config" data-i18n="cargar_lista">Cargar lista</button>
+      <button class="boton-icono" id="boton-config" data-i18n="cargar_lista">Gestionar Listas</button>
     </header>
 
     <div class="continuar" id="continuar" hidden>
@@ -58,11 +64,14 @@
     <div class="config">
       <div class="config__panel">
         <button class="config__volver" id="boton-volver" data-i18n="volver_guia">&larr; Volver a la guia</button>
-        <h1 class="config__titulo" data-i18n="cargar_titulo">Cargar lista de canales</h1>
+        <h1 class="config__titulo" data-i18n="cargar_titulo">Gestionar Listas de Canales</h1>
         <p class="config__subtitulo" data-i18n="cargar_subtitulo">
-          Sumá tu listado por URL remota, subiendo un archivo .m3u/.m3u8/.json, o pegando el texto directamente.
-          Se guarda en este dispositivo y se puede actualizar cuando quieras.
+          Guarda múltiples fuentes (M3U, M3U8 o JSON) y alterna entre ellas fácilmente.
         </p>
+
+        <div style="margin-bottom:15px;">
+          <input type="text" id="campo-nombre-lista" data-i18n-placeholder="nombre_lista_placeholder" placeholder="Nombre para esta lista (ej: Deportes, Argentina...)" style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff;">
+        </div>
 
         <div class="config__tabs">
           <button class="config__tab activo" data-tab="url" data-i18n="tab_url">URL remota</button>
@@ -93,16 +102,30 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
         </div>
 
         <div class="config__acciones">
-          <button class="boton-primario" id="boton-cargar" data-i18n="cargar_lista">Cargar lista</button>
-          <button class="boton-secundario" id="boton-limpiar" data-i18n="borrar_lista">Borrar lista guardada</button>
+          <button class="boton-primario" id="boton-cargar" data-i18n="cargar_lista">Agregar esta lista</button>
+          <button class="boton-secundario" id="boton-limpiar" data-i18n="borrar_lista">Restaurar predeterminadas</button>
         </div>
 
         <div class="config__mensaje" id="config-mensaje"></div>
 
-        <div class="config__info" data-i18n="config_info">
-          Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" tvg-country="AR" group-title="Categoria",Nombre del canal</code>
-          seguido de la URL del stream .m3u8 en la linea siguiente. <code>tvg-country</code> es opcional (codigo de pais ISO de 2 letras, ej. AR, MX, ES, US) y habilita el agrupado por pais.<br>
-          Formato JSON alternativo: una lista de objetos <code>{ "nombre": "", "url": "", "logo": "", "grupo": "", "pais": "AR" }</code>.
+        <!-- Sección de Control Parental -->
+        <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+          <h3 data-i18n="control_parental" style="margin-bottom:10px; font-size:16px;">Control Parental</h3>
+          <div style="margin-bottom:10px;">
+            <input type="password" id="campo-pin-parental" maxlength="4" data-i18n-placeholder="pin_placeholder" placeholder="PIN de 4 dígitos" style="width:140px; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; text-align:center; letter-spacing:2px;">
+          </div>
+          <div style="font-size:13px; opacity:0.8; margin-bottom:6px;">Selecciona las categorías a bloquear:</div>
+          <div id="parental-categorias" style="max-height:150px; overflow-y:auto; background:rgba(0,0,0,0.2); padding:8px; border-radius:6px;"></div>
+          <button class="boton-secundario" id="boton-guardar-parental" data-i18n="guardar_pin" style="margin-top:10px;">Guardar PIN y Bloqueos</button>
+        </div>
+
+        <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+          <h3 data-i18n="mis_listas" style="margin-bottom:10px; font-size:16px;">Mis Listas Guardadas</h3>
+          <div id="listas-guardadas-lista"></div>
+        </div>
+
+        <div class="config__info" data-i18n="config_info" style="margin-top:20px;">
+          Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" group-title="Categoria",Nombre del canal</code>.
         </div>
       </div>
     </div>
