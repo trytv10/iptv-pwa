@@ -1,132 +1,120 @@
 #!/usr/bin/env python3
-"""
-Revisa cada señal de canales.m3u8 y marca las que no responden, en vez de
-borrarlas. Un canal marcado como caído no aparece en la app (el marcador
-lo convierte en comentario), pero el bloque queda en el archivo por si
-vuelve a andar: la próxima corrida lo reintenta solo y lo reactiva
-automáticamente si responde de nuevo.
-
-Uso: python scripts/check_channels.py [archivo.m3u8]
-"""
-import re
 import sys
-from datetime import datetime, timezone
-import requests
+import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-ARCHIVO = sys.argv[1] if len(sys.argv) > 1 else "canales.m3u8"
-TIMEOUT = 10
+# Configuración de velocidad y tiempos límite
+TIMEOUT_FFMPEG_SEG = 12  # Segundos máximos de espera para que el stream responda y emita video
+MAX_HILOS = 20           # Hilos concurrentes (FFmpeg consume recursos, 20-30 es un buen balance)
 
-HEADERS_NAVEGADOR = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-    "Accept": "*/*",
-    "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
-    "Connection": "keep-alive",
-}
-
-MARCA_RE = re.compile(r"^# \[CAIDO \d{4}-\d{2}-\d{2}\] ")
-
-
-def quitar_marca(linea):
-    return MARCA_RE.sub("", linea, count=1)
-
-
-def es_extinf(linea):
-    return quitar_marca(linea).lstrip().startswith("#EXTINF")
-
-
-def es_linea_url(linea):
-    limpio = quitar_marca(linea).strip()
-    return bool(limpio) and not limpio.startswith("#")
-
-
-def revisar_url(url):
-    # Saltamos la validación en scripts de comandos o canales especiales (ej. YouTube)
-    if "youtube.com" in url or "youtu.be" in url:
-        return True
-
+def verificar_stream_real(url):
+    """
+    Usa FFmpeg para intentar conectar al stream y verificar si es capaz de 
+    comenzar a recibir y decodificar video de forma real sin errores.
+    """
+    cmd = [
+        'ffmpeg',
+        '-v', 'error',                 # Solo mostrar errores críticos
+        '-rw_timeout', '8000000',      # Timeout de lectura de red en microsegundos (8 segundos)
+        '-i', url,                     # URL del stream
+        '-t', '1',                     # Analizar solo el primer segundo de video válido
+        '-f', 'null',                  # Descartar la salida visual (no guarda archivo)
+        '-'
+    ]
+    
     try:
-        # Petición inicial ligera
-        resp = requests.get(
-            url,
-            headers=HEADERS_NAVEGADOR,
-            timeout=TIMEOUT,
-            stream=True,
-            allow_redirects=True,
-            verify=False
+        # Ejecutamos FFmpeg limitando estrictamente el tiempo total de ejecución
+        resultado = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=TIMEOUT_FFMPEG_SEG
         )
-        ok = resp.status_code < 400
-        resp.close()
-        return ok
-    except requests.RequestException:
-        # Reintento con fallback si falla la conexión SSL/HTTP inicial
-        try:
-            resp = requests.head(
-                url,
-                headers=HEADERS_NAVEGADOR,
-                timeout=TIMEOUT,
-                allow_redirects=True,
-                verify=False
-            )
-            ok = resp.status_code < 400
-            resp.close()
-            return ok
-        except requests.RequestException:
-            return False
+        
+        # Si el código de retorno es 0, FFmpeg logró leer y procesar video con éxito
+        if resultado.returncode == 0:
+            return True
+    except (subprocess.TimeoutExpired, Exception):
+        # Si superó el tiempo límite o dio error de decodificación/red, el canal está caído o lento
+        pass
 
+    return False
 
-def main():
-    # Desactivar advertencias de SSL no verificado en el log del runner
-    requests.packages.urllib3.disable_warnings()
+def procesar_playlist(ruta_archivo):
+    print(f"Leyendo canales desde: {ruta_archivo}...")
+    
+    try:
+        with open(ruta_archivo, 'r', encoding='utf-8') as f:
+            lineas = f.readlines()
+    except FileNotFoundError:
+        print(f"Error: No se encontró el archivo {ruta_archivo}")
+        sys.exit(1)
 
-    with open(ARCHIVO, encoding="utf-8") as f:
-        lineas = f.readlines()
-
-    hoy = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    marca_hoy = f"# [CAIDO {hoy}] "
-
-    salida = []
-    total = activos = caidos = recuperados = 0
+    # Extraer bloques de canales estructurados
+    canales = []
     i = 0
     while i < len(lineas):
-        linea = lineas[i]
-
-        if es_extinf(linea):
-            j = i + 1
-            while j < len(lineas) and lineas[j].strip() == "":
-                j += 1
-            if j < len(lineas) and es_linea_url(lineas[j]):
-                url_linea = lineas[j]
-                url = quitar_marca(url_linea).strip()
-                estaba_caido = bool(MARCA_RE.match(linea))
-                total += 1
-
-                if revisar_url(url):
-                    activos += 1
-                    if estaba_caido:
-                        recuperados += 1
-                    salida.append(quitar_marca(linea))
-                    salida.extend(lineas[i + 1:j])
-                    salida.append(quitar_marca(url_linea))
-                else:
-                    caidos += 1
-                    salida.append(marca_hoy + quitar_marca(linea))
-                    salida.extend(lineas[i + 1:j])
-                    salida.append(marca_hoy + quitar_marca(url_linea))
-
-                i = j + 1
-                continue
-
-        salida.append(linea)
+        linea = lineas[i].strip()
+        if linea.startswith('#EXTINF:'):
+            extinf = lineas[i]
+            i += 1
+            extras = []
+            while i < len(lineas) and lineas[i].strip().startswith('#'):
+                extras.append(lineas[i])
+                i += 1
+            if i < len(lineas):
+                url_canal = lineas[i].strip()
+                canales.append({
+                    'extinf': extinf,
+                    'extras': extras,
+                    'url': url_canal
+                })
         i += 1
 
-    with open(ARCHIVO, "w", encoding="utf-8") as f:
-        f.writelines(salida)
+    total_canales = len(canales)
+    print(f"Iniciando chequeo real de video para {total_canales} canales ({MAX_HILOS} hilos concurrentes)...")
 
-    print(
-        f"Revisados: {total} | Activos: {activos} | "
-        f"Caidos: {caidos} | Recuperados hoy: {recuperados}"
-    )
+    activos = []
+    caidos = 0
 
+    def chequear(canal):
+        if verificar_stream_real(canal['url']):
+            return canal
+        return None
 
-if __name__ == "__main__":
-    main()
+    # Ejecución concurrente ultra-rápida basada en decodificación real
+    with ThreadPoolExecutor(max_workers=MAX_HILOS) as executor:
+        futuros = {executor.submit(chequear, c): c for c in canales}
+        for idx, futuro in enumerate(as_completed(futuros), 1):
+            resultado = futuro.result()
+            if resultado:
+                activos.append(resultado)
+                print(f"[{idx}/{total_canales}] [OK] {resultado['url'][:50]}...")
+            else:
+                caidos += 1
+                print(f"[{idx}/{total_canales}] [CAÍDO/LENTO] Eliminado.")
+
+    # Reconstruir el archivo M3U8 limpio de señales rotas o congeladas
+    nuevas_lineas = ['#EXTM3U\n']
+    for c in activos:
+        nuevas_lineas.append(c['extinf'])
+        for extra in c['extras']:
+            nuevas_lineas.append(extra)
+        nuevas_lineas.append(c['url'] + '\n')
+
+    with open(ruta_archivo, 'w', encoding='utf-8') as f:
+        f.writelines(nuevas_lineas)
+
+    print("\n==========================================")
+    print(f" Chequeo Real de Video Finalizado:")
+    print(f" - Canales analizados: {total_canales}")
+    print(f" - Canales activos con video: {len(activos)}")
+    print(f" - Canales caídos o congelados removidos: {caidos}")
+    print("==========================================")
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Uso: python check_channels.py <archivo.m3u8>")
+        sys.exit(1)
+    
+    procesar_playlist(sys.argv[1])
