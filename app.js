@@ -15,6 +15,7 @@ const IDIOMAS = {
     por_categoria: 'Categoria',
     por_pais: 'Pais',
     favoritos: 'Favoritos',
+    destacados: 'Deportes/Eventos',
     todos: 'Todos',
     sin_pais: 'Sin pais',
     volver_guia: '\u2190 Volver a la guia',
@@ -51,6 +52,7 @@ const IDIOMAS = {
     lista_borrada: 'Se restauro la lista oficial predeterminada.',
     cargando: 'Cargando...',
     a_continuacion: 'A continuacion',
+    voz_escuchando: 'Escuchando...',
   },
   en: {
     marca: 'Channel Guide',
@@ -62,6 +64,7 @@ const IDIOMAS = {
     por_categoria: 'Category',
     por_pais: 'Country',
     favoritos: 'Favorites',
+    destacados: 'Sports/Events',
     todos: 'All',
     sin_pais: 'No country',
     volver_guia: '\u2190 Back to guide',
@@ -98,6 +101,7 @@ const IDIOMAS = {
     lista_borrada: 'Restored to default official list.',
     cargando: 'Loading...',
     a_continuacion: 'Up next',
+    voz_escuchando: 'Listening...',
   },
 };
 
@@ -170,6 +174,7 @@ const estado = {
   filtro: 'Todos',
   agrupacion: localStorage.getItem(CLAVE_AGRUPACION) || 'categoria',
   soloFavoritos: false,
+  soloDestacados: false,
   busqueda: '',
   indiceActual: -1,
   hls: null,
@@ -593,24 +598,41 @@ function renderFiltros() {
 
   if (estado.canales.length === 0) return;
 
+  // Filtro Favoritos
   const chipFav = document.createElement('button');
   chipFav.className = 'filtro' + (estado.soloFavoritos ? ' activo' : '');
   chipFav.textContent = '\u2605 ' + t('favoritos');
   chipFav.tabIndex = 0;
   chipFav.addEventListener('click', () => {
     estado.soloFavoritos = !estado.soloFavoritos;
+    estado.soloDestacados = false;
     renderFiltros();
     renderGuia();
   });
   el.filtros.appendChild(chipFav);
 
+  // Filtro Deportes / Eventos Destacados
+  const chipDestacados = document.createElement('button');
+  chipDestacados.className = 'filtro' + (estado.soloDestacados ? ' activo' : '');
+  chipDestacados.textContent = '\u26BD ' + t('destacados');
+  chipDestacados.tabIndex = 0;
+  chipDestacados.addEventListener('click', () => {
+    estado.soloDestacados = !estado.soloDestacados;
+    estado.soloFavoritos = false;
+    renderFiltros();
+    renderGuia();
+  });
+  el.filtros.appendChild(chipDestacados);
+
   const grupos = gruposDisponibles();
   const chipTodos = document.createElement('button');
-  chipTodos.className = 'filtro' + (estado.filtro === 'Todos' ? ' activo' : '');
+  chipTodos.className = 'filtro' + (estado.filtro === 'Todos' && !estado.soloFavoritos && !estado.soloDestacados ? ' activo' : '');
   chipTodos.textContent = t('todos');
   chipTodos.tabIndex = 0;
   chipTodos.addEventListener('click', () => {
     estado.filtro = 'Todos';
+    estado.soloFavoritos = false;
+    estado.soloDestacados = false;
     renderFiltros();
     renderGuia();
   });
@@ -618,11 +640,13 @@ function renderFiltros() {
 
   for (const g of grupos) {
     const b = document.createElement('button');
-    b.className = 'filtro' + (estado.filtro === g ? ' activo' : '');
+    b.className = 'filtro' + (estado.filtro === g && !estado.soloFavoritos && !estado.soloDestacados ? ' activo' : '');
     b.textContent = etiquetaGrupo(g);
     b.tabIndex = 0;
     b.addEventListener('click', () => {
       estado.filtro = g;
+      estado.soloFavoritos = false;
+      estado.soloDestacados = false;
       renderFiltros();
       renderGuia();
     });
@@ -635,18 +659,27 @@ document.querySelectorAll('.agrupar__opcion').forEach((boton) => {
     estado.agrupacion = boton.dataset.agrupar;
     localStorage.setItem(CLAVE_AGRUPACION, estado.agrupacion);
     estado.filtro = 'Todos';
+    estado.soloFavoritos = false;
+    estado.soloDestacados = false;
     document.querySelectorAll('.agrupar__opcion').forEach((b) => b.classList.toggle('activo', b === boton));
     renderFiltros();
     renderGuia();
   });
 });
 
+function esCanalDestacado(c) {
+  const g = c.grupo.toLowerCase();
+  const n = c.nombre.toLowerCase();
+  return g.includes('deportes') || g.includes('sports') || g.includes('eventos') || n.includes('dsports') || n.includes('espn') || n.includes('fox') || n.includes('tyc');
+}
+
 function canalesFiltrados() {
   const q = estado.busqueda.trim().toLowerCase();
   return estado.canales.filter((c) => {
     if (estado.soloFavoritos && !esFavorito(c.id)) return false;
+    if (estado.soloDestacados && !esCanalDestacado(c)) return false;
     const valorGrupo = estado.agrupacion === 'pais' ? (c.pais || '') : c.grupo;
-    const pasaGrupo = estado.filtro === 'Todos' || valorGrupo === estado.filtro;
+    const pasaGrupo = estado.filtro === 'Todos' || valorGrupo === estado.filtro || estado.soloFavoritos || estado.soloDestacados;
     const pasaBusqueda = !q || c.nombre.toLowerCase().includes(q);
     return pasaGrupo && pasaBusqueda;
   });
@@ -1147,6 +1180,7 @@ async function manejarCarga() {
     estado.canales = canales;
     estado.filtro = 'Todos';
     estado.soloFavoritos = false;
+    estado.soloDestacados = false;
     renderFiltros();
     renderGuia();
     actualizarBannerContinuar();
@@ -1171,6 +1205,42 @@ cfg.botonLimpiar.addEventListener('click', async () => {
   actualizarBannerContinuar();
   mostrarMensaje(t('lista_borrada'), 'ok');
 });
+
+/* =======================================================
+   Búsqueda por Voz (Web Speech API)
+   ======================================================= */
+
+function iniciarBusquedaVoz() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('Tu navegador no soporta búsqueda por voz.');
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = estado.idioma === 'en' ? 'en-US' : 'es-ES';
+  recognition.interimResults = false;
+
+  el.busqueda.placeholder = t('voz_escuchando');
+
+  recognition.onresult = (e) => {
+    const texto = e.results[0][0].transcript;
+    el.busqueda.value = texto;
+    estado.busqueda = texto;
+    renderGuia();
+    el.busqueda.placeholder = t('buscar_placeholder');
+  };
+
+  recognition.onerror = () => {
+    el.busqueda.placeholder = t('buscar_placeholder');
+  };
+
+  recognition.onend = () => {
+    el.busqueda.placeholder = t('buscar_placeholder');
+  };
+
+  recognition.start();
+}
 
 /* =======================================================
    Eventos generales y Control Remoto
@@ -1264,7 +1334,6 @@ async function iniciar() {
     b.classList.toggle('activo', b.dataset.agrupar === estado.agrupacion);
   });
 
-  // Carga lista guardada o la oficial del servidor
   const guardadaManualmente = cargarListaGuardada();
   if (guardadaManualmente.length > 0) {
     estado.canales = guardadaManualmente;
@@ -1275,7 +1344,6 @@ async function iniciar() {
   aplicarIdioma();
   actualizarBannerContinuar();
 
-  // Zap In Directo: Si hay canales, reproduce de inmediato el ultimo canal visto o el primero de la lista
   if (estado.canales.length > 0) {
     const idUltimo = leerUltimoVisto();
     const canalInicial = estado.canales.find((c) => c.id === idUltimo) || estado.canales[0];
@@ -1284,7 +1352,6 @@ async function iniciar() {
     }
   }
 
-  // Carga asincrona de Guia EPG
   cargarProgramacion()
     .then((programacion) => {
       estado.programacion = programacion;
