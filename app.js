@@ -55,6 +55,8 @@ const IDIOMAS = {
     voz_escuchando: 'Escuchando...',
     sin_epg: 'Sin informacion de programacion',
     reintentando: 'Reintentando senal...',
+    vista_lista: '☰ Lista',
+    vista_grilla: '▦ Grilla',
   },
   en: {
     marca: 'Channel Guide',
@@ -106,6 +108,8 @@ const IDIOMAS = {
     voz_escuchando: 'Listening...',
     sin_epg: 'No guide information',
     reintentando: 'Retrying stream...',
+    vista_lista: '☰ List',
+    vista_grilla: '▦ Grid',
   },
 };
 
@@ -123,6 +127,7 @@ function aplicarIdioma() {
     elemento.placeholder = t(elemento.dataset.i18nPlaceholder);
   });
   document.getElementById('boton-idioma').textContent = estado.idioma.toUpperCase();
+  actualizarBotonVista();
   renderFiltros();
   renderGuia();
   actualizarBannerContinuar();
@@ -168,6 +173,7 @@ const CLAVE_FAVORITOS = 'iptv:favoritos';
 const CLAVE_ULTIMO = 'iptv:ultimo-canal';
 const CLAVE_IDIOMA = 'iptv:idioma';
 const CLAVE_AGRUPACION = 'iptv:agrupacion';
+const CLAVE_MODO_VISTA = 'iptv:modo-vista';
 
 const URL_LISTA_PREDETERMINADA = './canales.m3u8';
 const URL_FUENTES = './fuentes.json';
@@ -177,6 +183,7 @@ const estado = {
   canales: [],
   filtro: 'Todos',
   agrupacion: localStorage.getItem(CLAVE_AGRUPACION) || 'categoria',
+  modoVista: localStorage.getItem(CLAVE_MODO_VISTA) || (window.innerWidth < 768 ? 'lista' : 'grilla'),
   soloFavoritos: false,
   soloDestacados: false,
   busqueda: '',
@@ -562,7 +569,7 @@ function formatoHora(iso) {
 }
 
 /* =======================================================
-   Render: guia de canales
+   Render: Guia de Canales (Lista vs Grilla)
    ======================================================= */
 
 const el = {
@@ -691,6 +698,7 @@ function canalesFiltrados() {
 function renderGuia() {
   const lista = canalesFiltrados();
   el.guia.innerHTML = '';
+  el.guia.className = 'guia-contenedor modo-' + estado.modoVista;
 
   if (estado.canales.length === 0) {
     el.guia.appendChild(vistaVacia(t('guia_vacia_titulo'), t('guia_vacia_texto'), true));
@@ -704,7 +712,7 @@ function renderGuia() {
 
   const frag = document.createDocumentFragment();
   for (const canal of lista) {
-    frag.appendChild(filaCanalGrid(canal));
+    frag.appendChild(estado.modoVista === 'grilla' ? filaCanalGrid(canal) : filaCanalLista(canal));
   }
   el.guia.appendChild(frag);
 }
@@ -723,9 +731,51 @@ function vistaVacia(titulo, texto, mostrarBoton) {
   return div;
 }
 
+// Vista 1: Modo Lista Limpia (Accesible)
+function filaCanalLista(canal) {
+  const fila = document.createElement('div');
+  fila.className = 'fila-canal modo-lista';
+  fila.dataset.id = canal.id;
+  fila.setAttribute('role', 'button');
+  fila.tabIndex = 0;
+
+  const logoHtml = canal.logo
+    ? `<img src="${canal.logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${canal.nombre.slice(0, 2).toUpperCase()}'">`
+    : canal.nombre.slice(0, 2).toUpperCase();
+
+  const banderaHtml = canal.pais ? `<span class="fila-canal__bandera">${bandera(canal.pais)}</span>` : '';
+  const enCurso = programaActual(canal.tvgId);
+
+  fila.innerHTML = `
+    <span class="fila-canal__numero">${canal.numero}</span>
+    <span class="fila-canal__logo">${logoHtml}</span>
+    <span class="fila-canal__info">
+      <span class="fila-canal__nombre">${canal.nombre}</span>
+      <span class="fila-canal__grupo">${banderaHtml}${canal.grupo} ${enCurso ? '\u00b7 ' + enCurso.titulo : ''}</span>
+    </span>
+    <button class="fila-canal__favorito ${esFavorito(canal.id) ? 'activo' : ''}" aria-label="Favorito" data-id="${canal.id}" tabIndex="-1">${esFavorito(canal.id) ? '\u2605' : '\u2606'}</button>
+  `;
+
+  fila.addEventListener('click', (e) => {
+    if (e.target.closest('.fila-canal__favorito')) return;
+    reproducirCanalPorId(canal.id);
+  });
+  fila.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reproducirCanalPorId(canal.id); }
+  });
+  fila.querySelector('.fila-canal__favorito').addEventListener('click', (e) => {
+    e.stopPropagation();
+    alternarFavorito(canal.id);
+    renderGuia();
+  });
+
+  return fila;
+}
+
+// Vista 2: Modo Grilla Horaria (Grid EPG)
 function filaCanalGrid(canal) {
   const fila = document.createElement('div');
-  fila.className = 'fila-canal';
+  fila.className = 'fila-canal modo-grilla';
   fila.dataset.id = canal.id;
   fila.setAttribute('role', 'button');
   fila.tabIndex = 0;
@@ -789,6 +839,24 @@ function filaCanalGrid(canal) {
   });
 
   return fila;
+}
+
+/* =======================================================
+   Selector de Vista
+   ======================================================= */
+
+function actualizarBotonVista() {
+  const btn = document.getElementById('boton-vista');
+  if (btn) {
+    btn.textContent = estado.modoVista === 'grilla' ? t('vista_grilla') : t('vista_lista');
+  }
+}
+
+function alternarModoVista() {
+  estado.modoVista = estado.modoVista === 'lista' ? 'grilla' : 'lista';
+  localStorage.setItem(CLAVE_MODO_VISTA, estado.modoVista);
+  actualizarBotonVista();
+  renderGuia();
 }
 
 /* =======================================================
@@ -1254,6 +1322,9 @@ document.getElementById('boton-cerrar-reproductor').addEventListener('click', ce
 document.getElementById('boton-canal-anterior').addEventListener('click', () => cambiarCanal(-1));
 document.getElementById('boton-canal-siguiente').addEventListener('click', () => cambiarCanal(1));
 
+const btnVista = document.getElementById('boton-vista');
+if (btnVista) btnVista.addEventListener('click', alternarModoVista);
+
 document.getElementById('boton-idioma').addEventListener('click', () => {
   estado.idioma = estado.idioma === 'es' ? 'en' : 'es';
   localStorage.setItem(CLAVE_IDIOMA, estado.idioma);
@@ -1328,7 +1399,7 @@ if ('serviceWorker' in navigator) {
 }
 
 /* =======================================================
-   Arranque con Splash Screen (Intro Netflix)
+   Arranque con Splash Screen
    ======================================================= */
 
 function mostrarIntroCarga() {
