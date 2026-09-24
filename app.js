@@ -9,6 +9,7 @@ const IDIOMAS = {
     marca: 'Guia de Canales',
     buscar_placeholder: 'Buscar canal...',
     cargar_lista: 'Cargar lista',
+    restaurar_oficial: 'Usar lista oficial',
     continuar_viendo: 'Continuar viendo',
     reanudar: 'Reanudar',
     por_categoria: 'Categoria',
@@ -28,8 +29,8 @@ const IDIOMAS = {
     archivo_arrastrar: 'Arrastra un archivo o',
     archivo_elegir: 'elegilo manualmente',
     etiqueta_texto: 'Contenido M3U o JSON',
-    borrar_lista: 'Borrar lista guardada',
-    config_info: 'Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" tvg-country="AR" group-title="Categoria",Nombre del canal</code> seguido de la URL del stream .m3u8 en la linea siguiente. <code>tvg-country</code> es opcional (codigo de pais ISO de 2 letras) y habilita el agrupado por pais.<br>Formato JSON alternativo: una lista de objetos <code>{ "nombre": "", "url": "", "logo": "", "grupo": "", "pais": "AR" }</code>.',
+    borrar_lista: 'Restaurar lista predeterminada',
+    config_info: 'Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" tvg-country="AR" group-title="Categoria",Nombre del canal</code> seguido de la URL del stream .m3u8 en la linea siguiente.',
     subtitulos: 'Subtitulos',
     calidad: 'Calidad',
     miniatura: 'Miniatura',
@@ -47,7 +48,7 @@ const IDIOMAS = {
     elegi_archivo: 'Elegi un archivo primero.',
     pega_contenido: 'Pega el contenido M3U o JSON.',
     sin_canales_validos: 'No se encontraron canales validos en ese contenido.',
-    lista_borrada: 'Se borro la lista guardada en este dispositivo.',
+    lista_borrada: 'Se restauro la lista oficial predeterminada.',
     cargando: 'Cargando...',
     a_continuacion: 'A continuacion',
   },
@@ -55,6 +56,7 @@ const IDIOMAS = {
     marca: 'Channel Guide',
     buscar_placeholder: 'Search channel...',
     cargar_lista: 'Load list',
+    restaurar_oficial: 'Use official list',
     continuar_viendo: 'Continue watching',
     reanudar: 'Resume',
     por_categoria: 'Category',
@@ -65,7 +67,7 @@ const IDIOMAS = {
     volver_guia: '\u2190 Back to guide',
     volver_guia_corto: '\u2190 Guide',
     cargar_titulo: 'Load channel list',
-    cargar_subtitulo: 'Add your list via remote URL, uploading a .m3u/.m3u8/.json file, or pasting the text directly. It is saved on this device and can be updated anytime.',
+    cargar_subtitulo: 'Add your list via remote URL, uploading a .m3u/.m3u8/.json file, or pasting the text directly.',
     tab_url: 'Remote URL',
     tab_archivo: 'File',
     tab_texto: 'Paste text',
@@ -74,13 +76,13 @@ const IDIOMAS = {
     archivo_arrastrar: 'Drag a file or',
     archivo_elegir: 'choose it manually',
     etiqueta_texto: 'M3U or JSON content',
-    borrar_lista: 'Delete saved list',
-    config_info: 'Expected M3U format per line: <code>#EXTINF:-1 tvg-logo="LOGO_URL" tvg-country="AR" group-title="Category",Channel name</code> followed by the .m3u8 stream URL on the next line. <code>tvg-country</code> is optional (2-letter ISO country code) and enables grouping by country.<br>Alternative JSON format: a list of objects <code>{ "nombre": "", "url": "", "logo": "", "grupo": "", "pais": "AR" }</code>.',
+    borrar_lista: 'Restore default list',
+    config_info: 'Expected M3U format per line: <code>#EXTINF:-1 tvg-logo="LOGO_URL" tvg-country="AR" group-title="Category",Channel name</code> followed by the .m3u8 stream URL.',
     subtitulos: 'Subtitles',
     calidad: 'Quality',
     miniatura: 'PiP',
     error_titulo: 'This channel could not be played',
-    error_texto: 'Check the channel URL or try another one. You can go back to the guide and pick a different channel.',
+    error_texto: 'Check the channel URL or try another one.',
     guia_vacia_titulo: 'No channels loaded yet',
     guia_vacia_texto: 'Load your list (.m3u, .m3u8 or .json) to start browsing the guide.',
     sin_resultados_titulo: 'No results',
@@ -92,8 +94,8 @@ const IDIOMAS = {
     ingresa_url: 'Enter a valid URL.',
     elegi_archivo: 'Choose a file first.',
     pega_contenido: 'Paste the M3U or JSON content.',
-    sin_canales_validos: 'No valid channels were found in that content.',
-    lista_borrada: 'The saved list on this device was deleted.',
+    sin_canales_validos: 'No valid channels were found.',
+    lista_borrada: 'Restored to default official list.',
     cargando: 'Loading...',
     a_continuacion: 'Up next',
   },
@@ -757,7 +759,7 @@ function actualizarBannerContinuar() {
 }
 
 /* =======================================================
-   Reproductor HLS + subtitulos + calidad + cast/airplay/pip
+   Reproductor HLS + Zap In Directo
    ======================================================= */
 
 const rp = {
@@ -1160,10 +1162,10 @@ async function manejarCarga() {
 
 cfg.botonCargar.addEventListener('click', manejarCarga);
 
-cfg.botonLimpiar.addEventListener('click', () => {
+cfg.botonLimpiar.addEventListener('click', async () => {
   localStorage.removeItem(CLAVE_LISTA);
   localStorage.removeItem(CLAVE_ORIGEN);
-  estado.canales = [];
+  estado.canales = await obtenerListaCombinadaDesdeFuentes();
   renderFiltros();
   renderGuia();
   actualizarBannerContinuar();
@@ -1171,7 +1173,7 @@ cfg.botonLimpiar.addEventListener('click', () => {
 });
 
 /* =======================================================
-   Eventos generales y navegacion por Control Remoto / D-Pad
+   Eventos generales y Control Remoto
    ======================================================= */
 
 document.getElementById('boton-config').addEventListener('click', irAConfig);
@@ -1191,7 +1193,6 @@ el.busqueda.addEventListener('input', (e) => {
   renderGuia();
 });
 
-// Navegacion asistida por D-Pad / Teclado
 document.addEventListener('keydown', (e) => {
   const reproductorAbierto = rp.seccion.classList.contains('activo');
 
@@ -1213,7 +1214,6 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // Navegacion en la Guia de Canales
   if (el.pantallaGuia.classList.contains('activa')) {
     const filas = Array.from(document.querySelectorAll('.fila-canal'));
     if (filas.length === 0) return;
@@ -1256,7 +1256,7 @@ if ('serviceWorker' in navigator) {
 }
 
 /* =======================================================
-   Arranque
+   Arranque con Zap In Directo
    ======================================================= */
 
 async function iniciar() {
@@ -1264,8 +1264,8 @@ async function iniciar() {
     b.classList.toggle('activo', b.dataset.agrupar === estado.agrupacion);
   });
 
+  // Carga lista guardada o la oficial del servidor
   const guardadaManualmente = cargarListaGuardada();
-
   if (guardadaManualmente.length > 0) {
     estado.canales = guardadaManualmente;
   } else {
@@ -1275,6 +1275,16 @@ async function iniciar() {
   aplicarIdioma();
   actualizarBannerContinuar();
 
+  // Zap In Directo: Si hay canales, reproduce de inmediato el ultimo canal visto o el primero de la lista
+  if (estado.canales.length > 0) {
+    const idUltimo = leerUltimoVisto();
+    const canalInicial = estado.canales.find((c) => c.id === idUltimo) || estado.canales[0];
+    if (canalInicial) {
+      reproducirCanalPorId(canalInicial.id);
+    }
+  }
+
+  // Carga asincrona de Guia EPG
   cargarProgramacion()
     .then((programacion) => {
       estado.programacion = programacion;
