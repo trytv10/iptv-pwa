@@ -1,6 +1,10 @@
 {
   "fuentes": [
     {
+      "url": "./canales.json",
+      "tipo": "json"
+    },
+    {
       "url": "./canales.m3u8",
       "tipo": "m3u"
     }
