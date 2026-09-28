@@ -1,4 +1,4 @@
-const CACHE = 'iptv-shell-v2';
+const CACHE = 'iptv-shell-v3';
 const ARCHIVOS_SHELL = [
   './',
   './index.html',
