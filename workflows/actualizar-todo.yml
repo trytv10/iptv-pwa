@@ -1,0 +1,46 @@
+name: Actualizar canales (M3U8 + JSON)
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # Todos los días a las 4:00 AM UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 1) Genera canales.m3u8 desde las fuentes M3U (con filtro no-HLS)
+      - name: Unificar listas M3U
+        run: node unificar.js
+
+      # 2) Genera canales.json + canales.csv + canales.m3u8 desde Free-TV
+      #    (este es el que aporta los metadatos ricos: tvg-id, tvg-country, etc.)
+      - name: Extraer canales con metadatos
+        run: python extraer_canales.py --sin-duplicados --salida .
+
+      # 3) Guardar cambios en GitHub
+      - name: Commit y push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-actualización de canales (M3U8 + JSON) [skip ci]"
+          branch: main
+          file_pattern: |
+            canales.m3u8
+            canales.json
+            canales.csv
