@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1418">
+<title>Guia de Canales</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== Pantalla: Guia de canales ===== -->
+  <section id="pantalla-guia" class="pantalla activa">
+    <header class="encabezado">
+      <div class="marca">
+        <span class="marca__numero">00</span>
+        <span class="marca__texto" data-i18n="marca">Guia de Canales</span>
+      </div>
+
+      <select id="select-lista-header" class="boton-secundario" style="margin-right:8px;" hidden>
+        <!-- Opciones generadas dinámicamente -->
+      </select>
+
+      <div class="buscador">
+        <input type="text" id="campo-busqueda" data-i18n-placeholder="buscar_placeholder" placeholder="Buscar canal, evento o equipo..." autocomplete="off">
+      </div>
+      <button id="boton-actualizar-guia" class="boton-secundario" title="Actualizar canales desde el servidor" style="background: rgba(229, 9, 20, 0.2); border-color: #e50914;" data-i18n="actualizar_guia">🔄 Actualizar</button>
+      <button id="boton-vista" class="boton-secundario">☰ Lista</button>
+      <button class="boton-icono" id="boton-idioma" aria-label="Cambiar idioma / Change language">ES</button>
+      <button class="boton-icono" id="boton-config" data-i18n="cargar_lista">Gestionar Listas</button>
+    </header>
+
+    <div class="continuar" id="continuar" hidden>
+      <div class="continuar__info">
+        <span class="continuar__etiqueta" data-i18n="continuar_viendo">Continuar viendo</span>
+        <span class="continuar__nombre" id="continuar-nombre"></span>
+      </div>
+      <button class="boton-primario boton-primario--chico" id="continuar-boton" data-i18n="reanudar">Reanudar</button>
+    </div>
+
+    <div class="agrupar" id="agrupar" hidden>
+      <button class="agrupar__opcion activo" data-agrupar="categoria" data-i18n="por_categoria">Categoria</button>
+      <button class="agrupar__opcion" data-agrupar="pais" data-i18n="por_pais">Pais</button>
+    </div>
+
+    <nav class="filtros" id="filtros" aria-label="Filtrar canales">
+      <!-- se completa dinamicamente -->
+    </nav>
+
+    <main class="guia" id="guia" tabindex="-1">
+      <!-- filas de canales o estado vacio, generado por app.js -->
+    </main>
+  </section>
+
+  <!-- ===== Pantalla: Cargar lista de canales ===== -->
+  <section id="pantalla-config" class="pantalla">
+    <div class="config">
+      <div class="config__panel">
+        <button class="config__volver" id="boton-volver" data-i18n="volver_guia">&larr; Volver a la guia</button>
+        <h1 class="config__titulo" data-i18n="cargar_titulo">Gestionar Listas de Canales</h1>
+        <p class="config__subtitulo" data-i18n="cargar_subtitulo">
+          Guarda múltiples fuentes (M3U, M3U8 o JSON) y alterna entre ellas fácilmente.
+        </p>
+
+        <div style="margin-bottom:15px;">
+          <input type="text" id="campo-nombre-lista" data-i18n-placeholder="nombre_lista_placeholder" placeholder="Nombre para esta lista (ej: Deportes, Argentina...)" style="width:100%; padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff;">
+        </div>
+
+        <div class="config__tabs">
+          <button class="config__tab activo" data-tab="url" data-i18n="tab_url">URL remota</button>
+          <button class="config__tab" data-tab="archivo" data-i18n="tab_archivo">Archivo</button>
+          <button class="config__tab" data-tab="texto" data-i18n="tab_texto">Pegar texto</button>
+        </div>
+
+        <div class="config__campo activo" data-campo="url">
+          <label for="campo-url" data-i18n="etiqueta_url">URL del listado (.m3u, .m3u8 o .json)</label>
+          <input type="url" id="campo-url" placeholder="https://tu-servidor.com/lista.m3u8">
+        </div>
+
+        <div class="config__campo" data-campo="archivo">
+          <label data-i18n="etiqueta_archivo">Archivo del listado</label>
+          <div class="config__archivo">
+            <span data-i18n="archivo_arrastrar">Arrastrá un archivo o</span>
+            <label for="campo-archivo" data-i18n="archivo_elegir">elegilo manualmente</label>
+            <input type="file" id="campo-archivo" accept=".m3u,.m3u8,.json,text/plain,application/json">
+            <div id="nombre-archivo" style="margin-top:8px;font-size:12.5px;"></div>
+          </div>
+        </div>
+
+        <div class="config__campo" data-campo="texto">
+          <label for="campo-texto" data-i18n="etiqueta_texto">Contenido M3U o JSON</label>
+          <textarea id="campo-texto" placeholder="#EXTM3U
+#EXTINF:-1 tvg-logo=&quot;&quot; tvg-country=&quot;AR&quot; group-title=&quot;General&quot;,Nombre del canal
+https://ejemplo.com/canal/index.m3u8"></textarea>
+        </div>
+
+        <div class="config__acciones">
+          <button class="boton-primario" id="boton-cargar" data-i18n="cargar_lista">Agregar esta lista</button>
+          <button class="boton-secundario" id="boton-limpiar" data-i18n="borrar_lista">Restaurar predeterminadas</button>
+        </div>
+
+        <div class="config__mensaje" id="config-mensaje"></div>
+
+        <!-- Sección de Control Parental -->
+        <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+          <h3 data-i18n="control_parental" style="margin-bottom:10px; font-size:16px;">Control Parental</h3>
+          <div style="margin-bottom:10px;">
+            <input type="password" id="campo-pin-parental" maxlength="4" data-i18n-placeholder="pin_placeholder" placeholder="PIN de 4 dígitos" style="width:140px; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; text-align:center; letter-spacing:2px;">
+          </div>
+          <div style="font-size:13px; opacity:0.8; margin-bottom:6px;">Selecciona las categorías a bloquear:</div>
+          <div id="parental-categorias" style="max-height:150px; overflow-y:auto; background:rgba(0,0,0,0.2); padding:8px; border-radius:6px;"></div>
+          <button class="boton-secundario" id="boton-guardar-parental" data-i18n="guardar_pin" style="margin-top:10px;">Guardar PIN y Bloqueos</button>
+        </div>
+
+        <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+          <h3 data-i18n="mis_listas" style="margin-bottom:10px; font-size:16px;">Mis Listas Guardadas</h3>
+          <div id="listas-guardadas-lista"></div>
+        </div>
+
+        <div class="config__info" data-i18n="config_info" style="margin-top:20px;">
+          Formato M3U esperado por linea: <code>#EXTINF:-1 tvg-logo="URL_LOGO" group-title="Categoria",Nombre del canal</code>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Reproductor a pantalla completa ===== -->
+  <section id="reproductor" class="reproductor">
+    <video id="video" playsinline autoplay x-webkit-airplay="allow"></video>
+
+    <div class="reproductor__capa">
+      <div class="reproductor__superior">
+        <button class="boton-icono" id="boton-cerrar-reproductor" data-i18n="volver_guia_corto">&larr; Guia</button>
+        <div class="reproductor__titulo-bloque">
+          <div class="reproductor__titulo">
+            <span class="numero" id="rp-numero"></span>
+            <span class="nombre" id="rp-nombre"></span>
+          </div>
+          <div class="reproductor__programa" id="rp-programa" hidden></div>
+        </div>
+        <span class="reproductor__estado" id="rp-estado"></span>
+      </div>
+
+      <div class="reproductor__inferior">
+        <button class="boton-icono" id="boton-canal-anterior" aria-label="Canal anterior">&uarr;</button>
+        <button class="boton-icono" id="boton-canal-siguiente" aria-label="Canal siguiente">&darr;</button>
+        <button class="boton-icono" id="boton-favorito" aria-label="Marcar como favorito">&#9734;</button>
+
+        <div class="menu-flotante-cont">
+          <button class="boton-icono" id="boton-subtitulos" hidden data-i18n="subtitulos">Subtitulos</button>
+          <div class="menu-flotante" id="menu-subtitulos" hidden></div>
+        </div>
+
+        <div class="menu-flotante-cont">
+          <button class="boton-icono" id="boton-calidad" hidden data-i18n="calidad">Calidad</button>
+          <div class="menu-flotante" id="menu-calidad" hidden></div>
+        </div>
+
+        <button class="boton-icono" id="boton-pip" hidden data-i18n="miniatura">Miniatura</button>
+        <button class="boton-icono" id="boton-airplay" hidden>AirPlay</button>
+        <button class="boton-icono" id="boton-cast" hidden>Cast</button>
+      </div>
+    </div>
+
+    <div class="reproductor__error">
+      <div class="reproductor__error__titulo" data-i18n="error_titulo">No se pudo reproducir esta senal</div>
+      <div data-i18n="error_texto">Revisa la URL del canal o probá con otro. Podés volver a la guia y elegir otro canal.</div>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+<script src="app.js"></script>
+<script src="intro.js"></script>
+</body>
+</html>

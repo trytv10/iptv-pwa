@@ -1,0 +1,8 @@
+{
+  "fuentes": [
+    {
+      "url": "./canales.m3u8",
+      "tipo": "m3u"
+    }
+  ]
+}

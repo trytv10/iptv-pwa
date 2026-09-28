@@ -1,0 +1,19 @@
+{
+  "name": "Guia de Canales",
+  "short_name": "Canales",
+  "description": "Reproductor de senales de TV en vivo (HLS/M3U8)",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0B1418",
+  "theme_color": "#0B1418",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
