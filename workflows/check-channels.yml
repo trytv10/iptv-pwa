@@ -1,0 +1,47 @@
+name: Chequeo automático de canales caídos
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # Cada 6 horas
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests urllib3
+
+      - name: Revisar canales.m3u8
+        run: python scripts/check_channels.py canales.m3u8
+
+      - name: Generar resumen del histórico
+        run: python resumen_historial.py --historial historial.csv --salida salida
+
+      - name: Commit y push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Chequeo automático de canales caídos [skip ci]"
+          branch: main
+          file_pattern: |
+            canales.m3u8
+            historial.csv
+            salida/resumen.json
+            salida/top_caidos.csv
+            salida/uptime_por_hora.csv
