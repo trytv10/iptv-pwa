@@ -136,6 +136,19 @@ textarea:focus,
 .boton-icono {
   padding: 9px 12px;
 }
+#boton-reportar {
+  font-size: 18px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+#boton-reportar:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
 
 /* =======================================================
    Banner: Continuar viendo
