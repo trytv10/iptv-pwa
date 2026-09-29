@@ -673,6 +673,22 @@ textarea:focus,
   color: #94a3b8;
   font-family: monospace;
 }
+.config__seccion {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.sync-estado {
+  font-size: 13px;
+  min-height: 18px;
+  margin-top: 6px;
+  opacity: 0.85;
+}
+
+.sync-estado--ok { color: #4ade80; }
+.sync-estado--error { color: #ff6b6b; }
+.sync-estado--info { color: #60a5fa; }
 
 /* =======================================================
    Reproductor HLS a Pantalla Completa
