@@ -1503,6 +1503,7 @@ const rp = {
   botonPip: document.getElementById('boton-pip'),
   botonAirplay: document.getElementById('boton-airplay'),
   botonCast: document.getElementById('boton-cast'),
+  botonReportar: document.getElementById('boton-reportar'),
 };
 
 let temporizadorPrograma = null;
