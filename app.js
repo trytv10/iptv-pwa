@@ -67,7 +67,7 @@ const IDIOMAS = {
     ingrese_pin: 'Ingrese el PIN de control parental:',
     actualizar_guia: 'Actualizar',
     actualizar_toast: 'Guía actualizada correctamente desde el servidor.',
-    canal_caido: 'Canal caído (marcado por admin)',
+    canal_caido: 'Canal caído',
     // Sincronización
     sync_titulo: 'Sincronizar favoritos entre dispositivos',
     sync_descripcion: 'Generá un código y usá el mismo en todos tus dispositivos (celu, TV, tablet) para compartir favoritos.',
@@ -114,6 +114,14 @@ const IDIOMAS = {
     qr_invitacion_si: 'Sí, vincular',
     qr_invitacion_no: 'Ahora no',
     qr_error: 'No se pudo generar el QR. Verificá tu conexión.',
+    // Historial
+    historial_titulo: '📺 Recientes',
+    historial_vacio: 'Todavía no viste ningún canal. Los que veas van a aparecer acá.',
+    historial_borrar: '🗑 Borrar historial',
+    historial_borrar_confirm: '¿Borrar todo el historial de reproducción?',
+    historial_borrado: 'Historial borrado',
+    historial_cerrar: 'Cerrar',
+    historial_contador: 'canales en el historial',
   },
   en: {
     marca: 'Channel Guide',
@@ -177,7 +185,7 @@ const IDIOMAS = {
     ingrese_pin: 'Enter parental control PIN:',
     actualizar_guia: 'Update',
     actualizar_toast: 'Guide successfully updated from server.',
-    canal_caido: 'Channel offline (marked by admin)',
+    canal_caido: 'Channel offline',
     // Sincronización
     sync_titulo: 'Sync favorites across devices',
     sync_descripcion: 'Generate a code and use the same one on all your devices (phone, TV, tablet) to share favorites.',
@@ -224,6 +232,14 @@ const IDIOMAS = {
     qr_invitacion_si: 'Yes, link',
     qr_invitacion_no: 'Not now',
     qr_error: 'Could not generate QR. Check your connection.',
+    // Historial
+    historial_titulo: '📺 Recent',
+    historial_vacio: 'You haven\'t watched any channel yet. They\'ll appear here.',
+    historial_borrar: '🗑 Clear history',
+    historial_borrar_confirm: 'Clear all watch history?',
+    historial_borrado: 'History cleared',
+    historial_cerrar: 'Close',
+    historial_contador: 'channels in history',
   },
 };
 
@@ -327,6 +343,9 @@ const CLAVE_PARENTAL_PIN = 'iptv:parental-pin';
 const CLAVE_PARENTAL_BLOQUEOS = 'iptv:parental-bloqueos';
 const CLAVE_SOLO_ACTIVOS = 'iptv:solo-activos';
 const CLAVE_SYNC_ID = 'iptv:sync-id';
+const CLAVE_HISTORIAL = 'iptv:historial';
+
+const HISTORIAL_MAX = 30;
 
 const URL_CANALES_JSON = './canales.json';
 const URL_CANALES_M3U8 = './canales.m3u8';
@@ -353,12 +372,11 @@ const estado = {
   parentalPin: localStorage.getItem(CLAVE_PARENTAL_PIN) || '',
   categoriasBloqueadas: JSON.parse(localStorage.getItem(CLAVE_PARENTAL_BLOQUEOS) || '[]'),
   hayMetadatos: false,
-  // Sincronización
   syncId: localStorage.getItem(CLAVE_SYNC_ID) || '',
   syncTimeout: null,
   syncEnProgreso: false,
-  // Canales caídos marcados desde el admin (id → true)
   caidosRemotos: {},
+  historial: [],
 };
 
 function cargarListasDeStorage() {
@@ -436,13 +454,217 @@ function leerUltimoVisto() {
 }
 
 /* =======================================================
-   CANALES CAÍDOS (marcados desde el admin)
+   HISTORIAL DE REPRODUCCIÓN
    ======================================================= */
 
+function cargarHistorial() {
+  try {
+    const crudo = localStorage.getItem(CLAVE_HISTORIAL);
+    if (!crudo) return [];
+    const arr = JSON.parse(crudo);
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+function guardarHistorial() {
+  localStorage.setItem(CLAVE_HISTORIAL, JSON.stringify(estado.historial.slice(0, HISTORIAL_MAX)));
+}
+
 /**
- * Baja la lista de canales marcados como caídos desde el Worker.
- * Se llama al arrancar la app y cada vez que se refresca.
+ * Agrega un canal al historial. Si ya existía, actualiza fecha y lo mueve al tope.
  */
+function agregarAlHistorial(canal) {
+  if (!canal || !canal.id) return;
+
+  const entrada = {
+    canalId: canal.id,
+    nombre: canal.nombre || 'Sin nombre',
+    logo: canal.logo || '',
+    grupo: canal.grupo || '',
+    pais: canal.pais || '',
+    fecha: new Date().toISOString(),
+  };
+
+  // Quita si ya existe
+  estado.historial = estado.historial.filter((e) => e.canalId !== canal.id);
+
+  // Lo pone al principio
+  estado.historial.unshift(entrada);
+
+  // Limita a HISTORIAL_MAX
+  if (estado.historial.length > HISTORIAL_MAX) {
+    estado.historial = estado.historial.slice(0, HISTORIAL_MAX);
+  }
+
+  guardarHistorial();
+}
+
+function borrarHistorial() {
+  estado.historial = [];
+  localStorage.removeItem(CLAVE_HISTORIAL);
+}
+
+/**
+ * Devuelve un texto tipo "hace 5 min", "hace 2 h", "ayer", "hace 3 días", etc.
+ */
+function formatearTiempoRelativo(iso) {
+  try {
+    const ms = Date.now() - new Date(iso).getTime();
+    const seg = Math.floor(ms / 1000);
+    const min = Math.floor(seg / 60);
+    const hora = Math.floor(min / 60);
+    const dia = Math.floor(hora / 24);
+
+    const es = estado.idioma !== 'en';
+
+    if (seg < 60) return es ? 'recién' : 'just now';
+    if (min < 60) return es ? `hace ${min} min` : `${min} min ago`;
+    if (hora < 24) return es ? `hace ${hora} h` : `${hora} h ago`;
+    if (dia === 1) return es ? 'ayer' : 'yesterday';
+    if (dia < 7) return es ? `hace ${dia} días` : `${dia} days ago`;
+
+    return new Date(iso).toLocaleDateString(es ? 'es-AR' : 'en-US', {
+      day: '2-digit', month: '2-digit', year: '2-digit',
+    });
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Abre el modal con la lista de recientes.
+ */
+function abrirModalHistorial() {
+  const previo = document.getElementById('modal-historial');
+  if (previo) previo.remove();
+
+  estado.historial = cargarHistorial();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'modal-historial';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000; padding: 16px;
+  `;
+
+  const listaHtml = estado.historial.length === 0
+    ? `<div style="padding: 40px 20px; text-align: center; color: #94a3b8; font-size: 0.9rem;">${t('historial_vacio')}</div>`
+    : estado.historial.map((e) => {
+        const logoHtml = e.logo
+          ? `<img src="${e.logo}" alt="" loading="lazy" style="width:100%; height:100%; object-fit:contain;" onerror="this.parentElement.textContent='${(e.nombre || '?').slice(0, 2).toUpperCase()}'">`
+          : (e.nombre || '?').slice(0, 2).toUpperCase();
+        const banderaHtml = e.pais ? `<span style="font-size:0.9rem;">${bandera(e.pais)}</span>` : '';
+        return `
+          <div class="hist-item" data-canal-id="${escapeHtml(e.canalId)}" style="
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            cursor: pointer; transition: background 0.15s;
+          ">
+            <div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 6px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; overflow: hidden;">
+              ${logoHtml}
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${escapeHtml(e.nombre)}
+              </div>
+              <div style="font-size: 0.78rem; color: #94a3b8; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                ${banderaHtml}
+                ${e.grupo ? `<span>${escapeHtml(e.grupo)}</span>` : ''}
+                <span style="opacity: 0.6;">· ${formatearTiempoRelativo(e.fecha)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+  overlay.innerHTML = `
+    <div style="background: #111b21; color: #fff; padding: 20px; border-radius: 14px; max-width: 520px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px; flex-wrap: wrap;">
+        <h3 style="margin: 0; font-size: 1.1rem;">${t('historial_titulo')}</h3>
+        <span style="font-size: 0.78rem; color: #94a3b8;">${estado.historial.length} ${t('historial_contador')}</span>
+      </div>
+
+      <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;" id="hist-lista">
+        ${listaHtml}
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
+        <button id="hist-borrar" class="boton-secundario" style="padding:8px 14px; color:#ff4d4d; border-color:rgba(255,77,77,0.4);" ${estado.historial.length === 0 ? 'disabled' : ''}>${t('historial_borrar')}</button>
+        <button id="hist-cerrar" class="boton-secundario" style="padding:8px 14px;">${t('historial_cerrar')}</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Eventos
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  overlay.querySelector('#hist-cerrar').addEventListener('click', () => overlay.remove());
+
+  overlay.querySelector('#hist-borrar').addEventListener('click', () => {
+    if (!confirm(t('historial_borrar_confirm'))) return;
+    borrarHistorial();
+    overlay.remove();
+    mostrarToastSimple(t('historial_borrado'));
+  });
+
+  overlay.querySelectorAll('.hist-item').forEach((item) => {
+    // Hover
+    item.addEventListener('mouseenter', () => item.style.background = 'rgba(255,255,255,0.1)');
+    item.addEventListener('mouseleave', () => item.style.background = 'rgba(255,255,255,0.04)');
+
+    item.addEventListener('click', () => {
+      const canalId = item.dataset.canalId;
+      overlay.remove();
+      reproducirCanalPorId(canalId);
+    });
+  });
+}
+
+/**
+ * Pequeño toast sin dependencias externas.
+ */
+function mostrarToastSimple(texto) {
+  const previo = document.getElementById('toast-simple');
+  if (previo) previo.remove();
+
+  const t2 = document.createElement('div');
+  t2.id = 'toast-simple';
+  t2.textContent = texto;
+  t2.style.cssText = `
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1f2c34; color: #fff; padding: 12px 20px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    font-size: 0.9rem; z-index: 20000; opacity: 0; transition: opacity 0.3s;
+  `;
+  document.body.appendChild(t2);
+  requestAnimationFrame(() => { t2.style.opacity = '1'; });
+  setTimeout(() => {
+    t2.style.opacity = '0';
+    setTimeout(() => t2.remove(), 300);
+  }, 2000);
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/* =======================================================
+   CANALES CAÍDOS
+   ======================================================= */
+
 async function cargarCaidosDelWorker() {
   try {
     const resp = await fetch(`${URL_WORKER}/caidos`, {
@@ -459,11 +681,6 @@ async function cargarCaidosDelWorker() {
   }
 }
 
-/**
- * Determina si un canal está caído. Combina:
- *  - El campo `estado` (heredado de canales.json / canales.m3u8).
- *  - Los canales marcados como caídos desde el admin (caidosRemotos).
- */
 function esCanalCaido(canal) {
   if (!canal) return false;
   if (canal.estado === 'sin_respuesta' || canal.estado === 'dudoso') return true;
@@ -493,6 +710,7 @@ function recolectarConfiguracion() {
     modoVista: estado.modoVista,
     soloActivos: estado.soloActivos,
     ultimoCanal: leerUltimoVisto(),
+    historial: estado.historial,
   };
 }
 
@@ -584,6 +802,10 @@ async function importarConfiguracion(file) {
     if (typeof datos.ultimoCanal === 'string' && datos.ultimoCanal) {
       localStorage.setItem(CLAVE_ULTIMO, datos.ultimoCanal);
     }
+    if (Array.isArray(datos.historial)) {
+      estado.historial = datos.historial.slice(0, HISTORIAL_MAX);
+      guardarHistorial();
+    }
 
     mostrarMensajeBackup(t('backup_import_ok'), 'ok');
     setTimeout(() => window.location.reload(), 1200);
@@ -606,7 +828,7 @@ function mostrarMensajeBackup(texto, tipo) {
 }
 
 /* =======================================================
-   QR PARA COMPARTIR SYNC ID
+   QR
    ======================================================= */
 
 function urlBaseApp() {
@@ -647,8 +869,8 @@ function abrirModalQR() {
       <h3 style="margin: 0 0 8px; font-size: 18px;">${t('qr_titulo')}</h3>
       <p style="margin: 0 0 16px; font-size: 13px; opacity: 0.75; line-height: 1.4;">${t('qr_ayuda')}</p>
 
-      <div id="qr-contenedor" style="background: #fff; padding: 14px; border-radius: 10px; display: inline-block; margin-bottom: 14px;">
-        <img id="qr-imagen" src="${qrUrl}" alt="QR" style="display: block; width: 260px; height: 260px; max-width: 100%;" onerror="this.parentElement.innerHTML='<div style=\\'padding:40px;color:#e50914;font-size:13px;\\'>${t('qr_error')}</div>';">
+      <div style="background: #fff; padding: 14px; border-radius: 10px; display: inline-block; margin-bottom: 14px;">
+        <img src="${qrUrl}" alt="QR" style="display: block; width: 260px; height: 260px; max-width: 100%;" onerror="this.parentElement.innerHTML='<div style=\\'padding:40px;color:#e50914;font-size:13px;\\'>${t('qr_error')}</div>';">
       </div>
 
       <div style="font-family: ui-monospace, monospace; font-size: 13px; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; margin-bottom: 14px; letter-spacing: 1px; word-break: break-all;">
@@ -720,13 +942,11 @@ function limpiarParamSync() {
     url.searchParams.delete('sync');
     const nueva = url.pathname + (url.search ? url.search : '') + url.hash;
     window.history.replaceState({}, '', nueva);
-  } catch {
-    // Nada
-  }
+  } catch {}
 }
 
 /* =======================================================
-   SINCRONIZACIÓN DE FAVORITOS CON CLOUDFLARE WORKER
+   SINCRONIZACIÓN DE FAVORITOS
    ======================================================= */
 
 function generarSyncId() {
@@ -888,7 +1108,7 @@ function renderSyncUI() {
     ${vinculado ? `
       <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
         <span style="font-size:13px; opacity:0.75;">${t('sync_estado_vinculado')}:</span>
-        <code id="sync-codigo-actual" style="font-size:15px; font-weight:600; background:rgba(229,9,20,0.15); padding:6px 10px; border-radius:6px; letter-spacing:1px;">${estado.syncId}</code>
+        <code style="font-size:15px; font-weight:600; background:rgba(229,9,20,0.15); padding:6px 10px; border-radius:6px; letter-spacing:1px;">${estado.syncId}</code>
         <button id="sync-copiar" class="boton-secundario" style="padding:6px 12px;">${t('sync_copiar')}</button>
         <button id="sync-qr" class="boton-secundario" style="padding:6px 12px;">${t('qr_boton')}</button>
         <button id="sync-desvincular" class="boton-secundario" style="padding:6px 12px;">${t('sync_desvincular')}</button>
@@ -928,9 +1148,7 @@ function renderSyncUI() {
   }
 
   const btnQR = document.getElementById('sync-qr');
-  if (btnQR) {
-    btnQR.addEventListener('click', abrirModalQR);
-  }
+  if (btnQR) btnQR.addEventListener('click', abrirModalQR);
 
   const btnDesvincular = document.getElementById('sync-desvincular');
   if (btnDesvincular) {
@@ -984,7 +1202,7 @@ function renderSyncUI() {
 }
 
 /* =======================================================
-   Carga de canales oficiales (JSON -> M3U8 -> fuentes.json)
+   Carga de canales
    ======================================================= */
 
 async function cargarCanalesOficiales() {
@@ -1058,10 +1276,6 @@ function normalizarDesdeJSON(lista) {
       };
     });
 }
-
-/* =======================================================
-   Parsers
-   ======================================================= */
 
 function esFuenteM3U(entrada) {
   const ref = ((entrada.tipo || '') + ' ' + (entrada.url || '')).toLowerCase();
@@ -1178,10 +1392,6 @@ function parsearContenido(texto) {
     return parsearM3U(limpio);
   }
 }
-
-/* =======================================================
-   ID estable por hash de URL
-   ======================================================= */
 
 function hashUrl(url) {
   let h = 0x811c9dc5;
@@ -1880,6 +2090,9 @@ function reproducirCanalPorId(id) {
     }
   }
 
+  // Guarda en historial
+  agregarAlHistorial(canal);
+
   estado.indiceActual = estado.canales.findIndex((c) => c.id === id);
   estado.reintentosCanalActual = 0;
   guardarUltimoVisto(id);
@@ -2271,7 +2484,7 @@ if (rp.botonReportar) {
 }
 
 /* =======================================================
-   Navegacion entre pantallas
+   Navegacion
    ======================================================= */
 
 function irAConfig() {
@@ -2287,7 +2500,7 @@ function irAGuia() {
 }
 
 /* =======================================================
-   Pantalla: cargar lista de canales
+   Pantalla: cargar lista
    ======================================================= */
 
 const cfg = {
@@ -2433,7 +2646,7 @@ if (cfg.botonGuardarParental) {
 }
 
 /* =======================================================
-   Actualización Rápida
+   Actualización
    ======================================================= */
 
 async function forzarActualizacionServidor() {
@@ -2454,7 +2667,6 @@ async function forzarActualizacionServidor() {
     guardarListasEnStorage();
     cambiarListaActiva('oficial');
 
-    // Refresca también los caídos desde el Worker
     await cargarCaidosDelWorker();
     renderGuia();
 
@@ -2489,6 +2701,12 @@ document.getElementById('boton-volver').addEventListener('click', irAGuia);
 document.getElementById('boton-cerrar-reproductor').addEventListener('click', cerrarReproductor);
 document.getElementById('boton-canal-anterior').addEventListener('click', () => cambiarCanal(-1));
 document.getElementById('boton-canal-siguiente').addEventListener('click', () => cambiarCanal(1));
+
+// Botón de historial
+const btnRecientes = document.getElementById('boton-recientes');
+if (btnRecientes) {
+  btnRecientes.addEventListener('click', abrirModalHistorial);
+}
 
 const selectHeader = document.getElementById('select-lista-header');
 if (selectHeader) {
@@ -2572,7 +2790,7 @@ if ('serviceWorker' in navigator) {
 }
 
 /* =======================================================
-   Arranque e Inicialización
+   Arranque
    ======================================================= */
 
 async function iniciar() {
@@ -2600,12 +2818,13 @@ async function iniciar() {
     b.classList.toggle('activo', b.dataset.agrupar === agrupacionEfectiva());
   });
 
+  // Carga el historial al estado
+  estado.historial = cargarHistorial();
+
   aplicarIdioma();
 
-  // Baja canales caídos del Worker (independiente de sync de favoritos)
   cargarCaidosDelWorker().then(() => renderGuia());
 
-  // Detectar invitación por QR (?sync=XXXX) antes de bajar favoritos
   detectarInvitacionSync().then(() => {
     if (estado.syncId) {
       bajarFavoritosDelWorker().catch((e) => {
