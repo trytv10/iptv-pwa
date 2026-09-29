@@ -101,6 +101,19 @@ const IDIOMAS = {
     backup_import_ok: 'Configuración importada correctamente. La app se va a recargar.',
     backup_import_error: 'No se pudo importar. Verificá que el archivo sea un backup válido.',
     backup_archivo_invalido: 'El archivo no parece un backup válido de esta app.',
+    // QR
+    qr_boton: '📱 Mostrar QR',
+    qr_titulo: 'Compartir código por QR',
+    qr_ayuda: 'Escaneá este código con la cámara del otro dispositivo, o copiá el link y abrilo ahí.',
+    qr_copiar_link: 'Copiar link',
+    qr_link_copiado: '¡Link copiado!',
+    qr_cerrar: 'Cerrar',
+    qr_invitacion_titulo: 'Vinculación por QR',
+    qr_invitacion_texto: 'El link tiene el código',
+    qr_invitacion_pregunta: '¿Querés vincular este dispositivo a ese código? Los favoritos se van a fusionar.',
+    qr_invitacion_si: 'Sí, vincular',
+    qr_invitacion_no: 'Ahora no',
+    qr_error: 'No se pudo generar el QR. Verificá tu conexión.',
   },
   en: {
     marca: 'Channel Guide',
@@ -198,6 +211,19 @@ const IDIOMAS = {
     backup_import_ok: 'Configuration imported successfully. The app will reload.',
     backup_import_error: 'Could not import. Verify the file is a valid backup.',
     backup_archivo_invalido: 'The file does not look like a valid backup from this app.',
+    // QR
+    qr_boton: '📱 Show QR',
+    qr_titulo: 'Share code via QR',
+    qr_ayuda: 'Scan this code with the other device camera, or copy the link and open it there.',
+    qr_copiar_link: 'Copy link',
+    qr_link_copiado: 'Link copied!',
+    qr_cerrar: 'Close',
+    qr_invitacion_titulo: 'QR linking',
+    qr_invitacion_texto: 'The link has the code',
+    qr_invitacion_pregunta: 'Do you want to link this device to that code? Favorites will be merged.',
+    qr_invitacion_si: 'Yes, link',
+    qr_invitacion_no: 'Not now',
+    qr_error: 'Could not generate QR. Check your connection.',
   },
 };
 
@@ -398,7 +424,6 @@ function alternarFavorito(id) {
   if (estado.favoritos.has(id)) estado.favoritos.delete(id);
   else estado.favoritos.add(id);
   guardarFavoritos();
-  // Sincronización automática (debounce)
   programarSincronizacionFavoritos();
 }
 
@@ -418,43 +443,25 @@ function leerUltimoVisto() {
 
 const VERSION_BACKUP = 1;
 
-/**
- * Recolecta toda la configuración actual en un objeto.
- */
 function recolectarConfiguracion() {
   return {
     app: 'guia-de-canales',
     version: VERSION_BACKUP,
     exportado: new Date().toISOString(),
-
-    // Listas
     listasGuardadas: estado.listasGuardadas,
     listaActivaId: estado.listaActivaId,
-
-    // Favoritos
     favoritos: [...estado.favoritos],
-
-    // Sincronización
     syncId: estado.syncId,
-
-    // Control parental
     parentalPin: estado.parentalPin,
     categoriasBloqueadas: estado.categoriasBloqueadas,
-
-    // Preferencias
     idioma: estado.idioma,
     agrupacion: estado.agrupacion,
     modoVista: estado.modoVista,
     soloActivos: estado.soloActivos,
-
-    // Último visto
     ultimoCanal: leerUltimoVisto(),
   };
 }
 
-/**
- * Exporta la configuración como archivo .json descargable.
- */
 function exportarConfiguracion() {
   try {
     const config = recolectarConfiguracion();
@@ -481,15 +488,11 @@ function exportarConfiguracion() {
   }
 }
 
-/**
- * Importa un archivo .json con la configuración y reemplaza todo.
- */
 async function importarConfiguracion(file) {
   try {
     const texto = await file.text();
     const datos = JSON.parse(texto);
 
-    // Validación mínima
     if (!datos || datos.app !== 'guia-de-canales') {
       mostrarMensajeBackup(t('backup_archivo_invalido'), 'error');
       return;
@@ -499,20 +502,17 @@ async function importarConfiguracion(file) {
       return;
     }
 
-    // Listas
     if (Array.isArray(datos.listasGuardadas) && datos.listasGuardadas.length > 0) {
       estado.listasGuardadas = datos.listasGuardadas;
       estado.listaActivaId = datos.listaActivaId || datos.listasGuardadas[0].id;
       guardarListasEnStorage();
     }
 
-    // Favoritos
     if (Array.isArray(datos.favoritos)) {
       estado.favoritos = new Set(datos.favoritos);
       guardarFavoritos();
     }
 
-    // Sync ID
     if (typeof datos.syncId === 'string') {
       estado.syncId = datos.syncId;
       if (datos.syncId) {
@@ -522,7 +522,6 @@ async function importarConfiguracion(file) {
       }
     }
 
-    // Control parental
     if (typeof datos.parentalPin === 'string') {
       estado.parentalPin = datos.parentalPin;
       localStorage.setItem(CLAVE_PARENTAL_PIN, datos.parentalPin);
@@ -532,7 +531,6 @@ async function importarConfiguracion(file) {
       localStorage.setItem(CLAVE_PARENTAL_BLOQUEOS, JSON.stringify(datos.categoriasBloqueadas));
     }
 
-    // Preferencias
     if (typeof datos.idioma === 'string') {
       estado.idioma = datos.idioma;
       localStorage.setItem(CLAVE_IDIOMA, datos.idioma);
@@ -561,9 +559,6 @@ async function importarConfiguracion(file) {
   }
 }
 
-/**
- * Muestra un mensaje en la sección de backup.
- */
 function mostrarMensajeBackup(texto, tipo) {
   const cont = document.getElementById('backup-mensaje');
   if (!cont) return;
@@ -577,13 +572,149 @@ function mostrarMensajeBackup(texto, tipo) {
 }
 
 /* =======================================================
-   SINCRONIZACIÓN DE FAVORITOS CON CLOUDFLARE WORKER
+   QR PARA COMPARTIR SYNC ID
    ======================================================= */
 
 /**
- * Genera un syncId aleatorio de 12 chars alfanuméricos.
- * Ejemplo: "a7Kd93mZpQ2x"
+ * Devuelve la URL base de la app (sin hash, sin query).
  */
+function urlBaseApp() {
+  const url = new URL(window.location.href);
+  url.hash = '';
+  url.search = '';
+  return url.toString();
+}
+
+/**
+ * Construye el link mágico con el syncId embebido.
+ */
+function construirLinkSync(syncId) {
+  return `${urlBaseApp()}?sync=${encodeURIComponent(syncId)}`;
+}
+
+/**
+ * Devuelve la URL de un QR generado con qrserver.com.
+ */
+function urlQR(texto, tamano) {
+  const size = tamano || 320;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=8&data=${encodeURIComponent(texto)}`;
+}
+
+/**
+ * Abre el modal con el QR para compartir.
+ */
+function abrirModalQR() {
+  if (!estado.syncId) return;
+
+  const previo = document.getElementById('modal-qr');
+  if (previo) previo.remove();
+
+  const link = construirLinkSync(estado.syncId);
+  const qrUrl = urlQR(link, 320);
+
+  const overlay = document.createElement('div');
+  overlay.id = 'modal-qr';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000; padding: 16px;
+  `;
+
+  overlay.innerHTML = `
+    <div style="background: #111b21; color: #fff; padding: 24px; border-radius: 14px; max-width: 420px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.6); text-align: center;">
+      <h3 style="margin: 0 0 8px; font-size: 18px;">${t('qr_titulo')}</h3>
+      <p style="margin: 0 0 16px; font-size: 13px; opacity: 0.75; line-height: 1.4;">${t('qr_ayuda')}</p>
+
+      <div id="qr-contenedor" style="background: #fff; padding: 14px; border-radius: 10px; display: inline-block; margin-bottom: 14px;">
+        <img id="qr-imagen" src="${qrUrl}" alt="QR" style="display: block; width: 260px; height: 260px; max-width: 100%;" onerror="this.parentElement.innerHTML='<div style=\\'padding:40px;color:#e50914;font-size:13px;\\'>${t('qr_error')}</div>';">
+      </div>
+
+      <div style="font-family: ui-monospace, monospace; font-size: 13px; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; margin-bottom: 14px; letter-spacing: 1px; word-break: break-all;">
+        ${estado.syncId}
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: center;">
+        <button id="qr-copiar-link" class="boton-primario" style="padding: 10px 16px;">${t('qr_copiar_link')}</button>
+        <button id="qr-cerrar" class="boton-secundario" style="padding: 10px 16px;">${t('qr_cerrar')}</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const btnCopiar = overlay.querySelector('#qr-copiar-link');
+  const btnCerrar = overlay.querySelector('#qr-cerrar');
+
+  btnCerrar.addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  btnCopiar.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      btnCopiar.textContent = t('qr_link_copiado');
+      setTimeout(() => { btnCopiar.textContent = t('qr_copiar_link'); }, 1500);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = link;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      btnCopiar.textContent = t('qr_link_copiado');
+      setTimeout(() => { btnCopiar.textContent = t('qr_copiar_link'); }, 1500);
+    }
+  });
+}
+
+/**
+ * Detecta si la URL tiene ?sync=XXXX al arrancar. Si sí, ofrece vincular.
+ * Se llama una sola vez al inicio.
+ */
+async function detectarInvitacionSync() {
+  const params = new URLSearchParams(window.location.search);
+  const syncIdInvitado = params.get('sync');
+
+  if (!syncIdInvitado || !validarSyncId(syncIdInvitado)) return;
+
+  // Si es el mismo syncId que ya tenemos, no preguntamos
+  if (estado.syncId === syncIdInvitado) {
+    limpiarParamSync();
+    return;
+  }
+
+  const aceptar = confirm(
+    `${t('qr_invitacion_titulo')}\n\n` +
+    `${t('qr_invitacion_texto')}: ${syncIdInvitado}\n\n` +
+    `${t('qr_invitacion_pregunta')}`
+  );
+
+  if (aceptar) {
+    await vincularSyncId(syncIdInvitado);
+  }
+
+  limpiarParamSync();
+}
+
+/**
+ * Limpia el ?sync= de la URL sin recargar.
+ */
+function limpiarParamSync() {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('sync');
+    const nueva = url.pathname + (url.search ? url.search : '') + url.hash;
+    window.history.replaceState({}, '', nueva);
+  } catch {
+    // Nada que hacer
+  }
+}
+
+/* =======================================================
+   SINCRONIZACIÓN DE FAVORITOS CON CLOUDFLARE WORKER
+   ======================================================= */
+
 function generarSyncId() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
   let id = '';
@@ -595,17 +726,10 @@ function generarSyncId() {
   return id;
 }
 
-/**
- * Valida que un syncId sea correcto (mismo criterio que el Worker).
- */
 function validarSyncId(id) {
   return /^[A-Za-z0-9_-]{8,64}$/.test(id);
 }
 
-/**
- * Programa una subida de favoritos al Worker, con debounce de 1.5s.
- * Se llama automáticamente cada vez que se marca/desmarca un favorito.
- */
 function programarSincronizacionFavoritos() {
   if (!estado.syncId) return;
   if (estado.syncTimeout) clearTimeout(estado.syncTimeout);
@@ -616,9 +740,6 @@ function programarSincronizacionFavoritos() {
   }, 1500);
 }
 
-/**
- * Sube los favoritos actuales al Worker (PUT /fav/:syncId).
- */
 async function subirFavoritosAlWorker() {
   if (!estado.syncId) return { ok: false, motivo: 'sin_syncid' };
   if (estado.syncEnProgreso) return { ok: false, motivo: 'en_progreso' };
@@ -642,9 +763,6 @@ async function subirFavoritosAlWorker() {
   }
 }
 
-/**
- * Baja los favoritos del Worker (GET /fav/:syncId) y los FUSIONA con los locales.
- */
 async function bajarFavoritosDelWorker() {
   if (!estado.syncId) return { ok: false, motivo: 'sin_syncid' };
 
@@ -688,9 +806,6 @@ async function bajarFavoritosDelWorker() {
   }
 }
 
-/**
- * Vincula este dispositivo a un syncId (nuevo o existente) y dispara la bajada inicial.
- */
 async function vincularSyncId(id) {
   if (!validarSyncId(id)) {
     actualizarEstadoSyncUI('Código inválido (8-64 chars alfanuméricos)', 'error');
@@ -708,19 +823,12 @@ async function vincularSyncId(id) {
   }
 }
 
-/**
- * Desvincula el dispositivo: borra el syncId local (NO borra los favoritos del Worker).
- */
 function desvincularSyncId() {
   estado.syncId = '';
   localStorage.removeItem(CLAVE_SYNC_ID);
   renderSyncUI();
 }
 
-/**
- * Borra TODOS los favoritos del Worker para este syncId (DELETE /fav/:syncId),
- * y luego desvincula el dispositivo.
- */
 async function borrarFavoritosDeLaNube() {
   if (!estado.syncId) return false;
 
@@ -747,9 +855,6 @@ async function borrarFavoritosDeLaNube() {
   }
 }
 
-/**
- * Actualiza el texto de estado dentro del panel de sincronización.
- */
 function actualizarEstadoSyncUI(texto, tipo) {
   const elEstado = document.getElementById('sync-estado');
   if (!elEstado) return;
@@ -757,9 +862,6 @@ function actualizarEstadoSyncUI(texto, tipo) {
   elEstado.className = 'sync-estado' + (tipo ? ' sync-estado--' + tipo : '');
 }
 
-/**
- * Renderiza la sección de sincronización en la pantalla de configuración.
- */
 function renderSyncUI() {
   const cont = document.getElementById('sync-contenido');
   if (!cont) return;
@@ -774,6 +876,7 @@ function renderSyncUI() {
         <span style="font-size:13px; opacity:0.75;">${t('sync_estado_vinculado')}:</span>
         <code id="sync-codigo-actual" style="font-size:15px; font-weight:600; background:rgba(229,9,20,0.15); padding:6px 10px; border-radius:6px; letter-spacing:1px;">${estado.syncId}</code>
         <button id="sync-copiar" class="boton-secundario" style="padding:6px 12px;">${t('sync_copiar')}</button>
+        <button id="sync-qr" class="boton-secundario" style="padding:6px 12px;">${t('qr_boton')}</button>
         <button id="sync-desvincular" class="boton-secundario" style="padding:6px 12px;">${t('sync_desvincular')}</button>
         <button id="sync-borrar-nube" class="boton-secundario" style="padding:6px 12px; color:#ff4d4d; border-color:rgba(255,77,77,0.4);">${t('sync_borrar_nube')}</button>
       </div>
@@ -808,6 +911,11 @@ function renderSyncUI() {
         setTimeout(() => { btnCopiar.textContent = t('sync_copiar'); }, 1500);
       }
     });
+  }
+
+  const btnQR = document.getElementById('sync-qr');
+  if (btnQR) {
+    btnQR.addEventListener('click', abrirModalQR);
   }
 
   const btnDesvincular = document.getElementById('sync-desvincular');
@@ -2482,11 +2590,14 @@ async function iniciar() {
 
   aplicarIdioma();
 
-  if (estado.syncId) {
-    bajarFavoritosDelWorker().catch((e) => {
-      console.warn('No se pudieron bajar los favoritos al arrancar:', e);
-    });
-  }
+  // Detectar invitación por QR (?sync=XXXX) antes de bajar favoritos
+  detectarInvitacionSync().then(() => {
+    if (estado.syncId) {
+      bajarFavoritosDelWorker().catch((e) => {
+        console.warn('No se pudieron bajar los favoritos al arrancar:', e);
+      });
+    }
+  });
 
   cargarProgramacion()
     .then((programacion) => {
