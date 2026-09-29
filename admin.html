@@ -85,7 +85,22 @@
   }
   button.peligro:hover { background: rgba(255, 107, 107, 0.15); }
 
-  /* ===== Pantalla de login ===== */
+  button.exito {
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.4);
+  }
+  button.exito:hover { background: rgba(74, 222, 128, 0.15); }
+
+  button.chico {
+    padding: 5px 10px;
+    font-size: 0.78rem;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   #login {
     max-width: 420px;
     margin: 80px auto;
@@ -129,7 +144,6 @@
     margin-top: 8px;
   }
 
-  /* ===== Dashboard ===== */
   #dashboard { display: none; }
 
   .tarjetas {
@@ -202,6 +216,14 @@
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
+  tr.es-caido td {
+    background: rgba(229, 9, 20, 0.06);
+  }
+
+  tr.es-caido:hover td {
+    background: rgba(229, 9, 20, 0.1);
+  }
+
   .pill {
     display: inline-block;
     font-size: 0.7rem;
@@ -218,6 +240,13 @@
   .pill--sin_audio,
   .pill--sin_video { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
   .pill--calidad_mala { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
+
+  .pill--estado-caido {
+    background: rgba(229, 9, 20, 0.25);
+    color: #fca5a5;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
 
   .mono {
     font-family: ui-monospace, 'SF Mono', Menlo, monospace;
@@ -269,22 +298,46 @@
   }
 
   footer a { color: #94a3b8; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2c34;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    font-size: 0.9rem;
+    z-index: 20000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-6px);
+  }
+
+  .toast.ok { border-color: rgba(74, 222, 128, 0.5); }
+  .toast.error { border-color: rgba(255, 107, 107, 0.5); }
 </style>
 </head>
 <body>
 
 <div class="contenedor">
 
-  <!-- ===== Login ===== -->
   <div id="login">
     <h2>Panel de admin</h2>
-    <p>Ingresá tu token de administrador para ver los reportes de canales caídos. Se guarda en este navegador.</p>
+    <p>Ingresá tu token de administrador para ver los reportes y marcar canales caídos. Se guarda en este navegador.</p>
     <input type="password" id="campo-token" placeholder="Token de admin" autocomplete="off">
     <button class="primario" id="boton-entrar">Entrar</button>
     <div class="error-login" id="error-login"></div>
   </div>
 
-  <!-- ===== Dashboard ===== -->
   <div id="dashboard">
     <header>
       <h1>📊 Reportes <span class="badge">ADMIN</span></h1>
@@ -304,16 +357,14 @@
         <div class="tarjeta__valor" id="stat-canales">–</div>
       </div>
       <div class="tarjeta">
-        <div class="tarjeta__label">Últimas 24h</div>
-        <div class="tarjeta__valor" id="stat-24h">–</div>
+        <div class="tarjeta__label">Canales marcados caídos</div>
+        <div class="tarjeta__valor" id="stat-caidos">–</div>
       </div>
     </div>
 
-    <!-- Ranking de canales más reportados -->
     <h2 class="seccion">🏆 Canales más reportados</h2>
     <div id="ranking-cont"></div>
 
-    <!-- Lista de reportes -->
     <h2 class="seccion">
       📝 Todos los reportes
       <span style="font-size: 0.75rem; opacity: 0.6; font-family: 'Inter'; font-weight: 400;">
@@ -340,6 +391,8 @@
   </footer>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 'use strict';
 
@@ -363,10 +416,11 @@ const el = {
   botonSalir: document.getElementById('boton-salir'),
   statTotal: document.getElementById('stat-total'),
   statCanales: document.getElementById('stat-canales'),
-  stat24h: document.getElementById('stat-24h'),
+  statCaidos: document.getElementById('stat-caidos'),
   rankingCont: document.getElementById('ranking-cont'),
   reportesCont: document.getElementById('reportes-cont'),
   filtrosMotivo: document.getElementById('filtros-motivo'),
+  toast: document.getElementById('toast'),
 };
 
 // ==========================================
@@ -483,11 +537,46 @@ function renderStats(total) {
   el.statTotal.textContent = total;
   el.statCanales.textContent = ESTADO.ranking.length;
 
-  const hace24h = Date.now() - (24 * 60 * 60 * 1000);
-  const ultimas24 = ESTADO.reportes.filter((r) => {
-    return new Date(r.fecha).getTime() > hace24h;
-  }).length;
-  el.stat24h.textContent = ultimas24;
+  const marcados = ESTADO.ranking.filter((r) => r.marcadoCaido).length;
+  el.statCaidos.textContent = marcados;
+}
+
+// ==========================================
+// Marcar / reactivar caído
+// ==========================================
+
+async function alternarCaido(canalId, canalNombre, marcar) {
+  try {
+    const resp = await fetch(`${URL_WORKER}/admin/marcar-caido?token=${encodeURIComponent(ESTADO.token)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ canalId, marcar, comentario: '' }),
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+
+    if (data.ok) {
+      mostrarToast(
+        marcar
+          ? `⚠ "${canalNombre}" marcado como caído`
+          : `✓ "${canalNombre}" reactivado`,
+        'ok'
+      );
+      // Actualiza en memoria para no tener que recargar todo
+      for (const r of ESTADO.ranking) {
+        if (r.canalId === canalId) r.marcadoCaido = marcar;
+      }
+      renderStats(ESTADO.reportes.length);
+      renderRanking();
+      return true;
+    } else {
+      throw new Error(data.error || 'Error desconocido');
+    }
+  } catch (e) {
+    console.error(e);
+    mostrarToast('✗ No se pudo actualizar el estado', 'error');
+    return false;
+  }
 }
 
 // ==========================================
@@ -511,25 +600,58 @@ function renderRanking() {
         <th style="width: 80px; text-align: center;">Total</th>
         <th>Motivos</th>
         <th style="width: 180px;">Último reporte</th>
+        <th style="width: 170px;">Acción</th>
       </tr>
     </thead>
     <tbody>
       ${top.map((r, i) => `
-        <tr>
+        <tr class="${r.marcadoCaido ? 'es-caido' : ''}">
           <td>${i + 1}</td>
           <td>
-            <div style="font-weight: 600;">${escapeHtml(r.canalNombre)}</div>
+            <div style="font-weight: 600;">
+              ${escapeHtml(r.canalNombre)}
+              ${r.marcadoCaido ? '<span class="pill pill--estado-caido">CAÍDO</span>' : ''}
+            </div>
             <div class="mono truncar" title="${escapeHtml(r.canalUrl)}">${escapeHtml(r.canalUrl)}</div>
           </td>
           <td style="text-align: center; font-weight: 700; font-size: 1.1rem;">${r.total}</td>
           <td>${Object.entries(r.motivos).map(([m, n]) => `<span class="pill pill--${m}">${m} ×${n}</span>`).join('')}</td>
           <td class="mono">${fechaCorta(r.ultimoReporte)}</td>
+          <td>
+            <button
+              class="chico ${r.marcadoCaido ? 'exito' : 'peligro'}"
+              data-canal-id="${escapeHtml(r.canalId)}"
+              data-canal-nombre="${escapeHtml(r.canalNombre)}"
+              data-marcar="${r.marcadoCaido ? '0' : '1'}"
+            >
+              ${r.marcadoCaido ? '✓ Reactivar' : '⚠ Marcar caído'}
+            </button>
+          </td>
         </tr>
       `).join('')}
     </tbody>
   `;
   el.rankingCont.innerHTML = '';
   el.rankingCont.appendChild(tabla);
+
+  // Listeners de los botones
+  tabla.querySelectorAll('button[data-canal-id]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const canalId = btn.dataset.canalId;
+      const canalNombre = btn.dataset.canalNombre;
+      const marcar = btn.dataset.marcar === '1';
+
+      const textoOriginal = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳...';
+
+      const ok = await alternarCaido(canalId, canalNombre, marcar);
+      if (!ok) {
+        btn.disabled = false;
+        btn.textContent = textoOriginal;
+      }
+    });
+  });
 }
 
 // ==========================================
@@ -610,12 +732,21 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+let temporizadorToast = null;
+function mostrarToast(texto, tipo) {
+  el.toast.textContent = texto;
+  el.toast.className = 'toast visible' + (tipo ? ' ' + tipo : '');
+  if (temporizadorToast) clearTimeout(temporizadorToast);
+  temporizadorToast = setTimeout(() => {
+    el.toast.classList.remove('visible');
+  }, 2500);
+}
+
 // ==========================================
 // Arranque
 // ==========================================
 
 if (ESTADO.token) {
-  // Ya tenía token guardado, valida con una petición rápida
   intentarLogin(ESTADO.token);
 } else {
   mostrarLogin();
