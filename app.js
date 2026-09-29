@@ -68,6 +68,24 @@ const IDIOMAS = {
     actualizar_guia: 'Actualizar',
     actualizar_toast: 'Guía actualizada correctamente desde el servidor.',
     canal_caido: 'Canal caído (último chequeo)',
+    // Sincronización
+    sync_titulo: 'Sincronizar favoritos entre dispositivos',
+    sync_descripcion: 'Generá un código y usá el mismo en todos tus dispositivos (celu, TV, tablet) para compartir favoritos.',
+    sync_generar: 'Generar código nuevo',
+    sync_vincular: 'Vincular este dispositivo',
+    sync_desvincular: 'Desvincular',
+    sync_copiar: 'Copiar',
+    sync_copiado: '¡Copiado!',
+    sync_estado_vinculado: 'Vinculado con el código',
+    sync_estado_no_vinculado: 'Sin sincronizar',
+    sync_code_placeholder: 'Pegá el código de otro dispositivo',
+    sync_error: 'No se pudo sincronizar. Revisá tu conexión.',
+    sync_ok_subida: 'Favoritos subidos',
+    sync_ok_bajada: 'Favoritos recibidos',
+    sync_fusionado: 'Favoritos combinados con los de este dispositivo',
+    sync_subiendo: 'Subiendo...',
+    sync_bajando: 'Bajando...',
+    sync_pedir_codigo: 'Primero generá o pegá un código.',
   },
   en: {
     marca: 'Channel Guide',
@@ -132,6 +150,24 @@ const IDIOMAS = {
     actualizar_guia: 'Update',
     actualizar_toast: 'Guide successfully updated from server.',
     canal_caido: 'Channel offline (last check)',
+    // Sincronización
+    sync_titulo: 'Sync favorites across devices',
+    sync_descripcion: 'Generate a code and use the same one on all your devices (phone, TV, tablet) to share favorites.',
+    sync_generar: 'Generate new code',
+    sync_vincular: 'Link this device',
+    sync_desvincular: 'Unlink',
+    sync_copiar: 'Copy',
+    sync_copiado: 'Copied!',
+    sync_estado_vinculado: 'Linked with code',
+    sync_estado_no_vinculado: 'Not synced',
+    sync_code_placeholder: 'Paste the code from another device',
+    sync_error: 'Sync failed. Check your connection.',
+    sync_ok_subida: 'Favorites uploaded',
+    sync_ok_bajada: 'Favorites received',
+    sync_fusionado: 'Favorites merged with this device',
+    sync_subiendo: 'Uploading...',
+    sync_bajando: 'Downloading...',
+    sync_pedir_codigo: 'Generate or paste a code first.',
   },
 };
 
@@ -156,6 +192,7 @@ function aplicarIdioma() {
   renderListasGuardadasUI();
   actualizarSelectorListasHeader();
   renderControlParentalUI();
+  renderSyncUI();
 }
 
 /* =======================================================
@@ -233,12 +270,16 @@ const CLAVE_MODO_VISTA = 'iptv:modo-vista';
 const CLAVE_PARENTAL_PIN = 'iptv:parental-pin';
 const CLAVE_PARENTAL_BLOQUEOS = 'iptv:parental-bloqueos';
 const CLAVE_SOLO_ACTIVOS = 'iptv:solo-activos';
+const CLAVE_SYNC_ID = 'iptv:sync-id';
 
 // Fuentes de canales (en orden de preferencia)
 const URL_CANALES_JSON = './canales.json';
 const URL_CANALES_M3U8 = './canales.m3u8';
 const URL_FUENTES = './fuentes.json';
-const URL_PROXY = '';
+const URL_PROXY = 'https://iptv-proxy.eolivera119600.workers.dev';
+
+// Worker para favoritos (mismo que el proxy, mismo dominio)
+const URL_WORKER = 'https://iptv-proxy.eolivera119600.workers.dev';
 
 const estado = {
   listasGuardadas: [],
@@ -258,7 +299,11 @@ const estado = {
   reintentosCanalActual: 0,
   parentalPin: localStorage.getItem(CLAVE_PARENTAL_PIN) || '',
   categoriasBloqueadas: JSON.parse(localStorage.getItem(CLAVE_PARENTAL_BLOQUEOS) || '[]'),
-  hayMetadatos: false, // true si cargamos desde canales.json
+  hayMetadatos: false,
+  // Sincronización
+  syncId: localStorage.getItem(CLAVE_SYNC_ID) || '',
+  syncTimeout: null,
+  syncEnProgreso: false,
 };
 
 function cargarListasDeStorage() {
@@ -300,8 +345,6 @@ function cargarFavoritos() {
   try {
     const crudo = localStorage.getItem(CLAVE_FAVORITOS);
     const arr = crudo ? JSON.parse(crudo) : [];
-    // Si todos son formato viejo 'c<num>', los descartamos (no podemos mapearlos
-    // sin el dataset original). Es preferible perderlos que mostrar basura.
     const soloNumericos = arr.length > 0 && arr.every((id) => /^c\d+$/.test(id));
     if (soloNumericos) {
       localStorage.removeItem(CLAVE_FAVORITOS);
@@ -325,6 +368,8 @@ function alternarFavorito(id) {
   if (estado.favoritos.has(id)) estado.favoritos.delete(id);
   else estado.favoritos.add(id);
   guardarFavoritos();
+  // Sincronización automática (debounce)
+  programarSincronizacionFavoritos();
 }
 
 estado.favoritos = cargarFavoritos();
@@ -338,15 +383,260 @@ function leerUltimoVisto() {
 }
 
 /* =======================================================
-   Carga de canales oficiales (JSON -> M3U8 -> fuentes.json)
+   SINCRONIZACIÓN DE FAVORITOS CON CLOUDFLARE WORKER
    ======================================================= */
 
 /**
- * Intenta cargar los canales oficiales desde la fuente más rica disponible.
- * Devuelve { canales, fuente } donde fuente es 'json' | 'm3u8' | 'fuentes'.
+ * Genera un syncId aleatorio de 12 chars alfanuméricos.
+ * Ejemplo: "a7Kd93mZpQ2x"
  */
+function generarSyncId() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  let id = '';
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
+  for (let i = 0; i < 12; i++) {
+    id += chars[bytes[i] % chars.length];
+  }
+  return id;
+}
+
+/**
+ * Valida que un syncId sea correcto (mismo criterio que el Worker).
+ */
+function validarSyncId(id) {
+  return /^[A-Za-z0-9_-]{8,64}$/.test(id);
+}
+
+/**
+ * Programa una subida de favoritos al Worker, con debounce de 1.5s.
+ * Se llama automáticamente cada vez que se marca/desmarca un favorito.
+ */
+function programarSincronizacionFavoritos() {
+  if (!estado.syncId) return; // No hay código → no hay nada que sincronizar
+  if (estado.syncTimeout) clearTimeout(estado.syncTimeout);
+  estado.syncTimeout = setTimeout(() => {
+    subirFavoritosAlWorker().catch((e) => {
+      console.warn('No se pudieron subir los favoritos:', e);
+    });
+  }, 1500);
+}
+
+/**
+ * Sube los favoritos actuales al Worker (PUT /fav/:syncId).
+ */
+async function subirFavoritosAlWorker() {
+  if (!estado.syncId) return { ok: false, motivo: 'sin_syncid' };
+  if (estado.syncEnProgreso) return { ok: false, motivo: 'en_progreso' };
+  estado.syncEnProgreso = true;
+
+  try {
+    const resp = await fetch(`${URL_WORKER}/fav/${encodeURIComponent(estado.syncId)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ favoritos: [...estado.favoritos] }),
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    actualizarEstadoSyncUI(t('sync_ok_subida'), 'ok');
+    return { ok: true, total: data.total };
+  } catch (e) {
+    actualizarEstadoSyncUI(t('sync_error'), 'error');
+    throw e;
+  } finally {
+    estado.syncEnProgreso = false;
+  }
+}
+
+/**
+ * Baja los favoritos del Worker (GET /fav/:syncId) y los FUSIONA con los locales.
+ * Devuelve cuántos favoritos nuevos se agregaron.
+ */
+async function bajarFavoritosDelWorker() {
+  if (!estado.syncId) return { ok: false, motivo: 'sin_syncid' };
+
+  try {
+    actualizarEstadoSyncUI(t('sync_bajando'), 'info');
+    const resp = await fetch(`${URL_WORKER}/fav/${encodeURIComponent(estado.syncId)}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const remotos = Array.isArray(data.favoritos) ? data.favoritos : [];
+
+    if (data.vacio || remotos.length === 0) {
+      // No hay nada en el Worker → subimos los locales para inicializar
+      actualizarEstadoSyncUI('Sin datos remotos, subiendo los locales...', 'info');
+      await subirFavoritosAlWorker();
+      return { ok: true, nuevos: 0, inicializado: true };
+    }
+
+    const antes = estado.favoritos.size;
+    remotos.forEach((id) => estado.favoritos.add(id));
+    const nuevos = estado.favoritos.size - antes;
+
+    guardarFavoritos();
+    renderGuia();
+
+    if (nuevos > 0) {
+      actualizarEstadoSyncUI(`${t('sync_ok_bajada')} · ${t('sync_fusionado')} (+${nuevos})`, 'ok');
+    } else {
+      actualizarEstadoSyncUI(t('sync_ok_bajada'), 'ok');
+    }
+
+    // Si agregamos locales que no estaban en el remoto, subimos el resultado fusionado
+    if (nuevos > 0) {
+      programarSincronizacionFavoritos();
+    }
+
+    return { ok: true, nuevos };
+  } catch (e) {
+    actualizarEstadoSyncUI(t('sync_error'), 'error');
+    throw e;
+  }
+}
+
+/**
+ * Vincula este dispositivo a un syncId (nuevo o existente) y dispara la bajada inicial.
+ */
+async function vincularSyncId(id) {
+  if (!validarSyncId(id)) {
+    actualizarEstadoSyncUI('Código inválido (8-64 chars alfanuméricos)', 'error');
+    return false;
+  }
+  estado.syncId = id;
+  localStorage.setItem(CLAVE_SYNC_ID, id);
+  renderSyncUI();
+  actualizarEstadoSyncUI(t('sync_bajando'), 'info');
+  try {
+    await bajarFavoritosDelWorker();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Desvincula el dispositivo: borra el syncId local (NO borra los favoritos del Worker).
+ */
+function desvincularSyncId() {
+  estado.syncId = '';
+  localStorage.removeItem(CLAVE_SYNC_ID);
+  renderSyncUI();
+}
+
+/**
+ * Actualiza el texto de estado dentro del panel de sincronización.
+ */
+function actualizarEstadoSyncUI(texto, tipo) {
+  const elEstado = document.getElementById('sync-estado');
+  if (!elEstado) return;
+  elEstado.textContent = texto || '';
+  elEstado.className = 'sync-estado' + (tipo ? ' sync-estado--' + tipo : '');
+}
+
+/**
+ * Renderiza la sección de sincronización en la pantalla de configuración.
+ */
+function renderSyncUI() {
+  const cont = document.getElementById('sync-contenido');
+  if (!cont) return;
+
+  const vinculado = !!estado.syncId;
+
+  cont.innerHTML = `
+    <p style="font-size:13.5px; opacity:0.85; margin:0 0 12px;">${t('sync_descripcion')}</p>
+
+    ${vinculado ? `
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
+        <span style="font-size:13px; opacity:0.75;">${t('sync_estado_vinculado')}:</span>
+        <code id="sync-codigo-actual" style="font-size:15px; font-weight:600; background:rgba(229,9,20,0.15); padding:6px 10px; border-radius:6px; letter-spacing:1px;">${estado.syncId}</code>
+        <button id="sync-copiar" class="boton-secundario" style="padding:6px 12px;">${t('sync_copiar')}</button>
+        <button id="sync-desvincular" class="boton-secundario" style="padding:6px 12px; color:#ff6b6b;">${t('sync_desvincular')}</button>
+      </div>
+      <div id="sync-estado" class="sync-estado"></div>
+    ` : `
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
+        <input id="sync-input" type="text" maxlength="64" placeholder="${t('sync_code_placeholder')}" style="flex:1; min-width:200px; padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.25); color:inherit; font-size:14px;">
+        <button id="sync-vincular" class="boton-primario" style="padding:8px 14px;">${t('sync_vincular')}</button>
+      </div>
+      <div style="margin-bottom:8px;">
+        <button id="sync-generar" class="boton-secundario" style="padding:8px 14px;">${t('sync_generar')}</button>
+      </div>
+      <div id="sync-estado" class="sync-estado"></div>
+    `}
+  `;
+
+  // Eventos
+  const btnCopiar = document.getElementById('sync-copiar');
+  if (btnCopiar) {
+    btnCopiar.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(estado.syncId);
+        btnCopiar.textContent = t('sync_copiado');
+        setTimeout(() => { btnCopiar.textContent = t('sync_copiar'); }, 1500);
+      } catch {
+        // Fallback si clipboard no está disponible (http sin https)
+        const ta = document.createElement('textarea');
+        ta.value = estado.syncId;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        btnCopiar.textContent = t('sync_copiado');
+        setTimeout(() => { btnCopiar.textContent = t('sync_copiar'); }, 1500);
+      }
+    });
+  }
+
+  const btnDesvincular = document.getElementById('sync-desvincular');
+  if (btnDesvincular) {
+    btnDesvincular.addEventListener('click', () => {
+      if (confirm('¿Desvincular este dispositivo? Los favoritos seguirán guardados en la nube con el código ' + estado.syncId)) {
+        desvincularSyncId();
+      }
+    });
+  }
+
+  const btnGenerar = document.getElementById('sync-generar');
+  if (btnGenerar) {
+    btnGenerar.addEventListener('click', async () => {
+      const nuevoId = generarSyncId();
+      await vincularSyncId(nuevoId);
+    });
+  }
+
+  const btnVincular = document.getElementById('sync-vincular');
+  if (btnVincular) {
+    btnVincular.addEventListener('click', async () => {
+      const input = document.getElementById('sync-input');
+      const id = (input?.value || '').trim();
+      if (!id) {
+        actualizarEstadoSyncUI(t('sync_pedir_codigo'), 'error');
+        return;
+      }
+      await vincularSyncId(id);
+    });
+  }
+
+  // Enter en el input = vincular
+  const input = document.getElementById('sync-input');
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('sync-vincular')?.click();
+      }
+    });
+  }
+}
+
+/* =======================================================
+   Carga de canales oficiales (JSON -> M3U8 -> fuentes.json)
+   ======================================================= */
+
 async function cargarCanalesOficiales() {
-  // 1) canales.json (metadatos completos)
   try {
     const resp = await fetch(URL_CANALES_JSON, { cache: 'no-store' });
     if (resp.ok) {
@@ -362,7 +652,6 @@ async function cargarCanalesOficiales() {
     console.warn('No se pudo leer canales.json:', e);
   }
 
-  // 2) canales.m3u8 (formato clásico)
   try {
     const resp = await fetch(URL_CANALES_M3U8, { cache: 'no-store' });
     if (resp.ok) {
@@ -377,7 +666,6 @@ async function cargarCanalesOficiales() {
     console.warn('No se pudo leer canales.m3u8:', e);
   }
 
-  // 3) fuentes.json (combinación en runtime, como antes)
   try {
     const combinados = await obtenerListaCombinadaDesdeFuentes();
     if (combinados.length > 0) {
@@ -392,11 +680,6 @@ async function cargarCanalesOficiales() {
   return { canales: [], fuente: null };
 }
 
-/**
- * Normaliza una lista de canales en formato JSON (canales.json).
- * Acepta tanto el formato del script Python (tvg_id, tvg_logo, tvg_country, estado)
- * como formatos más simples (nombre, url, logo, grupo, pais).
- */
 function normalizarDesdeJSON(lista) {
   return lista
     .filter((c) => c && (c.url || c.stream))
@@ -407,7 +690,7 @@ function normalizarDesdeJSON(lista) {
       const nombre = c.nombre || c.name || 'Sin nombre';
       const logo = c.tvg_logo || c.logo || '';
       const tvgId = c.tvg_id || c.tvgId || c['tvg-id'] || '';
-      const estadoCanal = c.estado || ''; // 'ok' | 'dudoso' | 'sin_respuesta' | ''
+      const estadoCanal = c.estado || '';
       return {
         id: 'c_' + hashUrl(url),
         numero: String(i + 1).padStart(2, '0'),
@@ -491,7 +774,6 @@ function parsearM3U(texto) {
   for (const linea of lineas) {
     if (linea.startsWith('#EXTM3U')) continue;
 
-    // Marca de canal caído: aplica a la siguiente línea #EXTINF
     if (/^#\s*\[CAIDO/.test(linea)) {
       caido = true;
       continue;
@@ -662,7 +944,7 @@ async function obtenerTextoXMLTV(url) {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
   } catch (e) {
     if (!URL_PROXY) throw e;
-    resp = await fetch(URL_PROXY + (URL_PROXY.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(url), { cache: 'no-store' });
+    resp = await fetch(URL_PROXY + '/proxy?url=' + encodeURIComponent(url), { cache: 'no-store' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
   }
 
@@ -843,7 +1125,6 @@ function renderFiltros() {
   });
   el.filtros.appendChild(chipDestacados);
 
-  // Solo activos: útil cuando canales.json trae campo "estado"
   if (estado.hayMetadatos) {
     const chipActivos = document.createElement('button');
     chipActivos.className = 'filtro' + (estado.soloActivos ? ' activo' : '');
@@ -1375,7 +1656,7 @@ function cargarStream(canal, intentarProxy) {
   temporizadorPrograma = setInterval(() => actualizarProgramaReproductor(canal.tvgId), 30000);
 
   const urlEfectiva = (intentarProxy && URL_PROXY)
-    ? URL_PROXY + (URL_PROXY.includes('?') ? '&' : '?') + 'url=' + encodeURIComponent(canal.url)
+    ? URL_PROXY + '/proxy?url=' + encodeURIComponent(canal.url)
     : canal.url;
 
   const marcarEnVivo = (res) => {
@@ -1538,6 +1819,7 @@ function irAConfig() {
   el.pantallaGuia.classList.remove('activa');
   el.pantallaConfig.classList.add('activa');
   renderControlParentalUI();
+  renderSyncUI();
 }
 
 function irAGuia() {
@@ -1818,7 +2100,6 @@ async function iniciar() {
   const listasLocales = cargarListasDeStorage();
   if (listasLocales.length > 0) {
     estado.listasGuardadas = listasLocales;
-    // Detecta si la lista guardada tiene metadatos (pais, estado)
     estado.hayMetadatos = listasLocales.some(l => l.canales.some(c => 'estado' in c));
   } else {
     const { canales: canalesOficiales, fuente } = await cargarCanalesOficiales();
@@ -1837,6 +2118,13 @@ async function iniciar() {
   });
 
   aplicarIdioma();
+
+  // Si hay syncId guardado, bajar favoritos del Worker automáticamente
+  if (estado.syncId) {
+    bajarFavoritosDelWorker().catch((e) => {
+      console.warn('No se pudieron bajar los favoritos al arrancar:', e);
+    });
+  }
 
   cargarProgramacion()
     .then((programacion) => {
