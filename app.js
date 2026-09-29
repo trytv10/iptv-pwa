@@ -91,6 +91,16 @@ const IDIOMAS = {
     sync_borrar_nube_ok: 'Favoritos borrados de la nube. Este dispositivo quedó desvinculado.',
     sync_borrar_nube_error: 'No se pudieron borrar los favoritos de la nube. Revisá tu conexión.',
     sync_borrando: 'Borrando...',
+    // Backup
+    backup_titulo: 'Backup de configuración',
+    backup_desc: 'Guardá toda tu configuración en un archivo (listas, favoritos, PIN, sync ID) o restaurála desde uno existente.',
+    backup_exportar: '⬇ Exportar',
+    backup_importar: '⬆ Importar',
+    backup_export_ok: 'Configuración exportada correctamente.',
+    backup_import_confirm: '¿Importar esta configuración? Se va a REEMPLAZAR toda la configuración actual (listas, favoritos, PIN).',
+    backup_import_ok: 'Configuración importada correctamente. La app se va a recargar.',
+    backup_import_error: 'No se pudo importar. Verificá que el archivo sea un backup válido.',
+    backup_archivo_invalido: 'El archivo no parece un backup válido de esta app.',
   },
   en: {
     marca: 'Channel Guide',
@@ -178,6 +188,16 @@ const IDIOMAS = {
     sync_borrar_nube_ok: 'Favorites deleted from cloud. This device is now unlinked.',
     sync_borrar_nube_error: 'Could not delete favorites from cloud. Check your connection.',
     sync_borrando: 'Deleting...',
+    // Backup
+    backup_titulo: 'Configuration backup',
+    backup_desc: 'Save all your configuration to a file (lists, favorites, PIN, sync ID) or restore it from an existing one.',
+    backup_exportar: '⬇ Export',
+    backup_importar: '⬆ Import',
+    backup_export_ok: 'Configuration exported successfully.',
+    backup_import_confirm: 'Import this configuration? It will REPLACE all current configuration (lists, favorites, PIN).',
+    backup_import_ok: 'Configuration imported successfully. The app will reload.',
+    backup_import_error: 'Could not import. Verify the file is a valid backup.',
+    backup_archivo_invalido: 'The file does not look like a valid backup from this app.',
   },
 };
 
@@ -393,6 +413,170 @@ function leerUltimoVisto() {
 }
 
 /* =======================================================
+   EXPORTAR / IMPORTAR CONFIGURACIÓN
+   ======================================================= */
+
+const VERSION_BACKUP = 1;
+
+/**
+ * Recolecta toda la configuración actual en un objeto.
+ */
+function recolectarConfiguracion() {
+  return {
+    app: 'guia-de-canales',
+    version: VERSION_BACKUP,
+    exportado: new Date().toISOString(),
+
+    // Listas
+    listasGuardadas: estado.listasGuardadas,
+    listaActivaId: estado.listaActivaId,
+
+    // Favoritos
+    favoritos: [...estado.favoritos],
+
+    // Sincronización
+    syncId: estado.syncId,
+
+    // Control parental
+    parentalPin: estado.parentalPin,
+    categoriasBloqueadas: estado.categoriasBloqueadas,
+
+    // Preferencias
+    idioma: estado.idioma,
+    agrupacion: estado.agrupacion,
+    modoVista: estado.modoVista,
+    soloActivos: estado.soloActivos,
+
+    // Último visto
+    ultimoCanal: leerUltimoVisto(),
+  };
+}
+
+/**
+ * Exporta la configuración como archivo .json descargable.
+ */
+function exportarConfiguracion() {
+  try {
+    const config = recolectarConfiguracion();
+    const json = JSON.stringify(config, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const fecha = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+    const nombreArchivo = `guia-canales-backup-${fecha}.json`;
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombreArchivo;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    mostrarMensajeBackup(t('backup_export_ok'), 'ok');
+  } catch (e) {
+    console.error(e);
+    mostrarMensajeBackup('No se pudo exportar: ' + e.message, 'error');
+  }
+}
+
+/**
+ * Importa un archivo .json con la configuración y reemplaza todo.
+ */
+async function importarConfiguracion(file) {
+  try {
+    const texto = await file.text();
+    const datos = JSON.parse(texto);
+
+    // Validación mínima
+    if (!datos || datos.app !== 'guia-de-canales') {
+      mostrarMensajeBackup(t('backup_archivo_invalido'), 'error');
+      return;
+    }
+
+    if (!confirm(t('backup_import_confirm'))) {
+      return;
+    }
+
+    // Listas
+    if (Array.isArray(datos.listasGuardadas) && datos.listasGuardadas.length > 0) {
+      estado.listasGuardadas = datos.listasGuardadas;
+      estado.listaActivaId = datos.listaActivaId || datos.listasGuardadas[0].id;
+      guardarListasEnStorage();
+    }
+
+    // Favoritos
+    if (Array.isArray(datos.favoritos)) {
+      estado.favoritos = new Set(datos.favoritos);
+      guardarFavoritos();
+    }
+
+    // Sync ID
+    if (typeof datos.syncId === 'string') {
+      estado.syncId = datos.syncId;
+      if (datos.syncId) {
+        localStorage.setItem(CLAVE_SYNC_ID, datos.syncId);
+      } else {
+        localStorage.removeItem(CLAVE_SYNC_ID);
+      }
+    }
+
+    // Control parental
+    if (typeof datos.parentalPin === 'string') {
+      estado.parentalPin = datos.parentalPin;
+      localStorage.setItem(CLAVE_PARENTAL_PIN, datos.parentalPin);
+    }
+    if (Array.isArray(datos.categoriasBloqueadas)) {
+      estado.categoriasBloqueadas = datos.categoriasBloqueadas;
+      localStorage.setItem(CLAVE_PARENTAL_BLOQUEOS, JSON.stringify(datos.categoriasBloqueadas));
+    }
+
+    // Preferencias
+    if (typeof datos.idioma === 'string') {
+      estado.idioma = datos.idioma;
+      localStorage.setItem(CLAVE_IDIOMA, datos.idioma);
+    }
+    if (typeof datos.agrupacion === 'string') {
+      estado.agrupacion = datos.agrupacion;
+      localStorage.setItem(CLAVE_AGRUPACION, datos.agrupacion);
+    }
+    if (typeof datos.modoVista === 'string') {
+      estado.modoVista = datos.modoVista;
+      localStorage.setItem(CLAVE_MODO_VISTA, datos.modoVista);
+    }
+    if (typeof datos.soloActivos === 'boolean') {
+      estado.soloActivos = datos.soloActivos;
+      localStorage.setItem(CLAVE_SOLO_ACTIVOS, datos.soloActivos ? '1' : '0');
+    }
+    if (typeof datos.ultimoCanal === 'string' && datos.ultimoCanal) {
+      localStorage.setItem(CLAVE_ULTIMO, datos.ultimoCanal);
+    }
+
+    mostrarMensajeBackup(t('backup_import_ok'), 'ok');
+    setTimeout(() => window.location.reload(), 1200);
+  } catch (e) {
+    console.error(e);
+    mostrarMensajeBackup(t('backup_import_error'), 'error');
+  }
+}
+
+/**
+ * Muestra un mensaje en la sección de backup.
+ */
+function mostrarMensajeBackup(texto, tipo) {
+  const cont = document.getElementById('backup-mensaje');
+  if (!cont) return;
+  cont.textContent = texto;
+  cont.className = 'config__mensaje ' + tipo;
+  if (tipo === 'ok') {
+    setTimeout(() => {
+      cont.className = 'config__mensaje';
+    }, 5000);
+  }
+}
+
+/* =======================================================
    SINCRONIZACIÓN DE FAVORITOS CON CLOUDFLARE WORKER
    ======================================================= */
 
@@ -423,7 +607,7 @@ function validarSyncId(id) {
  * Se llama automáticamente cada vez que se marca/desmarca un favorito.
  */
 function programarSincronizacionFavoritos() {
-  if (!estado.syncId) return; // No hay código → no hay nada que sincronizar
+  if (!estado.syncId) return;
   if (estado.syncTimeout) clearTimeout(estado.syncTimeout);
   estado.syncTimeout = setTimeout(() => {
     subirFavoritosAlWorker().catch((e) => {
@@ -460,7 +644,6 @@ async function subirFavoritosAlWorker() {
 
 /**
  * Baja los favoritos del Worker (GET /fav/:syncId) y los FUSIONA con los locales.
- * Devuelve cuántos favoritos nuevos se agregaron.
  */
 async function bajarFavoritosDelWorker() {
   if (!estado.syncId) return { ok: false, motivo: 'sin_syncid' };
@@ -476,7 +659,6 @@ async function bajarFavoritosDelWorker() {
     const remotos = Array.isArray(data.favoritos) ? data.favoritos : [];
 
     if (data.vacio || remotos.length === 0) {
-      // No hay nada en el Worker → subimos los locales para inicializar
       actualizarEstadoSyncUI('Sin datos remotos, subiendo los locales...', 'info');
       await subirFavoritosAlWorker();
       return { ok: true, nuevos: 0, inicializado: true };
@@ -495,7 +677,6 @@ async function bajarFavoritosDelWorker() {
       actualizarEstadoSyncUI(t('sync_ok_bajada'), 'ok');
     }
 
-    // Si agregamos locales que no estaban en el remoto, subimos el resultado fusionado
     if (nuevos > 0) {
       programarSincronizacionFavoritos();
     }
@@ -553,8 +734,6 @@ async function borrarFavoritosDeLaNube() {
     });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
 
-    // Solo si el DELETE fue OK, desvinculamos localmente.
-    // Antes de desvincular, mostramos el mensaje de éxito.
     estado.syncId = '';
     localStorage.removeItem(CLAVE_SYNC_ID);
     renderSyncUI();
@@ -611,7 +790,6 @@ function renderSyncUI() {
     `}
   `;
 
-  // Eventos
   const btnCopiar = document.getElementById('sync-copiar');
   if (btnCopiar) {
     btnCopiar.addEventListener('click', async () => {
@@ -672,7 +850,6 @@ function renderSyncUI() {
     });
   }
 
-  // Enter en el input = vincular
   const input = document.getElementById('sync-input');
   if (input) {
     input.addEventListener('keydown', (e) => {
@@ -1873,7 +2050,6 @@ function abrirDialogoReporte() {
   const canal = estado.canales[estado.indiceActual];
   if (!canal) return;
 
-  // Si ya existe un diálogo abierto, lo cerramos
   const previo = document.getElementById('dialogo-reporte');
   if (previo) previo.remove();
 
@@ -2009,6 +2185,9 @@ const cfg = {
   botonLimpiar: document.getElementById('boton-limpiar'),
   campoPinParental: document.getElementById('campo-pin-parental'),
   botonGuardarParental: document.getElementById('boton-guardar-parental'),
+  botonExportar: document.getElementById('boton-exportar'),
+  botonImportar: document.getElementById('boton-importar'),
+  campoImportar: document.getElementById('campo-importar'),
 };
 
 let tabActiva = 'url';
@@ -2097,6 +2276,25 @@ cfg.botonLimpiar.addEventListener('click', async () => {
   cambiarListaActiva('oficial');
   mostrarMensaje(t('lista_borrada'), 'ok');
 });
+
+/* ===== Backup: exportar / importar ===== */
+
+if (cfg.botonExportar) {
+  cfg.botonExportar.addEventListener('click', exportarConfiguracion);
+}
+
+if (cfg.botonImportar && cfg.campoImportar) {
+  cfg.botonImportar.addEventListener('click', () => {
+    cfg.campoImportar.value = '';
+    cfg.campoImportar.click();
+  });
+
+  cfg.campoImportar.addEventListener('change', async () => {
+    const f = cfg.campoImportar.files[0];
+    if (!f) return;
+    await importarConfiguracion(f);
+  });
+}
 
 if (cfg.botonGuardarParental) {
   cfg.botonGuardarParental.addEventListener('click', () => {
@@ -2284,7 +2482,6 @@ async function iniciar() {
 
   aplicarIdioma();
 
-  // Si hay syncId guardado, bajar favoritos del Worker automáticamente
   if (estado.syncId) {
     bajarFavoritosDelWorker().catch((e) => {
       console.warn('No se pudieron bajar los favoritos al arrancar:', e);
