@@ -108,6 +108,20 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
 
         <div class="config__mensaje" id="config-mensaje"></div>
 
+        <!-- Sección: Backup de configuración -->
+        <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+          <h3 data-i18n="backup_titulo" style="margin-bottom:6px; font-size:16px;">Backup de configuración</h3>
+          <p style="font-size:13px; opacity:0.75; margin-bottom:10px;" data-i18n="backup_desc">
+            Guardá toda tu configuración en un archivo (listas, favoritos, PIN, sync ID) o restaurála desde uno existente.
+          </p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="boton-secundario" id="boton-exportar" data-i18n="backup_exportar">⬇ Exportar</button>
+            <button class="boton-secundario" id="boton-importar" data-i18n="backup_importar">⬆ Importar</button>
+            <input type="file" id="campo-importar" accept=".json,application/json" style="display:none;">
+          </div>
+          <div id="backup-mensaje" class="config__mensaje" style="margin-top:10px;"></div>
+        </div>
+
         <!-- Sección de Control Parental -->
         <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
           <h3 data-i18n="control_parental" style="margin-bottom:10px; font-size:16px;">Control Parental</h3>
