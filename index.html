@@ -25,7 +25,6 @@
       </div>
 
       <select id="select-lista-header" class="boton-secundario" style="margin-right:8px;" hidden>
-        <!-- Opciones generadas dinámicamente -->
       </select>
 
       <div class="buscador">
@@ -34,6 +33,7 @@
       <button id="boton-actualizar-guia" class="boton-secundario" title="Actualizar canales desde el servidor" style="background: rgba(229, 9, 20, 0.2); border-color: #e50914;" data-i18n="actualizar_guia">🔄 Actualizar</button>
       <button id="boton-vista" class="boton-secundario">☰ Lista</button>
       <button class="boton-icono" id="boton-idioma" aria-label="Cambiar idioma / Change language">ES</button>
+      <button class="boton-icono" id="boton-recientes" title="Historial de reproducción">📺 Recientes</button>
       <button class="boton-icono" id="boton-config" data-i18n="cargar_lista">Gestionar Listas</button>
     </header>
 
@@ -51,11 +51,9 @@
     </div>
 
     <nav class="filtros" id="filtros" aria-label="Filtrar canales">
-      <!-- se completa dinamicamente -->
     </nav>
 
     <main class="guia" id="guia" tabindex="-1">
-      <!-- filas de canales o estado vacio, generado por app.js -->
     </main>
   </section>
 
@@ -108,7 +106,6 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
 
         <div class="config__mensaje" id="config-mensaje"></div>
 
-        <!-- Sección: Backup de configuración -->
         <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
           <h3 data-i18n="backup_titulo" style="margin-bottom:6px; font-size:16px;">Backup de configuración</h3>
           <p style="font-size:13px; opacity:0.75; margin-bottom:10px;" data-i18n="backup_desc">
@@ -122,7 +119,6 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
           <div id="backup-mensaje" class="config__mensaje" style="margin-top:10px;"></div>
         </div>
 
-        <!-- Sección de Control Parental -->
         <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
           <h3 data-i18n="control_parental" style="margin-bottom:10px; font-size:16px;">Control Parental</h3>
           <div style="margin-bottom:10px;">
@@ -133,13 +129,11 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
           <button class="boton-secundario" id="boton-guardar-parental" data-i18n="guardar_pin" style="margin-top:10px;">Guardar PIN y Bloqueos</button>
         </div>
 
-        <!-- Sección de Sincronización de favoritos -->
         <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
           <h3 data-i18n="sync_titulo" style="margin-bottom:10px; font-size:16px;">Sincronizar favoritos entre dispositivos</h3>
           <div id="sync-contenido"></div>
         </div>
 
-        <!-- Sección de Listas Guardadas -->
         <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
           <h3 data-i18n="mis_listas" style="margin-bottom:10px; font-size:16px;">Mis Listas Guardadas</h3>
           <div id="listas-guardadas-lista"></div>
