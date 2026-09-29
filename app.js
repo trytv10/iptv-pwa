@@ -77,51 +77,67 @@ const IDIOMAS = {
     sync_copiar: 'Copiar',
     sync_copiado: '¡Copiado!',
     sync_estado_vinculado: 'Vinculado con el código',
-    sync_estado_no_vinculado: 'Sin sincronizar',
     sync_code_placeholder: 'Pegá el código de otro dispositivo',
     sync_error: 'No se pudo sincronizar. Revisá tu conexión.',
     sync_ok_subida: 'Favoritos subidos',
     sync_ok_bajada: 'Favoritos recibidos',
-    sync_fusionado: 'Favoritos combinados con los de este dispositivo',
-    sync_subiendo: 'Subiendo...',
+    sync_fusionado: 'Favoritos combinados',
     sync_bajando: 'Bajando...',
     sync_pedir_codigo: 'Primero generá o pegá un código.',
     sync_borrar_nube: '🗑 Borrar de la nube',
-    sync_borrar_nube_confirm: '¿Borrar TODOS los favoritos guardados en la nube con este código?\n\nEsta acción NO se puede deshacer.\n\nLos favoritos locales de este dispositivo NO se borran.',
+    sync_borrar_nube_confirm: '¿Borrar TODOS los favoritos guardados en la nube con este código?\n\nEsta acción NO se puede deshacer.',
     sync_borrar_nube_ok: 'Favoritos borrados de la nube. Este dispositivo quedó desvinculado.',
-    sync_borrar_nube_error: 'No se pudieron borrar los favoritos de la nube. Revisá tu conexión.',
+    sync_borrar_nube_error: 'No se pudieron borrar los favoritos de la nube.',
     sync_borrando: 'Borrando...',
     // Backup
     backup_titulo: 'Backup de configuración',
-    backup_desc: 'Guardá toda tu configuración en un archivo (listas, favoritos, PIN, sync ID) o restaurála desde uno existente.',
+    backup_desc: 'Guardá toda tu configuración en un archivo.',
     backup_exportar: '⬇ Exportar',
     backup_importar: '⬆ Importar',
     backup_export_ok: 'Configuración exportada correctamente.',
-    backup_import_confirm: '¿Importar esta configuración? Se va a REEMPLAZAR toda la configuración actual (listas, favoritos, PIN).',
-    backup_import_ok: 'Configuración importada correctamente. La app se va a recargar.',
-    backup_import_error: 'No se pudo importar. Verificá que el archivo sea un backup válido.',
-    backup_archivo_invalido: 'El archivo no parece un backup válido de esta app.',
+    backup_import_confirm: '¿Importar esta configuración? Se va a REEMPLAZAR todo.',
+    backup_import_ok: 'Configuración importada. Recargando...',
+    backup_import_error: 'No se pudo importar.',
+    backup_archivo_invalido: 'El archivo no parece un backup válido.',
     // QR
     qr_boton: '📱 Mostrar QR',
     qr_titulo: 'Compartir código por QR',
-    qr_ayuda: 'Escaneá este código con la cámara del otro dispositivo, o copiá el link y abrilo ahí.',
+    qr_ayuda: 'Escaneá este código con la cámara del otro dispositivo.',
     qr_copiar_link: 'Copiar link',
     qr_link_copiado: '¡Link copiado!',
     qr_cerrar: 'Cerrar',
     qr_invitacion_titulo: 'Vinculación por QR',
     qr_invitacion_texto: 'El link tiene el código',
-    qr_invitacion_pregunta: '¿Querés vincular este dispositivo a ese código? Los favoritos se van a fusionar.',
-    qr_invitacion_si: 'Sí, vincular',
-    qr_invitacion_no: 'Ahora no',
-    qr_error: 'No se pudo generar el QR. Verificá tu conexión.',
+    qr_invitacion_pregunta: '¿Querés vincular este dispositivo a ese código?',
+    qr_error: 'No se pudo generar el QR.',
     // Historial
     historial_titulo: '📺 Recientes',
-    historial_vacio: 'Todavía no viste ningún canal. Los que veas van a aparecer acá.',
+    historial_vacio: 'Todavía no viste ningún canal.',
     historial_borrar: '🗑 Borrar historial',
     historial_borrar_confirm: '¿Borrar todo el historial de reproducción?',
     historial_borrado: 'Historial borrado',
     historial_cerrar: 'Cerrar',
     historial_contador: 'canales en el historial',
+    // Perfiles
+    perfil_boton: '👤 Perfil',
+    perfil_titulo: 'Cambiar perfil',
+    perfil_actual: 'Perfil actual',
+    perfil_nuevo: '+ Nuevo perfil',
+    perfil_editar: 'Editar',
+    perfil_borrar: 'Borrar',
+    perfil_cerrar: 'Cerrar',
+    perfil_nombre_placeholder: 'Nombre del perfil',
+    perfil_emoji_label: 'Elegí un ícono',
+    perfil_guardar: 'Guardar',
+    perfil_cancelar: 'Cancelar',
+    perfil_borrar_confirm: '¿Borrar el perfil "%s"? Se van a perder sus favoritos, historial y configuración.',
+    perfil_no_borrar_ultimo: 'No podés borrar el último perfil.',
+    perfil_cambiado: 'Perfil cambiado a "%s"',
+    perfil_creado: 'Perfil "%s" creado',
+    perfil_eliminado: 'Perfil "%s" eliminado',
+    perfil_nombre_vacio: 'Poné un nombre al perfil.',
+    perfil_nombre_duplicado: 'Ya existe un perfil con ese nombre.',
+    perfil_editar_titulo: 'Editar perfil',
   },
   en: {
     marca: 'Channel Guide',
@@ -159,7 +175,7 @@ const IDIOMAS = {
     guia_vacia_titulo: 'No channels loaded yet',
     guia_vacia_texto: 'Load your list (.m3u, .m3u8 or .json) to start browsing.',
     sin_resultados_titulo: 'No results',
-    sin_resultados_texto: 'Try a different search, event or category.',
+    sin_resultados_texto: 'Try a different search.',
     conectando: 'Connecting...',
     en_vivo: 'LIVE',
     subtitulos_off: 'Off',
@@ -168,7 +184,7 @@ const IDIOMAS = {
     elegi_archivo: 'Choose a file first.',
     pega_contenido: 'Paste the M3U or JSON content.',
     sin_canales_validos: 'No valid channels were found.',
-    lista_borrada: 'Restored to default official list.',
+    lista_borrada: 'Restored to default list.',
     cargando: 'Loading...',
     a_continuacion: 'Up next',
     voz_escuchando: 'Listening...',
@@ -176,70 +192,81 @@ const IDIOMAS = {
     reintentando: 'Retrying stream...',
     vista_lista: '☰ List',
     vista_grilla: '▦ Grid',
-    nombre_lista_placeholder: 'List name (e.g. Sports, Local...)',
+    nombre_lista_placeholder: 'List name',
     mis_listas: 'My Saved Lists',
-    control_parental: 'Parental Control (Block Categories)',
-    pin_placeholder: '4-digit PIN (e.g. 1234)',
+    control_parental: 'Parental Control',
+    pin_placeholder: '4-digit PIN',
     guardar_pin: 'Save PIN & Blocks',
     pin_incorrecto: 'Incorrect PIN',
-    ingrese_pin: 'Enter parental control PIN:',
+    ingrese_pin: 'Enter PIN:',
     actualizar_guia: 'Update',
-    actualizar_toast: 'Guide successfully updated from server.',
+    actualizar_toast: 'Guide successfully updated.',
     canal_caido: 'Channel offline',
-    // Sincronización
     sync_titulo: 'Sync favorites across devices',
-    sync_descripcion: 'Generate a code and use the same one on all your devices (phone, TV, tablet) to share favorites.',
+    sync_descripcion: 'Generate a code and use the same one on all your devices.',
     sync_generar: 'Generate new code',
     sync_vincular: 'Link this device',
     sync_desvincular: 'Unlink',
     sync_copiar: 'Copy',
     sync_copiado: 'Copied!',
     sync_estado_vinculado: 'Linked with code',
-    sync_estado_no_vinculado: 'Not synced',
     sync_code_placeholder: 'Paste the code from another device',
-    sync_error: 'Sync failed. Check your connection.',
+    sync_error: 'Sync failed.',
     sync_ok_subida: 'Favorites uploaded',
     sync_ok_bajada: 'Favorites received',
-    sync_fusionado: 'Favorites merged with this device',
-    sync_subiendo: 'Uploading...',
+    sync_fusionado: 'Favorites merged',
     sync_bajando: 'Downloading...',
     sync_pedir_codigo: 'Generate or paste a code first.',
     sync_borrar_nube: '🗑 Delete from cloud',
-    sync_borrar_nube_confirm: 'Delete ALL favorites stored in the cloud with this code?\n\nThis action CANNOT be undone.\n\nLocal favorites on this device are NOT deleted.',
-    sync_borrar_nube_ok: 'Favorites deleted from cloud. This device is now unlinked.',
-    sync_borrar_nube_error: 'Could not delete favorites from cloud. Check your connection.',
+    sync_borrar_nube_confirm: 'Delete ALL favorites stored in the cloud?',
+    sync_borrar_nube_ok: 'Favorites deleted from cloud. Device unlinked.',
+    sync_borrar_nube_error: 'Could not delete favorites.',
     sync_borrando: 'Deleting...',
-    // Backup
     backup_titulo: 'Configuration backup',
-    backup_desc: 'Save all your configuration to a file (lists, favorites, PIN, sync ID) or restore it from an existing one.',
+    backup_desc: 'Save all your configuration to a file.',
     backup_exportar: '⬇ Export',
     backup_importar: '⬆ Import',
     backup_export_ok: 'Configuration exported successfully.',
-    backup_import_confirm: 'Import this configuration? It will REPLACE all current configuration (lists, favorites, PIN).',
-    backup_import_ok: 'Configuration imported successfully. The app will reload.',
-    backup_import_error: 'Could not import. Verify the file is a valid backup.',
-    backup_archivo_invalido: 'The file does not look like a valid backup from this app.',
-    // QR
+    backup_import_confirm: 'Import this configuration? It will REPLACE everything.',
+    backup_import_ok: 'Configuration imported. Reloading...',
+    backup_import_error: 'Could not import.',
+    backup_archivo_invalido: 'The file does not look like a valid backup.',
     qr_boton: '📱 Show QR',
     qr_titulo: 'Share code via QR',
-    qr_ayuda: 'Scan this code with the other device camera, or copy the link and open it there.',
+    qr_ayuda: 'Scan this code with the other device camera.',
     qr_copiar_link: 'Copy link',
     qr_link_copiado: 'Link copied!',
     qr_cerrar: 'Close',
     qr_invitacion_titulo: 'QR linking',
     qr_invitacion_texto: 'The link has the code',
-    qr_invitacion_pregunta: 'Do you want to link this device to that code? Favorites will be merged.',
-    qr_invitacion_si: 'Yes, link',
-    qr_invitacion_no: 'Not now',
-    qr_error: 'Could not generate QR. Check your connection.',
-    // Historial
+    qr_invitacion_pregunta: 'Do you want to link this device?',
+    qr_error: 'Could not generate QR.',
     historial_titulo: '📺 Recent',
-    historial_vacio: 'You haven\'t watched any channel yet. They\'ll appear here.',
+    historial_vacio: 'You haven\'t watched any channel yet.',
     historial_borrar: '🗑 Clear history',
     historial_borrar_confirm: 'Clear all watch history?',
     historial_borrado: 'History cleared',
     historial_cerrar: 'Close',
     historial_contador: 'channels in history',
+    perfil_boton: '👤 Profile',
+    perfil_titulo: 'Switch profile',
+    perfil_actual: 'Current profile',
+    perfil_nuevo: '+ New profile',
+    perfil_editar: 'Edit',
+    perfil_borrar: 'Delete',
+    perfil_cerrar: 'Close',
+    perfil_nombre_placeholder: 'Profile name',
+    perfil_emoji_label: 'Pick an icon',
+    perfil_guardar: 'Save',
+    perfil_cancelar: 'Cancel',
+    perfil_borrar_confirm: 'Delete profile "%s"? Its favorites, history and config will be lost.',
+    perfil_no_borrar_ultimo: 'You cannot delete the last profile.',
+    perfil_cambiado: 'Profile switched to "%s"',
+    perfil_creado: 'Profile "%s" created',
+    perfil_eliminado: 'Profile "%s" deleted',
+    perfil_nombre_vacio: 'Give the profile a name.',
+    perfil_nombre_duplicado: 'A profile with that name already exists.',
+    perfil_editar_titulo: 'Edit profile',
   },
 };
 
@@ -265,6 +292,7 @@ function aplicarIdioma() {
   actualizarSelectorListasHeader();
   renderControlParentalUI();
   renderSyncUI();
+  actualizarBotonPerfil();
 }
 
 /* =======================================================
@@ -329,23 +357,44 @@ function nombrePais(codigoPais) {
 }
 
 /* =======================================================
-   Estado, Listas y Control Parental
+   Claves y constantes
    ======================================================= */
 
+// Globales (compartidas por todos los perfiles)
 const CLAVE_MULTIPLE_LISTAS = 'iptv:multiple-listas';
 const CLAVE_LISTA_ACTIVA_ID = 'iptv:lista-activa-id';
-const CLAVE_FAVORITOS = 'iptv:favoritos';
-const CLAVE_ULTIMO = 'iptv:ultimo-canal';
 const CLAVE_IDIOMA = 'iptv:idioma';
 const CLAVE_AGRUPACION = 'iptv:agrupacion';
 const CLAVE_MODO_VISTA = 'iptv:modo-vista';
-const CLAVE_PARENTAL_PIN = 'iptv:parental-pin';
-const CLAVE_PARENTAL_BLOQUEOS = 'iptv:parental-bloqueos';
 const CLAVE_SOLO_ACTIVOS = 'iptv:solo-activos';
-const CLAVE_SYNC_ID = 'iptv:sync-id';
-const CLAVE_HISTORIAL = 'iptv:historial';
 
-const HISTORIAL_MAX = 30;
+// Multi-perfil
+const CLAVE_PERFILES = 'iptv:perfiles';
+const CLAVE_PERFIL_ACTIVO = 'iptv:perfil-activo';
+
+// Claves por perfil
+const PREFIJO_PERFIL = 'iptv:perfil:';
+const SUFIJO_FAVORITOS = ':favoritos';
+const SUFIJO_HISTORIAL = ':historial';
+const SUFIJO_ULTIMO = ':ultimo-canal';
+const SUFIJO_PIN = ':parental-pin';
+const SUFIJO_BLOQUEOS = ':parental-bloqueos';
+const SUFIJO_SYNC = ':sync-id';
+
+// Claves viejas (pre multi-perfil) — para migrar
+const CLAVE_VIEJA_FAVORITOS = 'iptv:favoritos';
+const CLAVE_VIEJA_HISTORIAL = 'iptv:historial';
+const CLAVE_VIEJA_ULTIMO = 'iptv:ultimo-canal';
+const CLAVE_VIEJA_PIN = 'iptv:parental-pin';
+const CLAVE_VIEJA_BLOQUEOS = 'iptv:parental-bloqueos';
+const CLAVE_VIEJA_SYNC = 'iptv:sync-id';
+
+// Emojis disponibles para los perfiles
+const EMOJIS_PERFIL = [
+  '👤', '👨', '👩', '👦', '👧', '👶', '🧑', '👴', '👵',
+  '🐱', '🐶', '🦊', '🐼', '🦁', '🐯', '🐨', '🦄', '🐢',
+  '🎮', '📺', '⚽', '🎬', '🎵', '🍿', '🚀', '⭐', '🌟',
+];
 
 const URL_CANALES_JSON = './canales.json';
 const URL_CANALES_M3U8 = './canales.m3u8';
@@ -353,31 +402,592 @@ const URL_FUENTES = './fuentes.json';
 const URL_PROXY = 'https://iptv-proxy.eolivera119600.workers.dev';
 const URL_WORKER = 'https://iptv-proxy.eolivera119600.workers.dev';
 
+const HISTORIAL_MAX = 30;
+
+/* =======================================================
+   Estado
+   ======================================================= */
+
 const estado = {
+  // Globales
   listasGuardadas: [],
   listaActivaId: localStorage.getItem(CLAVE_LISTA_ACTIVA_ID) || 'oficial',
   canales: [],
-  filtro: 'Todos',
+  idioma: localStorage.getItem(CLAVE_IDIOMA) || ((navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'es'),
   agrupacion: localStorage.getItem(CLAVE_AGRUPACION) || 'categoria',
   modoVista: localStorage.getItem(CLAVE_MODO_VISTA) || (window.innerWidth < 768 ? 'lista' : 'grilla'),
+  soloActivos: localStorage.getItem(CLAVE_SOLO_ACTIVOS) === '1',
+
+  // Filtros / UI
+  filtro: 'Todos',
   soloFavoritos: false,
   soloDestacados: false,
-  soloActivos: localStorage.getItem(CLAVE_SOLO_ACTIVOS) === '1',
   busqueda: '',
   indiceActual: -1,
   hls: null,
-  idioma: localStorage.getItem(CLAVE_IDIOMA) || ((navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'es'),
   programacion: {},
   reintentosCanalActual: 0,
-  parentalPin: localStorage.getItem(CLAVE_PARENTAL_PIN) || '',
-  categoriasBloqueadas: JSON.parse(localStorage.getItem(CLAVE_PARENTAL_BLOQUEOS) || '[]'),
   hayMetadatos: false,
-  syncId: localStorage.getItem(CLAVE_SYNC_ID) || '',
+  caidosRemotos: {},
+
+  // Multi-perfil
+  perfiles: [],          // [{ id, nombre, emoji }]
+  perfilActivoId: '',    // id del perfil activo
+
+  // Datos del perfil activo (se cargan al cambiar)
+  favoritos: new Set(),
+  historial: [],
+  ultimoCanal: '',
+  parentalPin: '',
+  categoriasBloqueadas: [],
+  syncId: '',
+
+  // Sync
   syncTimeout: null,
   syncEnProgreso: false,
-  caidosRemotos: {},
-  historial: [],
 };
+
+/* =======================================================
+   PERFILES — Gestión y migración
+   ======================================================= */
+
+function generarIdPerfil() {
+  return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+}
+
+function cargarPerfilesDeStorage() {
+  try {
+    const crudo = localStorage.getItem(CLAVE_PERFILES);
+    if (!crudo) return null;
+    const arr = JSON.parse(crudo);
+    return Array.isArray(arr) ? arr : null;
+  } catch {
+    return null;
+  }
+}
+
+function guardarPerfilesEnStorage() {
+  localStorage.setItem(CLAVE_PERFILES, JSON.stringify(estado.perfiles));
+  localStorage.setItem(CLAVE_PERFIL_ACTIVO, estado.perfilActivoId);
+}
+
+/**
+ * Migra los datos viejos (sin perfiles) a un perfil "Yo".
+ * Devuelve true si hizo migración.
+ */
+function migrarDatosViejos() {
+  const perfilesExistentes = cargarPerfilesDeStorage();
+  if (perfilesExistentes && perfilesExistentes.length > 0) {
+    return false; // Ya hay perfiles, no migramos
+  }
+
+  const idPerfil = generarIdPerfil();
+  const perfil = { id: idPerfil, nombre: 'Yo', emoji: '👤' };
+
+  // Migrar datos
+  const favoritosViejos = localStorage.getItem(CLAVE_VIEJA_FAVORITOS);
+  const historialViejo = localStorage.getItem(CLAVE_VIEJA_HISTORIAL);
+  const ultimoViejo = localStorage.getItem(CLAVE_VIEJA_ULTIMO);
+  const pinViejo = localStorage.getItem(CLAVE_VIEJA_PIN);
+  const bloqueosViejos = localStorage.getItem(CLAVE_VIEJA_BLOQUEOS);
+  const syncViejo = localStorage.getItem(CLAVE_VIEJA_SYNC);
+
+  if (favoritosViejos) localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_FAVORITOS, favoritosViejos);
+  if (historialViejo) localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_HISTORIAL, historialViejo);
+  if (ultimoViejo) localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_ULTIMO, ultimoViejo);
+  if (pinViejo) localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_PIN, pinViejo);
+  if (bloqueosViejos) localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_BLOQUEOS, bloqueosViejos);
+  if (syncViejo) localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_SYNC, syncViejo);
+
+  // Borrar claves viejas
+  localStorage.removeItem(CLAVE_VIEJA_FAVORITOS);
+  localStorage.removeItem(CLAVE_VIEJA_HISTORIAL);
+  localStorage.removeItem(CLAVE_VIEJA_ULTIMO);
+  localStorage.removeItem(CLAVE_VIEJA_PIN);
+  localStorage.removeItem(CLAVE_VIEJA_BLOQUEOS);
+  localStorage.removeItem(CLAVE_VIEJA_SYNC);
+
+  // Guardar el perfil
+  estado.perfiles = [perfil];
+  estado.perfilActivoId = idPerfil;
+  guardarPerfilesEnStorage();
+
+  console.info('[perfiles] Migración completada. Perfil "Yo" creado.');
+  return true;
+}
+
+/**
+ * Inicializa perfiles: carga los existentes o crea el perfil "Yo".
+ */
+function inicializarPerfiles() {
+  const migrado = migrarDatosViejos();
+  if (migrado) return;
+
+  const perfilesGuardados = cargarPerfilesDeStorage();
+  if (perfilesGuardados && perfilesGuardados.length > 0) {
+    estado.perfiles = perfilesGuardados;
+  } else {
+    // No hay perfiles y no había datos viejos: crear "Yo" vacío
+    const idPerfil = generarIdPerfil();
+    estado.perfiles = [{ id: idPerfil, nombre: 'Yo', emoji: '👤' }];
+    estado.perfilActivoId = idPerfil;
+    guardarPerfilesEnStorage();
+  }
+
+  // Determinar perfil activo
+  let idActivo = localStorage.getItem(CLAVE_PERFIL_ACTIVO);
+  if (!idActivo || !estado.perfiles.find(p => p.id === idActivo)) {
+    idActivo = estado.perfiles[0].id;
+  }
+  estado.perfilActivoId = idActivo;
+}
+
+/**
+ * Carga los datos del perfil activo al estado.
+ */
+function cargarDatosPerfilActivo() {
+  const id = estado.perfilActivoId;
+  if (!id) return;
+
+  // Favoritos
+  try {
+    const crudo = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_FAVORITOS);
+    const arr = crudo ? JSON.parse(crudo) : [];
+    // Migración suave de IDs viejos
+    const soloNumericos = arr.length > 0 && arr.every((x) => /^c\d+$/.test(x));
+    estado.favoritos = soloNumericos ? new Set() : new Set(arr);
+  } catch {
+    estado.favoritos = new Set();
+  }
+
+  // Historial
+  try {
+    const crudo = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_HISTORIAL);
+    const arr = crudo ? JSON.parse(crudo) : [];
+    estado.historial = Array.isArray(arr) ? arr : [];
+  } catch {
+    estado.historial = [];
+  }
+
+  // Último canal
+  estado.ultimoCanal = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_ULTIMO) || '';
+
+  // PIN y bloqueos
+  estado.parentalPin = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_PIN) || '';
+  try {
+    const crudo = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_BLOQUEOS);
+    estado.categoriasBloqueadas = crudo ? JSON.parse(crudo) : [];
+  } catch {
+    estado.categoriasBloqueadas = [];
+  }
+
+  // Sync ID
+  estado.syncId = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_SYNC) || '';
+}
+
+/**
+ * Persiste los datos del perfil activo.
+ */
+function guardarDatosPerfilActivo() {
+  const id = estado.perfilActivoId;
+  if (!id) return;
+
+  localStorage.setItem(PREFIJO_PERFIL + id + SUFIJO_FAVORITOS, JSON.stringify([...estado.favoritos]));
+  localStorage.setItem(PREFIJO_PERFIL + id + SUFIJO_HISTORIAL, JSON.stringify(estado.historial.slice(0, HISTORIAL_MAX)));
+  if (estado.ultimoCanal) {
+    localStorage.setItem(PREFIJO_PERFIL + id + SUFIJO_ULTIMO, estado.ultimoCanal);
+  } else {
+    localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_ULTIMO);
+  }
+  if (estado.parentalPin) {
+    localStorage.setItem(PREFIJO_PERFIL + id + SUFIJO_PIN, estado.parentalPin);
+  } else {
+    localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_PIN);
+  }
+  localStorage.setItem(PREFIJO_PERFIL + id + SUFIJO_BLOQUEOS, JSON.stringify(estado.categoriasBloqueadas));
+  if (estado.syncId) {
+    localStorage.setItem(PREFIJO_PERFIL + id + SUFIJO_SYNC, estado.syncId);
+  } else {
+    localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_SYNC);
+  }
+}
+
+/**
+ * Devuelve el objeto completo del perfil activo.
+ */
+function perfilActivo() {
+  return estado.perfiles.find(p => p.id === estado.perfilActivoId) || estado.perfiles[0];
+}
+
+/**
+ * Cambia el perfil activo. Recarga todo.
+ */
+async function cambiarPerfil(id) {
+  if (id === estado.perfilActivoId) return;
+
+  const perfil = estado.perfiles.find(p => p.id === id);
+  if (!perfil) return;
+
+  // Guarda el perfil actual antes de salir
+  guardarDatosPerfilActivo();
+
+  // Cambia
+  estado.perfilActivoId = id;
+  localStorage.setItem(CLAVE_PERFIL_ACTIVO, id);
+
+  // Carga el nuevo
+  cargarDatosPerfilActivo();
+
+  // Refresca UI
+  actualizarBotonPerfil();
+  renderFiltros();
+  renderGuia();
+  actualizarBannerContinuar();
+  renderControlParentalUI();
+  renderSyncUI();
+
+  mostrarToastSimple(t('perfil_cambiado').replace('%s', perfil.nombre));
+
+  // Baja favoritos del nuevo perfil si tiene syncId
+  if (estado.syncId) {
+    bajarFavoritosDelWorker().catch((e) => {
+      console.warn('No se pudieron bajar los favoritos del nuevo perfil:', e);
+    });
+  }
+}
+
+function crearPerfil(nombre, emoji) {
+  const id = generarIdPerfil();
+  const perfil = { id, nombre, emoji: emoji || '👤' };
+  estado.perfiles.push(perfil);
+  guardarPerfilesEnStorage();
+  return perfil;
+}
+
+function editarPerfil(id, nombre, emoji) {
+  const perfil = estado.perfiles.find(p => p.id === id);
+  if (!perfil) return false;
+  perfil.nombre = nombre;
+  perfil.emoji = emoji;
+  guardarPerfilesEnStorage();
+  if (id === estado.perfilActivoId) actualizarBotonPerfil();
+  return true;
+}
+
+function borrarPerfil(id) {
+  if (estado.perfiles.length <= 1) {
+    mostrarToastSimple(t('perfil_no_borrar_ultimo'));
+    return false;
+  }
+
+  const perfil = estado.perfiles.find(p => p.id === id);
+  if (!perfil) return false;
+
+  // Borra los datos del perfil
+  localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_FAVORITOS);
+  localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_HISTORIAL);
+  localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_ULTIMO);
+  localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_PIN);
+  localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_BLOQUEOS);
+  localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_SYNC);
+
+  // Lo saca de la lista
+  estado.perfiles = estado.perfiles.filter(p => p.id !== id);
+
+  // Si era el activo, pasa al primero
+  if (estado.perfilActivoId === id) {
+    estado.perfilActivoId = estado.perfiles[0].id;
+    guardarPerfilesEnStorage();
+    cargarDatosPerfilActivo();
+  } else {
+    guardarPerfilesEnStorage();
+  }
+
+  actualizarBotonPerfil();
+  renderFiltros();
+  renderGuia();
+  actualizarBannerContinuar();
+  renderControlParentalUI();
+  renderSyncUI();
+
+  return true;
+}
+
+/**
+ * Actualiza el texto del botón de perfil en el header.
+ */
+function actualizarBotonPerfil() {
+  const btn = document.getElementById('boton-perfil');
+  if (!btn) return;
+  const p = perfilActivo();
+  if (p) {
+    btn.textContent = `${p.emoji} ${p.nombre}`;
+  } else {
+    btn.textContent = '👤 Perfil';
+  }
+}
+
+/**
+ * Abre el modal de gestión de perfiles.
+ */
+function abrirModalPerfiles() {
+  const previo = document.getElementById('modal-perfiles');
+  if (previo) previo.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'modal-perfiles';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000; padding: 16px;
+  `;
+
+  const renderContenido = () => {
+    const lista = estado.perfiles.map((p) => {
+      const esActivo = p.id === estado.perfilActivoId;
+      return `
+        <div class="perfil-item" data-id="${p.id}" style="
+          display: flex; align-items: center; gap: 12px;
+          padding: 12px 14px; border-radius: 10px;
+          background: ${esActivo ? 'rgba(229, 9, 20, 0.15)' : 'rgba(255,255,255,0.04)'};
+          border: 1px solid ${esActivo ? 'rgba(229, 9, 20, 0.4)' : 'rgba(255,255,255,0.06)'};
+          cursor: pointer; transition: background 0.15s;
+        ">
+          <div style="font-size: 28px; line-height: 1;">${p.emoji || '👤'}</div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${escapeHtml(p.nombre)} ${esActivo ? '✅' : ''}
+            </div>
+          </div>
+          <button class="btn-edit-perfil" data-id="${p.id}" title="${t('perfil_editar')}"
+            style="padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: inherit; cursor: pointer; font-size: 0.8rem;">
+            ✏️
+          </button>
+          ${estado.perfiles.length > 1 ? `
+            <button class="btn-del-perfil" data-id="${p.id}" title="${t('perfil_borrar')}"
+              style="padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,107,107,0.3); background: transparent; color: #ff6b6b; cursor: pointer; font-size: 0.8rem;">
+              🗑
+            </button>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div style="background: #111b21; color: #fff; padding: 22px; border-radius: 14px; max-width: 480px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px; flex-wrap: wrap;">
+          <h3 style="margin: 0; font-size: 1.1rem;">${t('perfil_titulo')}</h3>
+          <button id="perfil-cerrar-x" class="boton-secundario" style="padding: 6px 12px;">✕</button>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
+          ${lista}
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
+          <button id="perfil-nuevo" class="boton-primario" style="padding: 10px 16px;">${t('perfil_nuevo')}</button>
+          <button id="perfil-cerrar" class="boton-secundario" style="padding: 10px 16px;">${t('perfil_cerrar')}</button>
+        </div>
+      </div>
+    `;
+  };
+
+  overlay.innerHTML = renderContenido();
+  document.body.appendChild(overlay);
+
+  const refrescar = () => {
+    overlay.innerHTML = renderContenido();
+    bindEventos();
+  };
+
+  const bindEventos = () => {
+    overlay.querySelector('#perfil-cerrar-x').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('#perfil-cerrar').addEventListener('click', () => overlay.remove());
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    overlay.querySelector('#perfil-nuevo').addEventListener('click', () => {
+      abrirEditorPerfil(null, () => {
+        overlay.remove();
+        abrirModalPerfiles();
+      });
+    });
+
+    overlay.querySelectorAll('.perfil-item').forEach((item) => {
+      item.addEventListener('click', async (e) => {
+        // Si el click fue en un botón interno, ignorar
+        if (e.target.closest('.btn-edit-perfil') || e.target.closest('.btn-del-perfil')) return;
+        const id = item.dataset.id;
+        await cambiarPerfil(id);
+        overlay.remove();
+      });
+    });
+
+    overlay.querySelectorAll('.btn-edit-perfil').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        abrirEditorPerfil(id, () => {
+          overlay.remove();
+          abrirModalPerfiles();
+        });
+      });
+    });
+
+    overlay.querySelectorAll('.btn-del-perfil').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const perfil = estado.perfiles.find(p => p.id === id);
+        if (!perfil) return;
+        if (!confirm(t('perfil_borrar_confirm').replace('%s', perfil.nombre))) return;
+        const ok = borrarPerfil(id);
+        if (ok) {
+          mostrarToastSimple(t('perfil_eliminado').replace('%s', perfil.nombre));
+          refrescar();
+        }
+      });
+    });
+  };
+
+  bindEventos();
+}
+
+/**
+ * Abre el editor de perfil (crear o editar).
+ * Si `perfilId` es null, crea uno nuevo.
+ */
+function abrirEditorPerfil(perfilId, onClose) {
+  const previo = document.getElementById('modal-perfil-editor');
+  if (previo) previo.remove();
+
+  const esNuevo = !perfilId;
+  const perfil = esNuevo ? null : estado.perfiles.find(p => p.id === perfilId);
+  if (!esNuevo && !perfil) return;
+
+  let emojiSel = perfil ? perfil.emoji : '👤';
+  const nombreInit = perfil ? perfil.nombre : '';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'modal-perfil-editor';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10100; padding: 16px;
+  `;
+
+  const renderEmojis = () => `
+    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+      ${EMOJIS_PERFIL.map((em) => `
+        <button class="emoji-opt" data-emoji="${em}" style="
+          width: 40px; height: 40px; font-size: 22px;
+          border-radius: 8px; cursor: pointer;
+          border: 1px solid ${em === emojiSel ? '#e50914' : 'rgba(255,255,255,0.1)'};
+          background: ${em === emojiSel ? 'rgba(229,9,20,0.2)' : 'rgba(255,255,255,0.04)'};
+          color: inherit;
+        ">${em}</button>
+      `).join('')}
+    </div>
+  `;
+
+  const render = () => `
+    <div style="background: #111b21; color: #fff; padding: 22px; border-radius: 14px; max-width: 460px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+      <h3 style="margin: 0 0 16px; font-size: 1.1rem;">${esNuevo ? t('perfil_nuevo') : t('perfil_editar_titulo')}</h3>
+
+      <label style="display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px;">${t('perfil_nombre_placeholder')}</label>
+      <input id="perfil-nombre-input" type="text" maxlength="24" value="${escapeHtml(nombreInit)}" placeholder="${t('perfil_nombre_placeholder')}"
+        style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.25); color: inherit; font-size: 0.95rem; margin-bottom: 16px;">
+
+      <label style="display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px;">${t('perfil_emoji_label')}</label>
+      <div id="perfil-emojis-cont">${renderEmojis()}</div>
+
+      <div id="perfil-error" style="font-size: 0.85rem; color: #ff6b6b; min-height: 18px; margin: 12px 0;"></div>
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px;">
+        <button id="editor-cancelar" class="boton-secundario" style="padding: 10px 16px;">${t('perfil_cancelar')}</button>
+        <button id="editor-guardar" class="boton-primario" style="padding: 10px 16px;">${t('perfil_guardar')}</button>
+      </div>
+    </div>
+  `;
+
+  overlay.innerHTML = render();
+  document.body.appendChild(overlay);
+
+  const inputNombre = overlay.querySelector('#perfil-nombre-input');
+  const errCont = overlay.querySelector('#perfil-error');
+
+  // Focus y select all en el nombre
+  setTimeout(() => { inputNombre.focus(); inputNombre.select(); }, 50);
+
+  const rebindEmojis = () => {
+    overlay.querySelectorAll('.emoji-opt').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        emojiSel = btn.dataset.emoji;
+        // Re-render solo la zona de emojis
+        overlay.querySelector('#perfil-emojis-cont').innerHTML = renderEmojis();
+        rebindEmojis();
+      });
+    });
+  };
+  rebindEmojis();
+
+  overlay.querySelector('#editor-cancelar').addEventListener('click', () => {
+    overlay.remove();
+    if (onClose) onClose();
+  });
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.remove();
+      if (onClose) onClose();
+    }
+  });
+
+  inputNombre.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      overlay.querySelector('#editor-guardar').click();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      overlay.remove();
+      if (onClose) onClose();
+    }
+  });
+
+  overlay.querySelector('#editor-guardar').addEventListener('click', () => {
+    const nombre = inputNombre.value.trim();
+
+    if (!nombre) {
+      errCont.textContent = t('perfil_nombre_vacio');
+      return;
+    }
+
+    // Verificar duplicado (excepto en el que estamos editando)
+    const duplicado = estado.perfiles.find(
+      (p) => p.nombre.toLowerCase() === nombre.toLowerCase() && p.id !== perfilId
+    );
+    if (duplicado) {
+      errCont.textContent = t('perfil_nombre_duplicado');
+      return;
+    }
+
+    if (esNuevo) {
+      const nuevo = crearPerfil(nombre, emojiSel);
+      mostrarToastSimple(t('perfil_creado').replace('%s', nuevo.nombre));
+    } else {
+      editarPerfil(perfilId, nombre, emojiSel);
+    }
+
+    overlay.remove();
+    if (onClose) onClose();
+  });
+}
+
+/* =======================================================
+   Otros helpers
+   ======================================================= */
 
 function cargarListasDeStorage() {
   try {
@@ -413,23 +1023,12 @@ function cambiarListaActiva(id) {
   renderControlParentalUI();
 }
 
-function cargarFavoritos() {
-  try {
-    const crudo = localStorage.getItem(CLAVE_FAVORITOS);
-    const arr = crudo ? JSON.parse(crudo) : [];
-    const soloNumericos = arr.length > 0 && arr.every((id) => /^c\d+$/.test(id));
-    if (soloNumericos) {
-      localStorage.removeItem(CLAVE_FAVORITOS);
-      return new Set();
-    }
-    return new Set(arr);
-  } catch {
-    return new Set();
-  }
-}
+/* =======================================================
+   Favoritos (por perfil)
+   ======================================================= */
 
 function guardarFavoritos() {
-  localStorage.setItem(CLAVE_FAVORITOS, JSON.stringify([...estado.favoritos]));
+  guardarDatosPerfilActivo();
 }
 
 function esFavorito(id) {
@@ -443,38 +1042,27 @@ function alternarFavorito(id) {
   programarSincronizacionFavoritos();
 }
 
-estado.favoritos = cargarFavoritos();
+/* =======================================================
+   Último visto (por perfil)
+   ======================================================= */
 
 function guardarUltimoVisto(id) {
-  localStorage.setItem(CLAVE_ULTIMO, id);
+  estado.ultimoCanal = id;
+  guardarDatosPerfilActivo();
 }
 
 function leerUltimoVisto() {
-  return localStorage.getItem(CLAVE_ULTIMO);
+  return estado.ultimoCanal;
 }
 
 /* =======================================================
-   HISTORIAL DE REPRODUCCIÓN
+   Historial (por perfil)
    ======================================================= */
 
-function cargarHistorial() {
-  try {
-    const crudo = localStorage.getItem(CLAVE_HISTORIAL);
-    if (!crudo) return [];
-    const arr = JSON.parse(crudo);
-    return Array.isArray(arr) ? arr : [];
-  } catch {
-    return [];
-  }
-}
-
 function guardarHistorial() {
-  localStorage.setItem(CLAVE_HISTORIAL, JSON.stringify(estado.historial.slice(0, HISTORIAL_MAX)));
+  guardarDatosPerfilActivo();
 }
 
-/**
- * Agrega un canal al historial. Si ya existía, actualiza fecha y lo mueve al tope.
- */
 function agregarAlHistorial(canal) {
   if (!canal || !canal.id) return;
 
@@ -487,13 +1075,8 @@ function agregarAlHistorial(canal) {
     fecha: new Date().toISOString(),
   };
 
-  // Quita si ya existe
   estado.historial = estado.historial.filter((e) => e.canalId !== canal.id);
-
-  // Lo pone al principio
   estado.historial.unshift(entrada);
-
-  // Limita a HISTORIAL_MAX
   if (estado.historial.length > HISTORIAL_MAX) {
     estado.historial = estado.historial.slice(0, HISTORIAL_MAX);
   }
@@ -503,12 +1086,9 @@ function agregarAlHistorial(canal) {
 
 function borrarHistorial() {
   estado.historial = [];
-  localStorage.removeItem(CLAVE_HISTORIAL);
+  guardarHistorial();
 }
 
-/**
- * Devuelve un texto tipo "hace 5 min", "hace 2 h", "ayer", "hace 3 días", etc.
- */
 function formatearTiempoRelativo(iso) {
   try {
     const ms = Date.now() - new Date(iso).getTime();
@@ -533,14 +1113,9 @@ function formatearTiempoRelativo(iso) {
   }
 }
 
-/**
- * Abre el modal con la lista de recientes.
- */
 function abrirModalHistorial() {
   const previo = document.getElementById('modal-historial');
   if (previo) previo.remove();
-
-  estado.historial = cargarHistorial();
 
   const overlay = document.createElement('div');
   overlay.id = 'modal-historial';
@@ -588,7 +1163,7 @@ function abrirModalHistorial() {
         <span style="font-size: 0.78rem; color: #94a3b8;">${estado.historial.length} ${t('historial_contador')}</span>
       </div>
 
-      <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;" id="hist-lista">
+      <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
         ${listaHtml}
       </div>
 
@@ -601,7 +1176,6 @@ function abrirModalHistorial() {
 
   document.body.appendChild(overlay);
 
-  // Eventos
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) overlay.remove();
   });
@@ -616,7 +1190,6 @@ function abrirModalHistorial() {
   });
 
   overlay.querySelectorAll('.hist-item').forEach((item) => {
-    // Hover
     item.addEventListener('mouseenter', () => item.style.background = 'rgba(255,255,255,0.1)');
     item.addEventListener('mouseleave', () => item.style.background = 'rgba(255,255,255,0.04)');
 
@@ -628,9 +1201,6 @@ function abrirModalHistorial() {
   });
 }
 
-/**
- * Pequeño toast sin dependencias externas.
- */
 function mostrarToastSimple(texto) {
   const previo = document.getElementById('toast-simple');
   if (previo) previo.remove();
@@ -643,13 +1213,14 @@ function mostrarToastSimple(texto) {
     background: #1f2c34; color: #fff; padding: 12px 20px; border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     font-size: 0.9rem; z-index: 20000; opacity: 0; transition: opacity 0.3s;
+    max-width: 90vw; text-align: center;
   `;
   document.body.appendChild(t2);
   requestAnimationFrame(() => { t2.style.opacity = '1'; });
   setTimeout(() => {
     t2.style.opacity = '0';
     setTimeout(() => t2.remove(), 300);
-  }, 2000);
+  }, 2200);
 }
 
 function escapeHtml(s) {
@@ -689,28 +1260,56 @@ function esCanalCaido(canal) {
 }
 
 /* =======================================================
-   EXPORTAR / IMPORTAR CONFIGURACIÓN
+   Backup
    ======================================================= */
 
-const VERSION_BACKUP = 1;
+const VERSION_BACKUP = 2; // subimos por multi-perfil
 
 function recolectarConfiguracion() {
+  // Recolecta datos de TODOS los perfiles + globales
+  const perfilesCompletos = estado.perfiles.map((p) => {
+    const id = p.id;
+    let favoritos = [];
+    let historial = [];
+    try {
+      const f = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_FAVORITOS);
+      if (f) favoritos = JSON.parse(f);
+    } catch {}
+    try {
+      const h = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_HISTORIAL);
+      if (h) historial = JSON.parse(h);
+    } catch {}
+
+    return {
+      id,
+      nombre: p.nombre,
+      emoji: p.emoji,
+      favoritos,
+      historial,
+      ultimoCanal: localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_ULTIMO) || '',
+      parentalPin: localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_PIN) || '',
+      categoriasBloqueadas: (() => {
+        try {
+          const c = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_BLOQUEOS);
+          return c ? JSON.parse(c) : [];
+        } catch { return []; }
+      })(),
+      syncId: localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_SYNC) || '',
+    };
+  });
+
   return {
     app: 'guia-de-canales',
     version: VERSION_BACKUP,
     exportado: new Date().toISOString(),
     listasGuardadas: estado.listasGuardadas,
     listaActivaId: estado.listaActivaId,
-    favoritos: [...estado.favoritos],
-    syncId: estado.syncId,
-    parentalPin: estado.parentalPin,
-    categoriasBloqueadas: estado.categoriasBloqueadas,
     idioma: estado.idioma,
     agrupacion: estado.agrupacion,
     modoVista: estado.modoVista,
     soloActivos: estado.soloActivos,
-    ultimoCanal: leerUltimoVisto(),
-    historial: estado.historial,
+    perfiles: perfilesCompletos,
+    perfilActivoId: estado.perfilActivoId,
   };
 }
 
@@ -754,35 +1353,12 @@ async function importarConfiguracion(file) {
       return;
     }
 
+    // Listas y globales
     if (Array.isArray(datos.listasGuardadas) && datos.listasGuardadas.length > 0) {
       estado.listasGuardadas = datos.listasGuardadas;
       estado.listaActivaId = datos.listaActivaId || datos.listasGuardadas[0].id;
       guardarListasEnStorage();
     }
-
-    if (Array.isArray(datos.favoritos)) {
-      estado.favoritos = new Set(datos.favoritos);
-      guardarFavoritos();
-    }
-
-    if (typeof datos.syncId === 'string') {
-      estado.syncId = datos.syncId;
-      if (datos.syncId) {
-        localStorage.setItem(CLAVE_SYNC_ID, datos.syncId);
-      } else {
-        localStorage.removeItem(CLAVE_SYNC_ID);
-      }
-    }
-
-    if (typeof datos.parentalPin === 'string') {
-      estado.parentalPin = datos.parentalPin;
-      localStorage.setItem(CLAVE_PARENTAL_PIN, datos.parentalPin);
-    }
-    if (Array.isArray(datos.categoriasBloqueadas)) {
-      estado.categoriasBloqueadas = datos.categoriasBloqueadas;
-      localStorage.setItem(CLAVE_PARENTAL_BLOQUEOS, JSON.stringify(datos.categoriasBloqueadas));
-    }
-
     if (typeof datos.idioma === 'string') {
       estado.idioma = datos.idioma;
       localStorage.setItem(CLAVE_IDIOMA, datos.idioma);
@@ -799,12 +1375,62 @@ async function importarConfiguracion(file) {
       estado.soloActivos = datos.soloActivos;
       localStorage.setItem(CLAVE_SOLO_ACTIVOS, datos.soloActivos ? '1' : '0');
     }
-    if (typeof datos.ultimoCanal === 'string' && datos.ultimoCanal) {
-      localStorage.setItem(CLAVE_ULTIMO, datos.ultimoCanal);
-    }
-    if (Array.isArray(datos.historial)) {
-      estado.historial = datos.historial.slice(0, HISTORIAL_MAX);
-      guardarHistorial();
+
+    // Limpiar perfiles y datos de perfiles existentes
+    estado.perfiles.forEach((p) => {
+      localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_FAVORITOS);
+      localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_HISTORIAL);
+      localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_ULTIMO);
+      localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_PIN);
+      localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_BLOQUEOS);
+      localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_SYNC);
+    });
+
+    // Cargar perfiles del backup
+    if (Array.isArray(datos.perfiles) && datos.perfiles.length > 0) {
+      estado.perfiles = datos.perfiles.map((p) => ({
+        id: p.id || generarIdPerfil(),
+        nombre: p.nombre || 'Sin nombre',
+        emoji: p.emoji || '👤',
+      }));
+
+      estado.perfiles.forEach((p, i) => {
+        const src = datos.perfiles[i];
+        localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_FAVORITOS, JSON.stringify(src.favoritos || []));
+        localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_HISTORIAL, JSON.stringify((src.historial || []).slice(0, HISTORIAL_MAX)));
+        if (src.ultimoCanal) localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_ULTIMO, src.ultimoCanal);
+        if (src.parentalPin) localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_PIN, src.parentalPin);
+        if (Array.isArray(src.categoriasBloqueadas)) localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_BLOQUEOS, JSON.stringify(src.categoriasBloqueadas));
+        if (src.syncId) localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_SYNC, src.syncId);
+      });
+
+      estado.perfilActivoId = datos.perfilActivoId && estado.perfiles.find(p => p.id === datos.perfilActivoId)
+        ? datos.perfilActivoId
+        : estado.perfiles[0].id;
+
+      guardarPerfilesEnStorage();
+    } else if (Array.isArray(datos.favoritos)) {
+      // Backup viejo (v1): migrar a un único perfil "Yo"
+      const idPerfil = generarIdPerfil();
+      estado.perfiles = [{ id: idPerfil, nombre: 'Yo', emoji: '👤' }];
+      estado.perfilActivoId = idPerfil;
+      localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_FAVORITOS, JSON.stringify(datos.favoritos));
+      if (typeof datos.parentalPin === 'string' && datos.parentalPin) {
+        localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_PIN, datos.parentalPin);
+      }
+      if (Array.isArray(datos.categoriasBloqueadas)) {
+        localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_BLOQUEOS, JSON.stringify(datos.categoriasBloqueadas));
+      }
+      if (typeof datos.syncId === 'string' && datos.syncId) {
+        localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_SYNC, datos.syncId);
+      }
+      if (Array.isArray(datos.historial)) {
+        localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_HISTORIAL, JSON.stringify(datos.historial.slice(0, HISTORIAL_MAX)));
+      }
+      if (typeof datos.ultimoCanal === 'string' && datos.ultimoCanal) {
+        localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_ULTIMO, datos.ultimoCanal);
+      }
+      guardarPerfilesEnStorage();
     }
 
     mostrarMensajeBackup(t('backup_import_ok'), 'ok');
@@ -946,7 +1572,7 @@ function limpiarParamSync() {
 }
 
 /* =======================================================
-   SINCRONIZACIÓN DE FAVORITOS
+   Sync favoritos (por perfil)
    ======================================================= */
 
 function generarSyncId() {
@@ -1046,7 +1672,7 @@ async function vincularSyncId(id) {
     return false;
   }
   estado.syncId = id;
-  localStorage.setItem(CLAVE_SYNC_ID, id);
+  guardarDatosPerfilActivo();
   renderSyncUI();
   actualizarEstadoSyncUI(t('sync_bajando'), 'info');
   try {
@@ -1059,7 +1685,7 @@ async function vincularSyncId(id) {
 
 function desvincularSyncId() {
   estado.syncId = '';
-  localStorage.removeItem(CLAVE_SYNC_ID);
+  guardarDatosPerfilActivo();
   renderSyncUI();
 }
 
@@ -1077,7 +1703,7 @@ async function borrarFavoritosDeLaNube() {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
 
     estado.syncId = '';
-    localStorage.removeItem(CLAVE_SYNC_ID);
+    guardarDatosPerfilActivo();
     renderSyncUI();
     actualizarEstadoSyncUI(t('sync_borrar_nube_ok'), 'ok');
 
@@ -1920,7 +2546,7 @@ function filaCanalGrid(canal) {
 }
 
 /* =======================================================
-   Selector de Vista
+   Vista
    ======================================================= */
 
 function actualizarBotonVista() {
@@ -1938,7 +2564,7 @@ function alternarModoVista() {
 }
 
 /* =======================================================
-   Selector de Listas y Control Parental UI
+   Listas y Control Parental UI
    ======================================================= */
 
 function actualizarSelectorListasHeader() {
@@ -2042,7 +2668,7 @@ function actualizarBannerContinuar() {
 }
 
 /* =======================================================
-   Reproductor HLS
+   Reproductor
    ======================================================= */
 
 const rp = {
@@ -2090,7 +2716,6 @@ function reproducirCanalPorId(id) {
     }
   }
 
-  // Guarda en historial
   agregarAlHistorial(canal);
 
   estado.indiceActual = estado.canales.findIndex((c) => c.id === id);
@@ -2484,7 +3109,7 @@ if (rp.botonReportar) {
 }
 
 /* =======================================================
-   Navegacion
+   Navegación pantallas
    ======================================================= */
 
 function irAConfig() {
@@ -2500,7 +3125,7 @@ function irAGuia() {
 }
 
 /* =======================================================
-   Pantalla: cargar lista
+   Pantalla cargar lista
    ======================================================= */
 
 const cfg = {
@@ -2628,7 +3253,6 @@ if (cfg.botonImportar && cfg.campoImportar) {
 if (cfg.botonGuardarParental) {
   cfg.botonGuardarParental.addEventListener('click', () => {
     estado.parentalPin = cfg.campoPinParental.value.trim();
-    localStorage.setItem(CLAVE_PARENTAL_PIN, estado.parentalPin);
 
     const checkboxes = document.querySelectorAll('#parental-categorias input[type="checkbox"]');
     const bloqueadas = [];
@@ -2637,7 +3261,8 @@ if (cfg.botonGuardarParental) {
     });
 
     estado.categoriasBloqueadas = bloqueadas;
-    localStorage.setItem(CLAVE_PARENTAL_BLOQUEOS, JSON.stringify(bloqueadas));
+
+    guardarDatosPerfilActivo();
 
     renderFiltros();
     renderGuia();
@@ -2693,7 +3318,7 @@ if (btnActualizarGuia) {
 }
 
 /* =======================================================
-   Eventos generales y Control Remoto
+   Eventos generales
    ======================================================= */
 
 document.getElementById('boton-config').addEventListener('click', irAConfig);
@@ -2702,10 +3327,14 @@ document.getElementById('boton-cerrar-reproductor').addEventListener('click', ce
 document.getElementById('boton-canal-anterior').addEventListener('click', () => cambiarCanal(-1));
 document.getElementById('boton-canal-siguiente').addEventListener('click', () => cambiarCanal(1));
 
-// Botón de historial
 const btnRecientes = document.getElementById('boton-recientes');
 if (btnRecientes) {
   btnRecientes.addEventListener('click', abrirModalHistorial);
+}
+
+const btnPerfil = document.getElementById('boton-perfil');
+if (btnPerfil) {
+  btnPerfil.addEventListener('click', abrirModalPerfiles);
 }
 
 const selectHeader = document.getElementById('select-lista-header');
@@ -2794,6 +3423,12 @@ if ('serviceWorker' in navigator) {
    ======================================================= */
 
 async function iniciar() {
+  // 1) Inicializar perfiles (con migración si hace falta)
+  inicializarPerfiles();
+
+  // 2) Cargar datos del perfil activo
+  cargarDatosPerfilActivo();
+
   document.querySelectorAll('.agrupar__opcion').forEach((b) => {
     b.classList.toggle('activo', b.dataset.agrupar === estado.agrupacion);
   });
@@ -2817,9 +3452,6 @@ async function iniciar() {
   document.querySelectorAll('.agrupar__opcion').forEach((b) => {
     b.classList.toggle('activo', b.dataset.agrupar === agrupacionEfectiva());
   });
-
-  // Carga el historial al estado
-  estado.historial = cargarHistorial();
 
   aplicarIdioma();
 
