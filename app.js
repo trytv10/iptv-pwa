@@ -67,7 +67,7 @@ const IDIOMAS = {
     ingrese_pin: 'Ingrese el PIN de control parental:',
     actualizar_guia: 'Actualizar',
     actualizar_toast: 'Guía actualizada correctamente desde el servidor.',
-    canal_caido: 'Canal caído (último chequeo)',
+    canal_caido: 'Canal caído (marcado por admin)',
     // Sincronización
     sync_titulo: 'Sincronizar favoritos entre dispositivos',
     sync_descripcion: 'Generá un código y usá el mismo en todos tus dispositivos (celu, TV, tablet) para compartir favoritos.',
@@ -177,7 +177,7 @@ const IDIOMAS = {
     ingrese_pin: 'Enter parental control PIN:',
     actualizar_guia: 'Update',
     actualizar_toast: 'Guide successfully updated from server.',
-    canal_caido: 'Channel offline (last check)',
+    canal_caido: 'Channel offline (marked by admin)',
     // Sincronización
     sync_titulo: 'Sync favorites across devices',
     sync_descripcion: 'Generate a code and use the same one on all your devices (phone, TV, tablet) to share favorites.',
@@ -328,13 +328,10 @@ const CLAVE_PARENTAL_BLOQUEOS = 'iptv:parental-bloqueos';
 const CLAVE_SOLO_ACTIVOS = 'iptv:solo-activos';
 const CLAVE_SYNC_ID = 'iptv:sync-id';
 
-// Fuentes de canales (en orden de preferencia)
 const URL_CANALES_JSON = './canales.json';
 const URL_CANALES_M3U8 = './canales.m3u8';
 const URL_FUENTES = './fuentes.json';
 const URL_PROXY = 'https://iptv-proxy.eolivera119600.workers.dev';
-
-// Worker para favoritos (mismo que el proxy, mismo dominio)
 const URL_WORKER = 'https://iptv-proxy.eolivera119600.workers.dev';
 
 const estado = {
@@ -360,6 +357,8 @@ const estado = {
   syncId: localStorage.getItem(CLAVE_SYNC_ID) || '',
   syncTimeout: null,
   syncEnProgreso: false,
+  // Canales caídos marcados desde el admin (id → true)
+  caidosRemotos: {},
 };
 
 function cargarListasDeStorage() {
@@ -396,7 +395,6 @@ function cambiarListaActiva(id) {
   renderControlParentalUI();
 }
 
-/* Favoritos: migración suave de IDs viejos ('c0', 'c1') a nuevos ('c_hash') */
 function cargarFavoritos() {
   try {
     const crudo = localStorage.getItem(CLAVE_FAVORITOS);
@@ -435,6 +433,42 @@ function guardarUltimoVisto(id) {
 
 function leerUltimoVisto() {
   return localStorage.getItem(CLAVE_ULTIMO);
+}
+
+/* =======================================================
+   CANALES CAÍDOS (marcados desde el admin)
+   ======================================================= */
+
+/**
+ * Baja la lista de canales marcados como caídos desde el Worker.
+ * Se llama al arrancar la app y cada vez que se refresca.
+ */
+async function cargarCaidosDelWorker() {
+  try {
+    const resp = await fetch(`${URL_WORKER}/caidos`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    estado.caidosRemotos = data.caidos || {};
+    return true;
+  } catch (e) {
+    console.warn('No se pudieron cargar los canales caídos del Worker:', e);
+    return false;
+  }
+}
+
+/**
+ * Determina si un canal está caído. Combina:
+ *  - El campo `estado` (heredado de canales.json / canales.m3u8).
+ *  - Los canales marcados como caídos desde el admin (caidosRemotos).
+ */
+function esCanalCaido(canal) {
+  if (!canal) return false;
+  if (canal.estado === 'sin_respuesta' || canal.estado === 'dudoso') return true;
+  if (estado.caidosRemotos && estado.caidosRemotos[canal.id]) return true;
+  return false;
 }
 
 /* =======================================================
@@ -575,9 +609,6 @@ function mostrarMensajeBackup(texto, tipo) {
    QR PARA COMPARTIR SYNC ID
    ======================================================= */
 
-/**
- * Devuelve la URL base de la app (sin hash, sin query).
- */
 function urlBaseApp() {
   const url = new URL(window.location.href);
   url.hash = '';
@@ -585,24 +616,15 @@ function urlBaseApp() {
   return url.toString();
 }
 
-/**
- * Construye el link mágico con el syncId embebido.
- */
 function construirLinkSync(syncId) {
   return `${urlBaseApp()}?sync=${encodeURIComponent(syncId)}`;
 }
 
-/**
- * Devuelve la URL de un QR generado con qrserver.com.
- */
 function urlQR(texto, tamano) {
   const size = tamano || 320;
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=8&data=${encodeURIComponent(texto)}`;
 }
 
-/**
- * Abre el modal con el QR para compartir.
- */
 function abrirModalQR() {
   if (!estado.syncId) return;
 
@@ -668,17 +690,12 @@ function abrirModalQR() {
   });
 }
 
-/**
- * Detecta si la URL tiene ?sync=XXXX al arrancar. Si sí, ofrece vincular.
- * Se llama una sola vez al inicio.
- */
 async function detectarInvitacionSync() {
   const params = new URLSearchParams(window.location.search);
   const syncIdInvitado = params.get('sync');
 
   if (!syncIdInvitado || !validarSyncId(syncIdInvitado)) return;
 
-  // Si es el mismo syncId que ya tenemos, no preguntamos
   if (estado.syncId === syncIdInvitado) {
     limpiarParamSync();
     return;
@@ -697,9 +714,6 @@ async function detectarInvitacionSync() {
   limpiarParamSync();
 }
 
-/**
- * Limpia el ?sync= de la URL sin recargar.
- */
 function limpiarParamSync() {
   try {
     const url = new URL(window.location.href);
@@ -707,7 +721,7 @@ function limpiarParamSync() {
     const nueva = url.pathname + (url.search ? url.search : '') + url.hash;
     window.history.replaceState({}, '', nueva);
   } catch {
-    // Nada que hacer
+    // Nada
   }
 }
 
@@ -1046,7 +1060,7 @@ function normalizarDesdeJSON(lista) {
 }
 
 /* =======================================================
-   Parsers: M3U/M3U8 y JSON (formato libre)
+   Parsers
    ======================================================= */
 
 function esFuenteM3U(entrada) {
@@ -1198,7 +1212,7 @@ function normalizarCanales(crudos) {
 }
 
 /* =======================================================
-   EPG (guia de programacion XMLTV con IndexedDB)
+   EPG
    ======================================================= */
 
 const URL_EPG_FUENTES = './epg.json';
@@ -1386,7 +1400,7 @@ function formatoHora(iso) {
 }
 
 /* =======================================================
-   Render: Guia de Canales y Control Parental
+   Render
    ======================================================= */
 
 const el = {
@@ -1426,10 +1440,6 @@ function etiquetaGrupo(valor) {
     return valor ? `${bandera(valor)} ${nombrePais(valor)}` : t('sin_pais');
   }
   return valor;
-}
-
-function esCanalCaido(c) {
-  return c.estado === 'sin_respuesta' || c.estado === 'dudoso';
 }
 
 function renderFiltros() {
@@ -2385,8 +2395,6 @@ cfg.botonLimpiar.addEventListener('click', async () => {
   mostrarMensaje(t('lista_borrada'), 'ok');
 });
 
-/* ===== Backup: exportar / importar ===== */
-
 if (cfg.botonExportar) {
   cfg.botonExportar.addEventListener('click', exportarConfiguracion);
 }
@@ -2425,7 +2433,7 @@ if (cfg.botonGuardarParental) {
 }
 
 /* =======================================================
-   Función de Actualización Rápida de la Guía
+   Actualización Rápida
    ======================================================= */
 
 async function forzarActualizacionServidor() {
@@ -2445,6 +2453,10 @@ async function forzarActualizacionServidor() {
 
     guardarListasEnStorage();
     cambiarListaActiva('oficial');
+
+    // Refresca también los caídos desde el Worker
+    await cargarCaidosDelWorker();
+    renderGuia();
 
     if ('caches' in window) {
       const cacheNames = await caches.keys();
@@ -2589,6 +2601,9 @@ async function iniciar() {
   });
 
   aplicarIdioma();
+
+  // Baja canales caídos del Worker (independiente de sync de favoritos)
+  cargarCaidosDelWorker().then(() => renderGuia());
 
   // Detectar invitación por QR (?sync=XXXX) antes de bajar favoritos
   detectarInvitacionSync().then(() => {
