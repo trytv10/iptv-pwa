@@ -86,6 +86,11 @@ const IDIOMAS = {
     sync_subiendo: 'Subiendo...',
     sync_bajando: 'Bajando...',
     sync_pedir_codigo: 'Primero generá o pegá un código.',
+    sync_borrar_nube: '🗑 Borrar de la nube',
+    sync_borrar_nube_confirm: '¿Borrar TODOS los favoritos guardados en la nube con este código?\n\nEsta acción NO se puede deshacer.\n\nLos favoritos locales de este dispositivo NO se borran.',
+    sync_borrar_nube_ok: 'Favoritos borrados de la nube. Este dispositivo quedó desvinculado.',
+    sync_borrar_nube_error: 'No se pudieron borrar los favoritos de la nube. Revisá tu conexión.',
+    sync_borrando: 'Borrando...',
   },
   en: {
     marca: 'Channel Guide',
@@ -168,6 +173,11 @@ const IDIOMAS = {
     sync_subiendo: 'Uploading...',
     sync_bajando: 'Downloading...',
     sync_pedir_codigo: 'Generate or paste a code first.',
+    sync_borrar_nube: '🗑 Delete from cloud',
+    sync_borrar_nube_confirm: 'Delete ALL favorites stored in the cloud with this code?\n\nThis action CANNOT be undone.\n\nLocal favorites on this device are NOT deleted.',
+    sync_borrar_nube_ok: 'Favorites deleted from cloud. This device is now unlinked.',
+    sync_borrar_nube_error: 'Could not delete favorites from cloud. Check your connection.',
+    sync_borrando: 'Deleting...',
   },
 };
 
@@ -527,6 +537,38 @@ function desvincularSyncId() {
 }
 
 /**
+ * Borra TODOS los favoritos del Worker para este syncId (DELETE /fav/:syncId),
+ * y luego desvincula el dispositivo.
+ */
+async function borrarFavoritosDeLaNube() {
+  if (!estado.syncId) return false;
+
+  const syncIdABorrar = estado.syncId;
+
+  try {
+    actualizarEstadoSyncUI(t('sync_borrando'), 'info');
+    const resp = await fetch(`${URL_WORKER}/fav/${encodeURIComponent(syncIdABorrar)}`, {
+      method: 'DELETE',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+    // Solo si el DELETE fue OK, desvinculamos localmente.
+    // Antes de desvincular, mostramos el mensaje de éxito.
+    estado.syncId = '';
+    localStorage.removeItem(CLAVE_SYNC_ID);
+    renderSyncUI();
+    actualizarEstadoSyncUI(t('sync_borrar_nube_ok'), 'ok');
+
+    return true;
+  } catch (e) {
+    console.warn('Error al borrar favoritos de la nube:', e);
+    actualizarEstadoSyncUI(t('sync_borrar_nube_error'), 'error');
+    return false;
+  }
+}
+
+/**
  * Actualiza el texto de estado dentro del panel de sincronización.
  */
 function actualizarEstadoSyncUI(texto, tipo) {
@@ -553,7 +595,8 @@ function renderSyncUI() {
         <span style="font-size:13px; opacity:0.75;">${t('sync_estado_vinculado')}:</span>
         <code id="sync-codigo-actual" style="font-size:15px; font-weight:600; background:rgba(229,9,20,0.15); padding:6px 10px; border-radius:6px; letter-spacing:1px;">${estado.syncId}</code>
         <button id="sync-copiar" class="boton-secundario" style="padding:6px 12px;">${t('sync_copiar')}</button>
-        <button id="sync-desvincular" class="boton-secundario" style="padding:6px 12px; color:#ff6b6b;">${t('sync_desvincular')}</button>
+        <button id="sync-desvincular" class="boton-secundario" style="padding:6px 12px;">${t('sync_desvincular')}</button>
+        <button id="sync-borrar-nube" class="boton-secundario" style="padding:6px 12px; color:#ff4d4d; border-color:rgba(255,77,77,0.4);">${t('sync_borrar_nube')}</button>
       </div>
       <div id="sync-estado" class="sync-estado"></div>
     ` : `
@@ -577,7 +620,6 @@ function renderSyncUI() {
         btnCopiar.textContent = t('sync_copiado');
         setTimeout(() => { btnCopiar.textContent = t('sync_copiar'); }, 1500);
       } catch {
-        // Fallback si clipboard no está disponible (http sin https)
         const ta = document.createElement('textarea');
         ta.value = estado.syncId;
         document.body.appendChild(ta);
@@ -596,6 +638,16 @@ function renderSyncUI() {
       if (confirm('¿Desvincular este dispositivo? Los favoritos seguirán guardados en la nube con el código ' + estado.syncId)) {
         desvincularSyncId();
       }
+    });
+  }
+
+  const btnBorrarNube = document.getElementById('sync-borrar-nube');
+  if (btnBorrarNube) {
+    btnBorrarNube.addEventListener('click', async () => {
+      if (!confirm(t('sync_borrar_nube_confirm'))) return;
+      btnBorrarNube.disabled = true;
+      btnBorrarNube.textContent = t('sync_borrando');
+      await borrarFavoritosDeLaNube();
     });
   }
 
