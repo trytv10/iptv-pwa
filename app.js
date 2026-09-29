@@ -1651,6 +1651,7 @@ function cargarStream(canal, intentarProxy) {
   rp.estadoTexto.textContent = t('cargando');
   rp.botonSubtitulos.hidden = true;
   rp.botonCalidad.hidden = true;
+  rp.botonReportar.hidden = false;
   actualizarBotonFavoritoReproductor(canal.id);
   actualizarProgramaReproductor(canal.tvgId);
   if (temporizadorPrograma) clearInterval(temporizadorPrograma);
@@ -1811,6 +1812,117 @@ function enviarACast() {
 }
 
 rp.botonCast.addEventListener('click', enviarACast);
+
+/* =======================================================
+   Reportar canal caído
+   ======================================================= */
+
+function abrirDialogoReporte() {
+  const canal = estado.canales[estado.indiceActual];
+  if (!canal) return;
+
+  // Si ya existe un diálogo abierto, lo cerramos
+  const previo = document.getElementById('dialogo-reporte');
+  if (previo) previo.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'dialogo-reporte';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000; padding: 16px;
+  `;
+
+  overlay.innerHTML = `
+    <div style="background: #1a1a1a; color: #fff; padding: 20px; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+      <h3 style="margin: 0 0 12px; font-size: 18px;">⚠ Reportar problema</h3>
+      <p style="margin: 0 0 16px; font-size: 13px; opacity: 0.75;">
+        Canal: <strong>${canal.nombre}</strong>
+      </p>
+
+      <label style="display:block; font-size: 13px; margin-bottom: 6px;">Motivo</label>
+      <select id="reporte-motivo" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #222; color: #fff; font-size: 14px; margin-bottom: 12px;">
+        <option value="caido">No funciona / caído</option>
+        <option value="lento">Va lento / se corta</option>
+        <option value="sin_audio">Sin audio</option>
+        <option value="sin_video">Sin video</option>
+        <option value="calidad_mala">Calidad mala</option>
+        <option value="otro">Otro</option>
+      </select>
+
+      <label style="display:block; font-size: 13px; margin-bottom: 6px;">Comentario (opcional)</label>
+      <textarea id="reporte-comentario" maxlength="500" rows="3"
+        style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #222; color: #fff; font-size: 14px; resize: vertical; margin-bottom: 16px;"
+        placeholder="Ej: desde ayer no carga..."></textarea>
+
+      <div id="reporte-mensaje" style="font-size: 13px; min-height: 18px; margin-bottom: 12px;"></div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="reporte-cancelar" style="padding: 10px 16px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; cursor: pointer; font-size: 14px;">
+          Cancelar
+        </button>
+        <button id="reporte-enviar" style="padding: 10px 16px; border-radius: 6px; border: none; background: #e50914; color: #fff; cursor: pointer; font-size: 14px; font-weight: 600;">
+          Enviar reporte
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const selMotivo = overlay.querySelector('#reporte-motivo');
+  const txtComentario = overlay.querySelector('#reporte-comentario');
+  const mensaje = overlay.querySelector('#reporte-mensaje');
+  const btnCancelar = overlay.querySelector('#reporte-cancelar');
+  const btnEnviar = overlay.querySelector('#reporte-enviar');
+
+  btnCancelar.addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  btnEnviar.addEventListener('click', async () => {
+    btnEnviar.disabled = true;
+    btnEnviar.textContent = 'Enviando...';
+    mensaje.textContent = '';
+    mensaje.style.color = '#60a5fa';
+
+    try {
+      const resp = await fetch(`${URL_WORKER}/reportes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          canalId: canal.id,
+          canalNombre: canal.nombre,
+          canalUrl: canal.url,
+          motivo: selMotivo.value,
+          comentario: txtComentario.value.trim(),
+        }),
+      });
+      const data = await resp.json();
+
+      if (data.ok) {
+        mensaje.style.color = '#4ade80';
+        mensaje.textContent = data.duplicado
+          ? '✓ Ya habías reportado este canal hace poco.'
+          : '✓ ¡Gracias! Reporte enviado.';
+        setTimeout(() => overlay.remove(), 1500);
+      } else {
+        throw new Error(data.error || 'Error desconocido');
+      }
+    } catch (e) {
+      console.error(e);
+      mensaje.style.color = '#ff6b6b';
+      mensaje.textContent = '✗ No se pudo enviar. Revisá tu conexión.';
+      btnEnviar.disabled = false;
+      btnEnviar.textContent = 'Enviar reporte';
+    }
+  });
+}
+
+if (rp.botonReportar) {
+  rp.botonReportar.addEventListener('click', abrirDialogoReporte);
+}
 
 /* =======================================================
    Navegacion entre pantallas
