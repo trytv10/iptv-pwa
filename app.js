@@ -2238,7 +2238,16 @@ function renderFiltros() {
   el.agrupar.hidden = !hayPaisesEnLista();
 
   if (estado.canales.length === 0) return;
-
+   // ----- Chip: 🧹 Limpiar filtros (solo si hay alguno activo) -----
+  if (hayFiltrosActivos()) {
+    const chipLimpiar = document.createElement('button');
+    chipLimpiar.className = 'filtro';
+    chipLimpiar.textContent = t('limpiar_filtros');
+    chipLimpiar.tabIndex = 0;
+    chipLimpiar.style.cssText = 'background: rgba(229, 9, 20, 0.25); border-color: rgba(229, 9, 20, 0.6); color: #fff; font-weight: 600; margin-right: 6px;';
+    chipLimpiar.addEventListener('click', limpiarFiltros);
+    el.filtros.appendChild(chipLimpiar);
+  }
   const chipFav = document.createElement('button');
   chipFav.className = 'filtro' + (estado.soloFavoritos ? ' activo' : '');
   chipFav.textContent = '\u2605 ' + t('favoritos');
@@ -2299,16 +2308,6 @@ function renderFiltros() {
       renderGuia();
     });
     el.filtros.appendChild(b);
-  }
-
-  if (hayFiltrosActivos()) {
-    const chipLimpiar = document.createElement('button');
-    chipLimpiar.className = 'filtro';
-    chipLimpiar.textContent = t('limpiar_filtros');
-    chipLimpiar.tabIndex = 0;
-    chipLimpiar.style.cssText = 'background: rgba(229, 9, 20, 0.15); border-color: rgba(229, 9, 20, 0.4); color: #fca5a5;';
-    chipLimpiar.addEventListener('click', limpiarFiltros);
-    el.filtros.appendChild(chipLimpiar);
   }
 }
 
