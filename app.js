@@ -68,6 +68,7 @@ const IDIOMAS = {
     actualizar_guia: 'Actualizar',
     actualizar_toast: 'Guía actualizada correctamente desde el servidor.',
     canal_caido: 'Canal caído',
+    limpiar_filtros: '🧹 Limpiar filtros',
     // Sincronización
     sync_titulo: 'Sincronizar favoritos entre dispositivos',
     sync_descripcion: 'Generá un código y usá el mismo en todos tus dispositivos (celu, TV, tablet) para compartir favoritos.',
@@ -202,6 +203,7 @@ const IDIOMAS = {
     actualizar_guia: 'Update',
     actualizar_toast: 'Guide successfully updated.',
     canal_caido: 'Channel offline',
+    limpiar_filtros: '🧹 Clear filters',
     sync_titulo: 'Sync favorites across devices',
     sync_descripcion: 'Generate a code and use the same one on all your devices.',
     sync_generar: 'Generate new code',
@@ -296,7 +298,7 @@ function aplicarIdioma() {
 }
 
 /* =======================================================
-   Paises: banderas y nombres
+   Paises
    ======================================================= */
 
 const NOMBRES_PAIS = {
@@ -357,10 +359,9 @@ function nombrePais(codigoPais) {
 }
 
 /* =======================================================
-   Claves y constantes
+   Claves
    ======================================================= */
 
-// Globales (compartidas por todos los perfiles)
 const CLAVE_MULTIPLE_LISTAS = 'iptv:multiple-listas';
 const CLAVE_LISTA_ACTIVA_ID = 'iptv:lista-activa-id';
 const CLAVE_IDIOMA = 'iptv:idioma';
@@ -368,11 +369,9 @@ const CLAVE_AGRUPACION = 'iptv:agrupacion';
 const CLAVE_MODO_VISTA = 'iptv:modo-vista';
 const CLAVE_SOLO_ACTIVOS = 'iptv:solo-activos';
 
-// Multi-perfil
 const CLAVE_PERFILES = 'iptv:perfiles';
 const CLAVE_PERFIL_ACTIVO = 'iptv:perfil-activo';
 
-// Claves por perfil
 const PREFIJO_PERFIL = 'iptv:perfil:';
 const SUFIJO_FAVORITOS = ':favoritos';
 const SUFIJO_HISTORIAL = ':historial';
@@ -381,7 +380,6 @@ const SUFIJO_PIN = ':parental-pin';
 const SUFIJO_BLOQUEOS = ':parental-bloqueos';
 const SUFIJO_SYNC = ':sync-id';
 
-// Claves viejas (pre multi-perfil) — para migrar
 const CLAVE_VIEJA_FAVORITOS = 'iptv:favoritos';
 const CLAVE_VIEJA_HISTORIAL = 'iptv:historial';
 const CLAVE_VIEJA_ULTIMO = 'iptv:ultimo-canal';
@@ -389,7 +387,6 @@ const CLAVE_VIEJA_PIN = 'iptv:parental-pin';
 const CLAVE_VIEJA_BLOQUEOS = 'iptv:parental-bloqueos';
 const CLAVE_VIEJA_SYNC = 'iptv:sync-id';
 
-// Emojis disponibles para los perfiles
 const EMOJIS_PERFIL = [
   '👤', '👨', '👩', '👦', '👧', '👶', '🧑', '👴', '👵',
   '🐱', '🐶', '🦊', '🐼', '🦁', '🐯', '🐨', '🦄', '🐢',
@@ -409,7 +406,6 @@ const HISTORIAL_MAX = 30;
    ======================================================= */
 
 const estado = {
-  // Globales
   listasGuardadas: [],
   listaActivaId: localStorage.getItem(CLAVE_LISTA_ACTIVA_ID) || 'oficial',
   canales: [],
@@ -418,7 +414,6 @@ const estado = {
   modoVista: localStorage.getItem(CLAVE_MODO_VISTA) || (window.innerWidth < 768 ? 'lista' : 'grilla'),
   soloActivos: localStorage.getItem(CLAVE_SOLO_ACTIVOS) === '1',
 
-  // Filtros / UI
   filtro: 'Todos',
   soloFavoritos: false,
   soloDestacados: false,
@@ -430,11 +425,9 @@ const estado = {
   hayMetadatos: false,
   caidosRemotos: {},
 
-  // Multi-perfil
-  perfiles: [],          // [{ id, nombre, emoji }]
-  perfilActivoId: '',    // id del perfil activo
+  perfiles: [],
+  perfilActivoId: '',
 
-  // Datos del perfil activo (se cargan al cambiar)
   favoritos: new Set(),
   historial: [],
   ultimoCanal: '',
@@ -442,13 +435,12 @@ const estado = {
   categoriasBloqueadas: [],
   syncId: '',
 
-  // Sync
   syncTimeout: null,
   syncEnProgreso: false,
 };
 
 /* =======================================================
-   PERFILES — Gestión y migración
+   PERFILES
    ======================================================= */
 
 function generarIdPerfil() {
@@ -471,20 +463,13 @@ function guardarPerfilesEnStorage() {
   localStorage.setItem(CLAVE_PERFIL_ACTIVO, estado.perfilActivoId);
 }
 
-/**
- * Migra los datos viejos (sin perfiles) a un perfil "Yo".
- * Devuelve true si hizo migración.
- */
 function migrarDatosViejos() {
   const perfilesExistentes = cargarPerfilesDeStorage();
-  if (perfilesExistentes && perfilesExistentes.length > 0) {
-    return false; // Ya hay perfiles, no migramos
-  }
+  if (perfilesExistentes && perfilesExistentes.length > 0) return false;
 
   const idPerfil = generarIdPerfil();
   const perfil = { id: idPerfil, nombre: 'Yo', emoji: '👤' };
 
-  // Migrar datos
   const favoritosViejos = localStorage.getItem(CLAVE_VIEJA_FAVORITOS);
   const historialViejo = localStorage.getItem(CLAVE_VIEJA_HISTORIAL);
   const ultimoViejo = localStorage.getItem(CLAVE_VIEJA_ULTIMO);
@@ -499,7 +484,6 @@ function migrarDatosViejos() {
   if (bloqueosViejos) localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_BLOQUEOS, bloqueosViejos);
   if (syncViejo) localStorage.setItem(PREFIJO_PERFIL + idPerfil + SUFIJO_SYNC, syncViejo);
 
-  // Borrar claves viejas
   localStorage.removeItem(CLAVE_VIEJA_FAVORITOS);
   localStorage.removeItem(CLAVE_VIEJA_HISTORIAL);
   localStorage.removeItem(CLAVE_VIEJA_ULTIMO);
@@ -507,7 +491,6 @@ function migrarDatosViejos() {
   localStorage.removeItem(CLAVE_VIEJA_BLOQUEOS);
   localStorage.removeItem(CLAVE_VIEJA_SYNC);
 
-  // Guardar el perfil
   estado.perfiles = [perfil];
   estado.perfilActivoId = idPerfil;
   guardarPerfilesEnStorage();
@@ -516,9 +499,6 @@ function migrarDatosViejos() {
   return true;
 }
 
-/**
- * Inicializa perfiles: carga los existentes o crea el perfil "Yo".
- */
 function inicializarPerfiles() {
   const migrado = migrarDatosViejos();
   if (migrado) return;
@@ -527,14 +507,12 @@ function inicializarPerfiles() {
   if (perfilesGuardados && perfilesGuardados.length > 0) {
     estado.perfiles = perfilesGuardados;
   } else {
-    // No hay perfiles y no había datos viejos: crear "Yo" vacío
     const idPerfil = generarIdPerfil();
     estado.perfiles = [{ id: idPerfil, nombre: 'Yo', emoji: '👤' }];
     estado.perfilActivoId = idPerfil;
     guardarPerfilesEnStorage();
   }
 
-  // Determinar perfil activo
   let idActivo = localStorage.getItem(CLAVE_PERFIL_ACTIVO);
   if (!idActivo || !estado.perfiles.find(p => p.id === idActivo)) {
     idActivo = estado.perfiles[0].id;
@@ -542,25 +520,19 @@ function inicializarPerfiles() {
   estado.perfilActivoId = idActivo;
 }
 
-/**
- * Carga los datos del perfil activo al estado.
- */
 function cargarDatosPerfilActivo() {
   const id = estado.perfilActivoId;
   if (!id) return;
 
-  // Favoritos
   try {
     const crudo = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_FAVORITOS);
     const arr = crudo ? JSON.parse(crudo) : [];
-    // Migración suave de IDs viejos
     const soloNumericos = arr.length > 0 && arr.every((x) => /^c\d+$/.test(x));
     estado.favoritos = soloNumericos ? new Set() : new Set(arr);
   } catch {
     estado.favoritos = new Set();
   }
 
-  // Historial
   try {
     const crudo = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_HISTORIAL);
     const arr = crudo ? JSON.parse(crudo) : [];
@@ -569,11 +541,9 @@ function cargarDatosPerfilActivo() {
     estado.historial = [];
   }
 
-  // Último canal
   estado.ultimoCanal = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_ULTIMO) || '';
-
-  // PIN y bloqueos
   estado.parentalPin = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_PIN) || '';
+
   try {
     const crudo = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_BLOQUEOS);
     estado.categoriasBloqueadas = crudo ? JSON.parse(crudo) : [];
@@ -581,13 +551,9 @@ function cargarDatosPerfilActivo() {
     estado.categoriasBloqueadas = [];
   }
 
-  // Sync ID
   estado.syncId = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_SYNC) || '';
 }
 
-/**
- * Persiste los datos del perfil activo.
- */
 function guardarDatosPerfilActivo() {
   const id = estado.perfilActivoId;
   if (!id) return;
@@ -612,33 +578,23 @@ function guardarDatosPerfilActivo() {
   }
 }
 
-/**
- * Devuelve el objeto completo del perfil activo.
- */
 function perfilActivo() {
   return estado.perfiles.find(p => p.id === estado.perfilActivoId) || estado.perfiles[0];
 }
 
-/**
- * Cambia el perfil activo. Recarga todo.
- */
 async function cambiarPerfil(id) {
   if (id === estado.perfilActivoId) return;
 
   const perfil = estado.perfiles.find(p => p.id === id);
   if (!perfil) return;
 
-  // Guarda el perfil actual antes de salir
   guardarDatosPerfilActivo();
 
-  // Cambia
   estado.perfilActivoId = id;
   localStorage.setItem(CLAVE_PERFIL_ACTIVO, id);
 
-  // Carga el nuevo
   cargarDatosPerfilActivo();
 
-  // Refresca UI
   actualizarBotonPerfil();
   renderFiltros();
   renderGuia();
@@ -648,7 +604,6 @@ async function cambiarPerfil(id) {
 
   mostrarToastSimple(t('perfil_cambiado').replace('%s', perfil.nombre));
 
-  // Baja favoritos del nuevo perfil si tiene syncId
   if (estado.syncId) {
     bajarFavoritosDelWorker().catch((e) => {
       console.warn('No se pudieron bajar los favoritos del nuevo perfil:', e);
@@ -683,7 +638,6 @@ function borrarPerfil(id) {
   const perfil = estado.perfiles.find(p => p.id === id);
   if (!perfil) return false;
 
-  // Borra los datos del perfil
   localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_FAVORITOS);
   localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_HISTORIAL);
   localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_ULTIMO);
@@ -691,10 +645,8 @@ function borrarPerfil(id) {
   localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_BLOQUEOS);
   localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_SYNC);
 
-  // Lo saca de la lista
   estado.perfiles = estado.perfiles.filter(p => p.id !== id);
 
-  // Si era el activo, pasa al primero
   if (estado.perfilActivoId === id) {
     estado.perfilActivoId = estado.perfiles[0].id;
     guardarPerfilesEnStorage();
@@ -713,9 +665,6 @@ function borrarPerfil(id) {
   return true;
 }
 
-/**
- * Actualiza el texto del botón de perfil en el header.
- */
 function actualizarBotonPerfil() {
   const btn = document.getElementById('boton-perfil');
   if (!btn) return;
@@ -727,9 +676,6 @@ function actualizarBotonPerfil() {
   }
 }
 
-/**
- * Abre el modal de gestión de perfiles.
- */
 function abrirModalPerfiles() {
   const previo = document.getElementById('modal-perfiles');
   if (previo) previo.remove();
@@ -817,7 +763,6 @@ function abrirModalPerfiles() {
 
     overlay.querySelectorAll('.perfil-item').forEach((item) => {
       item.addEventListener('click', async (e) => {
-        // Si el click fue en un botón interno, ignorar
         if (e.target.closest('.btn-edit-perfil') || e.target.closest('.btn-del-perfil')) return;
         const id = item.dataset.id;
         await cambiarPerfil(id);
@@ -855,10 +800,6 @@ function abrirModalPerfiles() {
   bindEventos();
 }
 
-/**
- * Abre el editor de perfil (crear o editar).
- * Si `perfilId` es null, crea uno nuevo.
- */
 function abrirEditorPerfil(perfilId, onClose) {
   const previo = document.getElementById('modal-perfil-editor');
   if (previo) previo.remove();
@@ -918,14 +859,12 @@ function abrirEditorPerfil(perfilId, onClose) {
   const inputNombre = overlay.querySelector('#perfil-nombre-input');
   const errCont = overlay.querySelector('#perfil-error');
 
-  // Focus y select all en el nombre
   setTimeout(() => { inputNombre.focus(); inputNombre.select(); }, 50);
 
   const rebindEmojis = () => {
     overlay.querySelectorAll('.emoji-opt').forEach((btn) => {
       btn.addEventListener('click', () => {
         emojiSel = btn.dataset.emoji;
-        // Re-render solo la zona de emojis
         overlay.querySelector('#perfil-emojis-cont').innerHTML = renderEmojis();
         rebindEmojis();
       });
@@ -964,7 +903,6 @@ function abrirEditorPerfil(perfilId, onClose) {
       return;
     }
 
-    // Verificar duplicado (excepto en el que estamos editando)
     const duplicado = estado.perfiles.find(
       (p) => p.nombre.toLowerCase() === nombre.toLowerCase() && p.id !== perfilId
     );
@@ -986,7 +924,7 @@ function abrirEditorPerfil(perfilId, onClose) {
 }
 
 /* =======================================================
-   Otros helpers
+   Helpers
    ======================================================= */
 
 function cargarListasDeStorage() {
@@ -1023,10 +961,6 @@ function cambiarListaActiva(id) {
   renderControlParentalUI();
 }
 
-/* =======================================================
-   Favoritos (por perfil)
-   ======================================================= */
-
 function guardarFavoritos() {
   guardarDatosPerfilActivo();
 }
@@ -1042,10 +976,6 @@ function alternarFavorito(id) {
   programarSincronizacionFavoritos();
 }
 
-/* =======================================================
-   Último visto (por perfil)
-   ======================================================= */
-
 function guardarUltimoVisto(id) {
   estado.ultimoCanal = id;
   guardarDatosPerfilActivo();
@@ -1054,10 +984,6 @@ function guardarUltimoVisto(id) {
 function leerUltimoVisto() {
   return estado.ultimoCanal;
 }
-
-/* =======================================================
-   Historial (por perfil)
-   ======================================================= */
 
 function guardarHistorial() {
   guardarDatosPerfilActivo();
@@ -1096,7 +1022,6 @@ function formatearTiempoRelativo(iso) {
     const min = Math.floor(seg / 60);
     const hora = Math.floor(min / 60);
     const dia = Math.floor(hora / 24);
-
     const es = estado.idioma !== 'en';
 
     if (seg < 60) return es ? 'recién' : 'just now';
@@ -1233,7 +1158,7 @@ function escapeHtml(s) {
 }
 
 /* =======================================================
-   CANALES CAÍDOS
+   Canales caídos
    ======================================================= */
 
 async function cargarCaidosDelWorker() {
@@ -1263,10 +1188,9 @@ function esCanalCaido(canal) {
    Backup
    ======================================================= */
 
-const VERSION_BACKUP = 2; // subimos por multi-perfil
+const VERSION_BACKUP = 2;
 
 function recolectarConfiguracion() {
-  // Recolecta datos de TODOS los perfiles + globales
   const perfilesCompletos = estado.perfiles.map((p) => {
     const id = p.id;
     let favoritos = [];
@@ -1349,11 +1273,8 @@ async function importarConfiguracion(file) {
       return;
     }
 
-    if (!confirm(t('backup_import_confirm'))) {
-      return;
-    }
+    if (!confirm(t('backup_import_confirm'))) return;
 
-    // Listas y globales
     if (Array.isArray(datos.listasGuardadas) && datos.listasGuardadas.length > 0) {
       estado.listasGuardadas = datos.listasGuardadas;
       estado.listaActivaId = datos.listaActivaId || datos.listasGuardadas[0].id;
@@ -1376,7 +1297,6 @@ async function importarConfiguracion(file) {
       localStorage.setItem(CLAVE_SOLO_ACTIVOS, datos.soloActivos ? '1' : '0');
     }
 
-    // Limpiar perfiles y datos de perfiles existentes
     estado.perfiles.forEach((p) => {
       localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_FAVORITOS);
       localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_HISTORIAL);
@@ -1386,7 +1306,6 @@ async function importarConfiguracion(file) {
       localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_SYNC);
     });
 
-    // Cargar perfiles del backup
     if (Array.isArray(datos.perfiles) && datos.perfiles.length > 0) {
       estado.perfiles = datos.perfiles.map((p) => ({
         id: p.id || generarIdPerfil(),
@@ -1410,7 +1329,6 @@ async function importarConfiguracion(file) {
 
       guardarPerfilesEnStorage();
     } else if (Array.isArray(datos.favoritos)) {
-      // Backup viejo (v1): migrar a un único perfil "Yo"
       const idPerfil = generarIdPerfil();
       estado.perfiles = [{ id: idPerfil, nombre: 'Yo', emoji: '👤' }];
       estado.perfilActivoId = idPerfil;
@@ -1572,7 +1490,7 @@ function limpiarParamSync() {
 }
 
 /* =======================================================
-   Sync favoritos (por perfil)
+   Sync
    ======================================================= */
 
 function generarSyncId() {
@@ -2290,7 +2208,6 @@ function renderFiltros() {
   chipFav.tabIndex = 0;
   chipFav.addEventListener('click', () => {
     estado.soloFavoritos = !estado.soloFavoritos;
-    estado.soloDestacados = false;
     renderFiltros();
     renderGuia();
   });
@@ -2302,7 +2219,6 @@ function renderFiltros() {
   chipDestacados.tabIndex = 0;
   chipDestacados.addEventListener('click', () => {
     estado.soloDestacados = !estado.soloDestacados;
-    estado.soloFavoritos = false;
     renderFiltros();
     renderGuia();
   });
@@ -2323,14 +2239,13 @@ function renderFiltros() {
   }
 
   const grupos = gruposDisponibles().filter(g => !estado.categoriasBloqueadas.includes(g));
+
   const chipTodos = document.createElement('button');
-  chipTodos.className = 'filtro' + (estado.filtro === 'Todos' && !estado.soloFavoritos && !estado.soloDestacados ? ' activo' : '');
+  chipTodos.className = 'filtro' + (estado.filtro === 'Todos' ? ' activo' : '');
   chipTodos.textContent = t('todos');
   chipTodos.tabIndex = 0;
   chipTodos.addEventListener('click', () => {
     estado.filtro = 'Todos';
-    estado.soloFavoritos = false;
-    estado.soloDestacados = false;
     renderFiltros();
     renderGuia();
   });
@@ -2338,17 +2253,25 @@ function renderFiltros() {
 
   for (const g of grupos) {
     const b = document.createElement('button');
-    b.className = 'filtro' + (estado.filtro === g && !estado.soloFavoritos && !estado.soloDestacados ? ' activo' : '');
+    b.className = 'filtro' + (estado.filtro === g ? ' activo' : '');
     b.textContent = etiquetaGrupo(g);
     b.tabIndex = 0;
     b.addEventListener('click', () => {
       estado.filtro = g;
-      estado.soloFavoritos = false;
-      estado.soloDestacados = false;
       renderFiltros();
       renderGuia();
     });
     el.filtros.appendChild(b);
+  }
+
+  if (hayFiltrosActivos()) {
+    const chipLimpiar = document.createElement('button');
+    chipLimpiar.className = 'filtro';
+    chipLimpiar.textContent = t('limpiar_filtros');
+    chipLimpiar.tabIndex = 0;
+    chipLimpiar.style.cssText = 'background: rgba(229, 9, 20, 0.15); border-color: rgba(229, 9, 20, 0.4); color: #fca5a5;';
+    chipLimpiar.addEventListener('click', limpiarFiltros);
+    el.filtros.appendChild(chipLimpiar);
   }
 }
 
@@ -2380,20 +2303,48 @@ function canalesFiltrados() {
     if (estado.soloFavoritos && !esFavorito(c.id)) return false;
     if (estado.soloDestacados && !esCanalDestacado(c)) return false;
 
-    const valorGrupo = agrupacionEfectiva() === 'pais' ? (c.pais || '') : c.grupo;
-    const pasaGrupo = estado.filtro === 'Todos' || valorGrupo === estado.filtro || estado.soloFavoritos || estado.soloDestacados;
+    if (estado.filtro !== 'Todos') {
+      const valorGrupo = agrupacionEfectiva() === 'pais' ? (c.pais || '') : c.grupo;
+      if (valorGrupo !== estado.filtro) return false;
+    }
 
-    if (!q) return pasaGrupo;
+    if (!q) return true;
 
     const coincideCanal = c.nombre.toLowerCase().includes(q) || c.grupo.toLowerCase().includes(q);
     const actual = programaActual(c.tvgId);
     const siguiente = programaSiguiente(c.tvgId);
 
-    const coincidePrograma = (actual && (actual.titulo.toLowerCase().includes(q) || actual.descripcion.toLowerCase().includes(q))) ||
-                             (siguiente && (siguiente.titulo.toLowerCase().includes(q) || siguiente.descripcion.toLowerCase().includes(q)));
+    const coincidePrograma =
+      (actual && (actual.titulo.toLowerCase().includes(q) || actual.descripcion.toLowerCase().includes(q))) ||
+      (siguiente && (siguiente.titulo.toLowerCase().includes(q) || siguiente.descripcion.toLowerCase().includes(q)));
 
-    return pasaGrupo && (coincideCanal || coincidePrograma);
+    return coincideCanal || coincidePrograma;
   });
+}
+
+function hayFiltrosActivos() {
+  return (
+    estado.busqueda.trim() !== '' ||
+    estado.filtro !== 'Todos' ||
+    estado.soloFavoritos ||
+    estado.soloDestacados ||
+    estado.soloActivos
+  );
+}
+
+function limpiarFiltros() {
+  estado.busqueda = '';
+  estado.filtro = 'Todos';
+  estado.soloFavoritos = false;
+  estado.soloDestacados = false;
+  estado.soloActivos = false;
+  localStorage.setItem(CLAVE_SOLO_ACTIVOS, '0');
+
+  const inputBusqueda = document.getElementById('campo-busqueda');
+  if (inputBusqueda) inputBusqueda.value = '';
+
+  renderFiltros();
+  renderGuia();
 }
 
 function renderGuia() {
@@ -2564,7 +2515,7 @@ function alternarModoVista() {
 }
 
 /* =======================================================
-   Listas y Control Parental UI
+   Listas
    ======================================================= */
 
 function actualizarSelectorListasHeader() {
@@ -2650,10 +2601,6 @@ function renderControlParentalUI() {
     cont.appendChild(block);
   });
 }
-
-/* =======================================================
-   Banner: continuar viendo
-   ======================================================= */
 
 function actualizarBannerContinuar() {
   const idUltimo = leerUltimoVisto();
@@ -2999,7 +2946,7 @@ function enviarACast() {
 rp.botonCast.addEventListener('click', enviarACast);
 
 /* =======================================================
-   Reportar canal caído
+   Reportar
    ======================================================= */
 
 function abrirDialogoReporte() {
@@ -3353,6 +3300,7 @@ document.getElementById('boton-idioma').addEventListener('click', () => {
 
 el.busqueda.addEventListener('input', (e) => {
   estado.busqueda = e.target.value;
+  renderFiltros();
   renderGuia();
 });
 
@@ -3423,10 +3371,7 @@ if ('serviceWorker' in navigator) {
    ======================================================= */
 
 async function iniciar() {
-  // 1) Inicializar perfiles (con migración si hace falta)
   inicializarPerfiles();
-
-  // 2) Cargar datos del perfil activo
   cargarDatosPerfilActivo();
 
   document.querySelectorAll('.agrupar__opcion').forEach((b) => {
