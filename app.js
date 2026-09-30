@@ -69,7 +69,6 @@ const IDIOMAS = {
     actualizar_toast: 'Guía actualizada correctamente desde el servidor.',
     canal_caido: 'Canal caído',
     limpiar_filtros: '🧹 Limpiar filtros',
-    // Sincronización
     sync_titulo: 'Sincronizar favoritos entre dispositivos',
     sync_descripcion: 'Generá un código y usá el mismo en todos tus dispositivos (celu, TV, tablet) para compartir favoritos.',
     sync_generar: 'Generar código nuevo',
@@ -90,7 +89,6 @@ const IDIOMAS = {
     sync_borrar_nube_ok: 'Favoritos borrados de la nube. Este dispositivo quedó desvinculado.',
     sync_borrar_nube_error: 'No se pudieron borrar los favoritos de la nube.',
     sync_borrando: 'Borrando...',
-    // Backup
     backup_titulo: 'Backup de configuración',
     backup_desc: 'Guardá toda tu configuración en un archivo.',
     backup_exportar: '⬇ Exportar',
@@ -100,7 +98,6 @@ const IDIOMAS = {
     backup_import_ok: 'Configuración importada. Recargando...',
     backup_import_error: 'No se pudo importar.',
     backup_archivo_invalido: 'El archivo no parece un backup válido.',
-    // QR
     qr_boton: '📱 Mostrar QR',
     qr_titulo: 'Compartir código por QR',
     qr_ayuda: 'Escaneá este código con la cámara del otro dispositivo.',
@@ -111,7 +108,6 @@ const IDIOMAS = {
     qr_invitacion_texto: 'El link tiene el código',
     qr_invitacion_pregunta: '¿Querés vincular este dispositivo a ese código?',
     qr_error: 'No se pudo generar el QR.',
-    // Historial
     historial_titulo: '📺 Recientes',
     historial_vacio: 'Todavía no viste ningún canal.',
     historial_borrar: '🗑 Borrar historial',
@@ -119,7 +115,6 @@ const IDIOMAS = {
     historial_borrado: 'Historial borrado',
     historial_cerrar: 'Cerrar',
     historial_contador: 'canales en el historial',
-    // Perfiles
     perfil_boton: '👤 Perfil',
     perfil_titulo: 'Cambiar perfil',
     perfil_actual: 'Perfil actual',
@@ -139,6 +134,35 @@ const IDIOMAS = {
     perfil_nombre_vacio: 'Poné un nombre al perfil.',
     perfil_nombre_duplicado: 'Ya existe un perfil con ese nombre.',
     perfil_editar_titulo: 'Editar perfil',
+    rec_titulo: '🔔 Recordatorios',
+    rec_boton_recordar: '🔔 Recordar',
+    rec_boton_grabado: '✓ Programado',
+    rec_aviso_antes: 'Avisame 10 min antes',
+    rec_aviso_ahora: 'Avisame cuando empiece',
+    rec_vacio: 'No tenés recordatorios guardados.',
+    rec_borrar: 'Borrar',
+    rec_borrar_todos: '🗑 Borrar todos',
+    rec_borrar_confirm: '¿Borrar todos los recordatorios?',
+    rec_cerrar: 'Cerrar',
+    rec_contador: 'recordatorios activos',
+    rec_guardado: 'Recordatorio guardado',
+    rec_borrado: 'Recordatorio borrado',
+    rec_ya_paso: 'Ese programa ya empezó',
+    rec_duplicado: 'Ya tenés un recordatorio para este programa',
+    rec_empezando: 'Empieza ahora',
+    rec_en_minutos: 'Empieza en %s min',
+    rec_notif_titulo: '🔔 %s',
+    rec_notif_cuerpo: '%s - %s',
+    rec_permiso_titulo: 'Notificaciones del navegador',
+    rec_permiso_texto: 'Permitir que la app te avise cuando empiecen los programas que marcaste.',
+    rec_permiso_activar: 'Activar notificaciones',
+    rec_permiso_estado_granted: '✓ Notificaciones activadas',
+    rec_permiso_estado_denied: '✗ Bloqueadas en el navegador.',
+    rec_permiso_estado_default: 'Sin activar',
+    rec_permiso_estado_unsupported: 'Este navegador no soporta notificaciones',
+    rec_programa_sin_info: 'Sin información del programa',
+    rec_actual: 'Ahora',
+    rec_a_continuacion: 'A continuación',
   },
   en: {
     marca: 'Channel Guide',
@@ -269,6 +293,35 @@ const IDIOMAS = {
     perfil_nombre_vacio: 'Give the profile a name.',
     perfil_nombre_duplicado: 'A profile with that name already exists.',
     perfil_editar_titulo: 'Edit profile',
+    rec_titulo: '🔔 Reminders',
+    rec_boton_recordar: '🔔 Remind me',
+    rec_boton_grabado: '✓ Scheduled',
+    rec_aviso_antes: 'Alert 10 min before',
+    rec_aviso_ahora: 'Alert when it starts',
+    rec_vacio: 'You have no reminders saved.',
+    rec_borrar: 'Delete',
+    rec_borrar_todos: '🗑 Delete all',
+    rec_borrar_confirm: 'Delete all reminders?',
+    rec_cerrar: 'Close',
+    rec_contador: 'active reminders',
+    rec_guardado: 'Reminder saved',
+    rec_borrado: 'Reminder deleted',
+    rec_ya_paso: 'That show already started',
+    rec_duplicado: 'You already have a reminder for this show',
+    rec_empezando: 'Starting now',
+    rec_en_minutos: 'Starts in %s min',
+    rec_notif_titulo: '🔔 %s',
+    rec_notif_cuerpo: '%s - %s',
+    rec_permiso_titulo: 'Browser notifications',
+    rec_permiso_texto: 'Allow the app to alert you when your scheduled shows start.',
+    rec_permiso_activar: 'Enable notifications',
+    rec_permiso_estado_granted: '✓ Notifications enabled',
+    rec_permiso_estado_denied: '✗ Blocked in browser.',
+    rec_permiso_estado_default: 'Not enabled',
+    rec_permiso_estado_unsupported: 'This browser does not support notifications',
+    rec_programa_sin_info: 'No show information',
+    rec_actual: 'Now',
+    rec_a_continuacion: 'Up next',
   },
 };
 
@@ -295,6 +348,7 @@ function aplicarIdioma() {
   renderControlParentalUI();
   renderSyncUI();
   actualizarBotonPerfil();
+  renderNotificacionesUI();
 }
 
 /* =======================================================
@@ -379,6 +433,7 @@ const SUFIJO_ULTIMO = ':ultimo-canal';
 const SUFIJO_PIN = ':parental-pin';
 const SUFIJO_BLOQUEOS = ':parental-bloqueos';
 const SUFIJO_SYNC = ':sync-id';
+const SUFIJO_RECORDATORIOS = ':recordatorios';
 
 const CLAVE_VIEJA_FAVORITOS = 'iptv:favoritos';
 const CLAVE_VIEJA_HISTORIAL = 'iptv:historial';
@@ -434,13 +489,14 @@ const estado = {
   parentalPin: '',
   categoriasBloqueadas: [],
   syncId: '',
+  recordatorios: [],
 
   syncTimeout: null,
   syncEnProgreso: false,
 };
 
 /* =======================================================
-   PERFILES
+   Perfiles
    ======================================================= */
 
 function generarIdPerfil() {
@@ -552,6 +608,14 @@ function cargarDatosPerfilActivo() {
   }
 
   estado.syncId = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_SYNC) || '';
+
+  try {
+    const crudo = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_RECORDATORIOS);
+    const arr = crudo ? JSON.parse(crudo) : [];
+    estado.recordatorios = Array.isArray(arr) ? arr : [];
+  } catch {
+    estado.recordatorios = [];
+  }
 }
 
 function guardarDatosPerfilActivo() {
@@ -576,6 +640,7 @@ function guardarDatosPerfilActivo() {
   } else {
     localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_SYNC);
   }
+  localStorage.setItem(PREFIJO_PERFIL + id + SUFIJO_RECORDATORIOS, JSON.stringify(estado.recordatorios));
 }
 
 function perfilActivo() {
@@ -601,6 +666,7 @@ async function cambiarPerfil(id) {
   actualizarBannerContinuar();
   renderControlParentalUI();
   renderSyncUI();
+  renderNotificacionesUI();
 
   mostrarToastSimple(t('perfil_cambiado').replace('%s', perfil.nombre));
 
@@ -644,6 +710,7 @@ function borrarPerfil(id) {
   localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_PIN);
   localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_BLOQUEOS);
   localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_SYNC);
+  localStorage.removeItem(PREFIJO_PERFIL + id + SUFIJO_RECORDATORIOS);
 
   estado.perfiles = estado.perfiles.filter(p => p.id !== id);
 
@@ -661,6 +728,7 @@ function borrarPerfil(id) {
   actualizarBannerContinuar();
   renderControlParentalUI();
   renderSyncUI();
+  renderNotificacionesUI();
 
   return true;
 }
@@ -1157,19 +1225,6 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
-/**
- * Devuelve hasta 2 iniciales del nombre del canal.
- * Filtra caracteres no alfanuméricos para evitar que quede vacío
- * con nombres que empiezan con espacios, comillas o emojis.
- * Ejemplos:
- *   "MBC 2"            → "M2"
- *   "MBC Action"       → "MA"
- *   "  Rai 1  "        → "R1"
- *   "İctimai TV"       → "İT"
- *   "24 horas"         → "2H"
- *   "Київ 24"          → "К2"
- *   "CCTV-1 综合"       → "C综"
- */
 function obtenerIniciales(nombre) {
   if (!nombre || typeof nombre !== 'string') return '?';
 
@@ -1192,6 +1247,376 @@ function obtenerIniciales(nombre) {
 
   const resultado = (a + b).toUpperCase();
   return resultado || '?';
+}
+
+/* =======================================================
+   RECORDATORIOS DE PROGRAMAS
+   ======================================================= */
+
+const REC_AVISO_ANTES_MIN = 10;
+const REC_INTERVALO_CHEQUEO_MS = 30 * 1000;
+const REC_LIMPIAR_DESPUES_DE_MS = 60 * 60 * 1000;
+
+let intervaloRecordatorios = null;
+
+async function pedirPermisoNotificaciones() {
+  if (!('Notification' in window)) return 'unsupported';
+  if (Notification.permission === 'granted') return 'granted';
+  if (Notification.permission === 'denied') return 'denied';
+  try {
+    const resultado = await Notification.requestPermission();
+    return resultado;
+  } catch {
+    return 'default';
+  }
+}
+
+function estadoPermisoNotificaciones() {
+  if (!('Notification' in window)) return 'unsupported';
+  return Notification.permission;
+}
+
+function avisar(mensaje, cuerpo) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      const notif = new Notification(mensaje, {
+        body: cuerpo || '',
+        icon: 'icons/icon.svg',
+        badge: 'icons/icon.svg',
+        tag: 'recordatorio-' + Date.now(),
+        requireInteraction: false,
+      });
+      setTimeout(() => { try { notif.close(); } catch {} }, 8000);
+      return;
+    } catch (e) {
+      console.warn('No se pudo mostrar la notificación:', e);
+    }
+  }
+
+  mostrarToastSimple(`🔔 ${mensaje}${cuerpo ? ' — ' + cuerpo : ''}`);
+}
+
+function claveRecordatorio(rec) {
+  return `${rec.tvgId}|${rec.inicio}`;
+}
+
+function yaExisteRecordatorio(tvgId, inicioIso) {
+  return estado.recordatorios.some(
+    (r) => r.tvgId === tvgId && r.inicio === inicioIso
+  );
+}
+
+function agregarRecordatorio(programa, canal) {
+  if (!programa || !programa.inicio) return { ok: false, motivo: 'sin_datos' };
+
+  const inicioMs = new Date(programa.inicio).getTime();
+  const ahora = Date.now();
+
+  if (inicioMs < ahora) {
+    return { ok: false, motivo: 'ya_paso' };
+  }
+
+  if (yaExisteRecordatorio(canal.tvgId, programa.inicio)) {
+    return { ok: false, motivo: 'duplicado' };
+  }
+
+  const rec = {
+    id: 'rec_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6),
+    tvgId: canal.tvgId,
+    canalNombre: canal.nombre,
+    canalLogo: canal.logo || '',
+    canalNumero: canal.numero || '',
+    titulo: programa.titulo || t('rec_programa_sin_info'),
+    descripcion: programa.descripcion || '',
+    inicio: programa.inicio,
+    fin: programa.fin,
+    creado: new Date().toISOString(),
+    avisoAntes: false,
+    avisoAhora: false,
+  };
+
+  estado.recordatorios.push(rec);
+  guardarDatosPerfilActivo();
+
+  arrancarChequeoRecordatorios();
+
+  return { ok: true, recordatorio: rec };
+}
+
+function borrarRecordatorio(id) {
+  estado.recordatorios = estado.recordatorios.filter((r) => r.id !== id);
+  guardarDatosPerfilActivo();
+}
+
+function borrarTodosLosRecordatorios() {
+  estado.recordatorios = [];
+  guardarDatosPerfilActivo();
+}
+
+function limpiarRecordatoriosViejos() {
+  const ahora = Date.now();
+  const antes = estado.recordatorios.length;
+  estado.recordatorios = estado.recordatorios.filter((r) => {
+    const finMs = new Date(r.fin || r.inicio).getTime();
+    return (ahora - finMs) < REC_LIMPIAR_DESPUES_DE_MS;
+  });
+  if (estado.recordatorios.length !== antes) {
+    guardarDatosPerfilActivo();
+  }
+}
+
+function chequearRecordatorios() {
+  const ahora = Date.now();
+  let cambio = false;
+
+  for (const rec of estado.recordatorios) {
+    const inicioMs = new Date(rec.inicio).getTime();
+    const msHastaInicio = inicioMs - ahora;
+
+    if (!rec.avisoAntes && msHastaInicio > 0 && msHastaInicio <= REC_AVISO_ANTES_MIN * 60 * 1000) {
+      const minRestantes = Math.max(1, Math.round(msHastaInicio / 60000));
+      avisar(
+        t('rec_notif_titulo').replace('%s', rec.canalNombre),
+        t('rec_en_minutos').replace('%s', minRestantes) + ': ' + rec.titulo
+      );
+      rec.avisoAntes = true;
+      cambio = true;
+    }
+
+    if (!rec.avisoAhora && msHastaInicio <= 0 && ahora < new Date(rec.fin).getTime()) {
+      avisar(
+        t('rec_notif_titulo').replace('%s', rec.canalNombre),
+        t('rec_empezando') + ': ' + rec.titulo
+      );
+      rec.avisoAhora = true;
+      cambio = true;
+    }
+  }
+
+  if (cambio) guardarDatosPerfilActivo();
+
+  limpiarRecordatoriosViejos();
+}
+
+function arrancarChequeoRecordatorios() {
+  if (intervaloRecordatorios) return;
+  chequearRecordatorios();
+  intervaloRecordatorios = setInterval(chequearRecordatorios, REC_INTERVALO_CHEQUEO_MS);
+}
+
+function crearBotonRecordar(programa, canal) {
+  if (!programa || !canal || !canal.tvgId || !programa.inicio) return null;
+
+  const inicioMs = new Date(programa.inicio).getTime();
+  if (inicioMs < Date.now()) return null;
+
+  const yaGuardado = yaExisteRecordatorio(canal.tvgId, programa.inicio);
+
+  const btn = document.createElement('button');
+  btn.className = 'menu-flotante__opcion';
+  btn.style.cssText = `
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; font-size: 0.8rem;
+    border-radius: 6px; cursor: pointer;
+    background: ${yaGuardado ? 'rgba(74,222,128,0.15)' : 'rgba(229,9,20,0.15)'};
+    border: 1px solid ${yaGuardado ? 'rgba(74,222,128,0.4)' : 'rgba(229,9,20,0.4)'};
+    color: ${yaGuardado ? '#4ade80' : '#fca5a5'};
+    font-family: inherit;
+    margin-top: 6px;
+  `;
+  btn.textContent = yaGuardado ? t('rec_boton_grabado') : t('rec_boton_recordar');
+  btn.title = t('rec_aviso_antes');
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (yaGuardado) {
+      mostrarToastSimple(t('rec_duplicado'));
+      return;
+    }
+
+    const res = agregarRecordatorio(programa, canal);
+    if (res.ok) {
+      mostrarToastSimple(t('rec_guardado'));
+      btn.textContent = t('rec_boton_grabado');
+      btn.style.background = 'rgba(74,222,128,0.15)';
+      btn.style.borderColor = 'rgba(74,222,128,0.4)';
+      btn.style.color = '#4ade80';
+    } else if (res.motivo === 'ya_paso') {
+      mostrarToastSimple(t('rec_ya_paso'));
+    } else if (res.motivo === 'duplicado') {
+      mostrarToastSimple(t('rec_duplicado'));
+    }
+  });
+
+  return btn;
+}
+
+function abrirModalRecordatorios() {
+  const previo = document.getElementById('modal-recordatorios');
+  if (previo) previo.remove();
+
+  limpiarRecordatoriosViejos();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'modal-recordatorios';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000; padding: 16px;
+  `;
+
+  const ahora = Date.now();
+
+  const listaOrdenada = [...estado.recordatorios].sort(
+    (a, b) => new Date(a.inicio) - new Date(b.inicio)
+  );
+
+  const listaHtml = listaOrdenada.length === 0
+    ? `<div style="padding: 40px 20px; text-align: center; color: #94a3b8; font-size: 0.9rem;">${t('rec_vacio')}</div>`
+    : listaOrdenada.map((r) => {
+        const inicioMs = new Date(r.inicio).getTime();
+        const finMs = new Date(r.fin).getTime();
+        const enCurso = ahora >= inicioMs && ahora < finMs;
+        const faltan = Math.max(0, Math.round((inicioMs - ahora) / 60000));
+
+        let estadoTxt = '';
+        let estadoColor = '#94a3b8';
+        if (enCurso) {
+          estadoTxt = '🔴 ' + t('rec_actual');
+          estadoColor = '#f87171';
+        } else if (faltan <= REC_AVISO_ANTES_MIN) {
+          estadoTxt = '⏰ ' + t('rec_en_minutos').replace('%s', faltan);
+          estadoColor = '#fbbf24';
+        } else {
+          estadoTxt = formatearHora(r.inicio) + ' → ' + formatearHora(r.fin);
+          estadoColor = '#94a3b8';
+        }
+
+        const logoHtml = r.canalLogo
+          ? `<img src="${escapeHtml(r.canalLogo)}" alt="" style="width:100%; height:100%; object-fit:contain;" onerror="this.parentElement.textContent='${escapeHtml(obtenerIniciales(r.canalNombre))}'">`
+          : escapeHtml(obtenerIniciales(r.canalNombre));
+
+        return `
+          <div class="rec-item" style="
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px; border-radius: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+          ">
+            <div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 6px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; overflow: hidden;">
+              ${logoHtml}
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 3px;">
+                ${escapeHtml(r.titulo)}
+              </div>
+              <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 4px;">
+                ${escapeHtml(r.canalNombre)}
+              </div>
+              <div style="font-size: 0.78rem; color: ${estadoColor}; font-weight: 500;">
+                ${estadoTxt}
+              </div>
+            </div>
+            <button class="rec-borrar" data-id="${escapeHtml(r.id)}" title="${t('rec_borrar')}"
+              style="
+                padding: 6px 10px; border-radius: 6px;
+                border: 1px solid rgba(255,107,107,0.3);
+                background: transparent; color: #ff6b6b;
+                cursor: pointer; font-size: 0.8rem;
+                flex-shrink: 0;
+              ">🗑</button>
+          </div>
+        `;
+      }).join('');
+
+  overlay.innerHTML = `
+    <div style="background: #111b21; color: #fff; padding: 20px; border-radius: 14px; max-width: 520px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px; flex-wrap: wrap;">
+        <h3 style="margin: 0; font-size: 1.1rem;">${t('rec_titulo')}</h3>
+        <span style="font-size: 0.78rem; color: #94a3b8;">${estado.recordatorios.length} ${t('rec_contador')}</span>
+      </div>
+
+      <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
+        ${listaHtml}
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
+        <button id="rec-borrar-todos" class="boton-secundario" style="padding:8px 14px; color:#ff4d4d; border-color:rgba(255,77,77,0.4);" ${estado.recordatorios.length === 0 ? 'disabled' : ''}>${t('rec_borrar_todos')}</button>
+        <button id="rec-cerrar" class="boton-secundario" style="padding:8px 14px;">${t('rec_cerrar')}</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  overlay.querySelector('#rec-cerrar').addEventListener('click', () => overlay.remove());
+
+  overlay.querySelector('#rec-borrar-todos').addEventListener('click', () => {
+    if (!confirm(t('rec_borrar_confirm'))) return;
+    borrarTodosLosRecordatorios();
+    overlay.remove();
+    mostrarToastSimple(t('rec_borrado'));
+  });
+
+  overlay.querySelectorAll('.rec-borrar').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      borrarRecordatorio(id);
+      mostrarToastSimple(t('rec_borrado'));
+      overlay.remove();
+      abrirModalRecordatorios();
+    });
+  });
+}
+
+async function renderNotificacionesUI() {
+  const cont = document.getElementById('notificaciones-contenido');
+  if (!cont) return;
+
+  const permiso = estadoPermisoNotificaciones();
+
+  let textoEstado = '';
+  let colorEstado = '#94a3b8';
+  let mostrarBoton = false;
+
+  if (permiso === 'granted') {
+    textoEstado = t('rec_permiso_estado_granted');
+    colorEstado = '#4ade80';
+  } else if (permiso === 'denied') {
+    textoEstado = t('rec_permiso_estado_denied');
+    colorEstado = '#ff6b6b';
+  } else if (permiso === 'unsupported') {
+    textoEstado = t('rec_permiso_estado_unsupported');
+    colorEstado = '#94a3b8';
+  } else {
+    textoEstado = t('rec_permiso_estado_default');
+    colorEstado = '#fbbf24';
+    mostrarBoton = true;
+  }
+
+  cont.innerHTML = `
+    <p style="font-size:13px; opacity:0.8; margin:0 0 10px;">${t('rec_permiso_texto')}</p>
+    <div style="font-size:13.5px; color:${colorEstado}; font-weight:500; margin-bottom:10px;">${textoEstado}</div>
+    ${mostrarBoton ? `<button id="btn-activar-notif" class="boton-primario" style="padding:8px 14px;">${t('rec_permiso_activar')}</button>` : ''}
+  `;
+
+  const btn = document.getElementById('btn-activar-notif');
+  if (btn) {
+    btn.addEventListener('click', async () => {
+      const resultado = await pedirPermisoNotificaciones();
+      await renderNotificacionesUI();
+      if (resultado === 'granted') {
+        mostrarToastSimple('✓ Notificaciones activadas');
+      } else if (resultado === 'denied') {
+        mostrarToastSimple('✗ Bloqueadas. Habilitalas desde el navegador.');
+      }
+    });
+  }
 }
 
 /* =======================================================
@@ -1225,13 +1650,14 @@ function esCanalCaido(canal) {
    Backup
    ======================================================= */
 
-const VERSION_BACKUP = 2;
+const VERSION_BACKUP = 3;
 
 function recolectarConfiguracion() {
   const perfilesCompletos = estado.perfiles.map((p) => {
     const id = p.id;
     let favoritos = [];
     let historial = [];
+    let recordatorios = [];
     try {
       const f = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_FAVORITOS);
       if (f) favoritos = JSON.parse(f);
@@ -1240,6 +1666,10 @@ function recolectarConfiguracion() {
       const h = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_HISTORIAL);
       if (h) historial = JSON.parse(h);
     } catch {}
+    try {
+      const r = localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_RECORDATORIOS);
+      if (r) recordatorios = JSON.parse(r);
+    } catch {}
 
     return {
       id,
@@ -1247,6 +1677,7 @@ function recolectarConfiguracion() {
       emoji: p.emoji,
       favoritos,
       historial,
+      recordatorios,
       ultimoCanal: localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_ULTIMO) || '',
       parentalPin: localStorage.getItem(PREFIJO_PERFIL + id + SUFIJO_PIN) || '',
       categoriasBloqueadas: (() => {
@@ -1341,6 +1772,7 @@ async function importarConfiguracion(file) {
       localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_PIN);
       localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_BLOQUEOS);
       localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_SYNC);
+      localStorage.removeItem(PREFIJO_PERFIL + p.id + SUFIJO_RECORDATORIOS);
     });
 
     if (Array.isArray(datos.perfiles) && datos.perfiles.length > 0) {
@@ -1354,6 +1786,7 @@ async function importarConfiguracion(file) {
         const src = datos.perfiles[i];
         localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_FAVORITOS, JSON.stringify(src.favoritos || []));
         localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_HISTORIAL, JSON.stringify((src.historial || []).slice(0, HISTORIAL_MAX)));
+        localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_RECORDATORIOS, JSON.stringify(src.recordatorios || []));
         if (src.ultimoCanal) localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_ULTIMO, src.ultimoCanal);
         if (src.parentalPin) localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_PIN, src.parentalPin);
         if (Array.isArray(src.categoriasBloqueadas)) localStorage.setItem(PREFIJO_PERFIL + p.id + SUFIJO_BLOQUEOS, JSON.stringify(src.categoriasBloqueadas));
@@ -2238,7 +2671,8 @@ function renderFiltros() {
   el.agrupar.hidden = !hayPaisesEnLista();
 
   if (estado.canales.length === 0) return;
-   // ----- Chip: 🧹 Limpiar filtros (solo si hay alguno activo) -----
+
+  // Chip limpiar filtros al principio (solo si hay filtros activos)
   if (hayFiltrosActivos()) {
     const chipLimpiar = document.createElement('button');
     chipLimpiar.className = 'filtro';
@@ -2248,6 +2682,7 @@ function renderFiltros() {
     chipLimpiar.addEventListener('click', limpiarFiltros);
     el.filtros.appendChild(chipLimpiar);
   }
+
   const chipFav = document.createElement('button');
   chipFav.className = 'filtro' + (estado.soloFavoritos ? ' activo' : '');
   chipFav.textContent = '\u2605 ' + t('favoritos');
@@ -2428,9 +2863,9 @@ function filaCanalLista(canal) {
   fila.tabIndex = 0;
 
   const iniciales = obtenerIniciales(canal.nombre);
-const logoHtml = canal.logo
-  ? `<img src="${canal.logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${iniciales}'">`
-  : iniciales;
+  const logoHtml = canal.logo
+    ? `<img src="${canal.logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${iniciales}'">`
+    : iniciales;
 
   const banderaHtml = canal.pais ? `<span class="fila-canal__bandera">${bandera(canal.pais)}</span>` : '';
   const enCurso = programaActual(canal.tvgId);
@@ -2471,9 +2906,9 @@ function filaCanalGrid(canal) {
   fila.tabIndex = 0;
 
   const iniciales = obtenerIniciales(canal.nombre);
-const logoHtml = canal.logo
-  ? `<img src="${canal.logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${iniciales}'">`
-  : iniciales;
+  const logoHtml = canal.logo
+    ? `<img src="${canal.logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${iniciales}'">`
+    : iniciales;
 
   const banderaHtml = canal.pais ? `<span class="fila-canal__bandera">${bandera(canal.pais)}</span>` : '';
 
@@ -2687,6 +3122,11 @@ function actualizarProgramaReproductor(tvgId) {
   rp.programa.hidden = false;
   rp.programa.innerHTML = `<strong>${actual.titulo}</strong> (${formatoHora(actual.inicio)}\u2013${formatoHora(actual.fin)})`
     + (siguiente ? ` \u00b7 ${t('a_continuacion')}: ${siguiente.titulo}` : '');
+
+  const canal = estado.canales[estado.indiceActual];
+  const programaObjetivo = siguiente || actual;
+  const btn = crearBotonRecordar(programaObjetivo, canal);
+  if (btn) rp.programa.appendChild(btn);
 }
 
 function reproducirCanalPorId(id) {
@@ -3102,6 +3542,7 @@ function irAConfig() {
   el.pantallaConfig.classList.add('activa');
   renderControlParentalUI();
   renderSyncUI();
+  renderNotificacionesUI();
 }
 
 function irAGuia() {
@@ -3317,6 +3758,11 @@ if (btnRecientes) {
   btnRecientes.addEventListener('click', abrirModalHistorial);
 }
 
+const btnRecordatorios = document.getElementById('boton-recordatorios');
+if (btnRecordatorios) {
+  btnRecordatorios.addEventListener('click', abrirModalRecordatorios);
+}
+
 const btnPerfil = document.getElementById('boton-perfil');
 if (btnPerfil) {
   btnPerfil.addEventListener('click', abrirModalPerfiles);
@@ -3414,6 +3860,8 @@ async function iniciar() {
   inicializarPerfiles();
   cargarDatosPerfilActivo();
 
+  limpiarRecordatoriosViejos();
+
   document.querySelectorAll('.agrupar__opcion').forEach((b) => {
     b.classList.toggle('activo', b.dataset.agrupar === estado.agrupacion);
   });
@@ -3456,6 +3904,8 @@ async function iniciar() {
       renderGuia();
     })
     .catch((e) => console.warn('No se pudo cargar la EPG', e));
+
+  arrancarChequeoRecordatorios();
 }
 
 iniciar();
