@@ -1157,6 +1157,43 @@ function escapeHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+/**
+ * Devuelve hasta 2 iniciales del nombre del canal.
+ * Filtra caracteres no alfanuméricos para evitar que quede vacío
+ * con nombres que empiezan con espacios, comillas o emojis.
+ * Ejemplos:
+ *   "MBC 2"            → "M2"
+ *   "MBC Action"       → "MA"
+ *   "  Rai 1  "        → "R1"
+ *   "İctimai TV"       → "İT"
+ *   "24 horas"         → "2H"
+ *   "Київ 24"          → "К2"
+ *   "CCTV-1 综合"       → "C综"
+ */
+function obtenerIniciales(nombre) {
+  if (!nombre || typeof nombre !== 'string') return '?';
+
+  const partes = nombre.trim().split(/\s+/).filter(Boolean);
+
+  if (partes.length === 0) return '?';
+
+  if (partes.length === 1) {
+    const p = partes[0];
+    const letras = p.replace(/^[\s\-_.,:;!?¡¿'"`´]+/, '');
+    if (!letras) return '?';
+    return letras.slice(0, 2).toUpperCase();
+  }
+
+  const primera = partes[0].replace(/^[\s\-_.,:;!?¡¿'"`´]+/, '');
+  const segunda = partes[1].replace(/^[\s\-_.,:;!?¡¿'"`´]+/, '');
+
+  const a = primera.charAt(0) || '';
+  const b = segunda.charAt(0) || '';
+
+  const resultado = (a + b).toUpperCase();
+  return resultado || '?';
+}
+
 /* =======================================================
    Canales caídos
    ======================================================= */
@@ -2391,9 +2428,10 @@ function filaCanalLista(canal) {
   fila.setAttribute('role', 'button');
   fila.tabIndex = 0;
 
-  const logoHtml = canal.logo
-    ? `<img src="${canal.logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${canal.nombre.slice(0, 2).toUpperCase()}'">`
-    : canal.nombre.slice(0, 2).toUpperCase();
+  const iniciales = obtenerIniciales(canal.nombre);
+const logoHtml = canal.logo
+  ? `<img src="${canal.logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${iniciales}'">`
+  : iniciales;
 
   const banderaHtml = canal.pais ? `<span class="fila-canal__bandera">${bandera(canal.pais)}</span>` : '';
   const enCurso = programaActual(canal.tvgId);
@@ -2433,9 +2471,10 @@ function filaCanalGrid(canal) {
   fila.setAttribute('role', 'button');
   fila.tabIndex = 0;
 
-  const logoHtml = canal.logo
-    ? `<img src="${canal.logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${canal.nombre.slice(0, 2).toUpperCase()}'">`
-    : canal.nombre.slice(0, 2).toUpperCase();
+  const iniciales = obtenerIniciales(canal.nombre);
+const logoHtml = canal.logo
+  ? `<img src="${canal.logo}" alt="" loading="lazy" onerror="this.parentElement.textContent='${iniciales}'">`
+  : iniciales;
 
   const banderaHtml = canal.pais ? `<span class="fila-canal__bandera">${bandera(canal.pais)}</span>` : '';
 
@@ -3371,6 +3410,8 @@ if ('serviceWorker' in navigator) {
    ======================================================= */
 
 async function iniciar() {
+  document.title = 'Guia de Canales';
+
   inicializarPerfiles();
   cargarDatosPerfilActivo();
 
