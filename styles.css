@@ -69,12 +69,14 @@ textarea:focus,
   background-color: #111b21;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .marca {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .marca__numero {
@@ -97,7 +99,8 @@ textarea:focus,
 }
 
 .buscador {
-  flex: 1;
+  flex: 1 1 260px;
+  min-width: 200px;
   max-width: 450px;
 }
 
@@ -116,7 +119,6 @@ textarea:focus,
   background-color: rgba(0, 0, 0, 0.3);
 }
 
-/* Botones genéricos de cabecera */
 .boton-secundario, .boton-icono {
   background-color: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -127,6 +129,7 @@ textarea:focus,
   cursor: pointer;
   white-space: nowrap;
   transition: background-color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
 }
 
 .boton-secundario:hover {
@@ -378,6 +381,7 @@ textarea:focus,
 
 .fila-canal__bandera {
   font-size: 0.9rem;
+  margin-right: 4px;
 }
 
 /* Botón de favorito en tarjeta */
@@ -465,7 +469,7 @@ textarea:focus,
 }
 
 /* =======================================================
-   Canales caídos (marcados desde canales.json)
+   Canales caídos
    ======================================================= */
 
 .fila-canal.canal-caido {
@@ -494,7 +498,7 @@ textarea:focus,
 }
 
 /* =======================================================
-   Estado Vacío o Sin Resultados
+   Estado Vacío
    ======================================================= */
 
 .guia-vacia {
@@ -520,7 +524,7 @@ textarea:focus,
 }
 
 /* =======================================================
-   Pantalla de Configuración y Gestión de Listas
+   Pantalla de Configuración
    ======================================================= */
 
 .config {
@@ -702,7 +706,7 @@ textarea:focus,
 .sync-estado--info { color: #60a5fa; }
 
 /* =======================================================
-   Reproductor HLS a Pantalla Completa
+   Reproductor HLS
    ======================================================= */
 
 .reproductor {
@@ -796,9 +800,10 @@ textarea:focus,
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
-/* Menús flotantes de subtítulos y calidad */
+/* Menús flotantes */
 .menu-flotante-cont {
   position: relative;
 }
@@ -837,7 +842,6 @@ textarea:focus,
   font-weight: 600;
 }
 
-/* Pantalla de Error en Reproductor */
 .reproductor__error {
   position: absolute;
   display: none;
@@ -876,11 +880,56 @@ textarea:focus,
 }
 
 /* =======================================================
-   Responsive: móviles chicos
+   Responsive: header en pantallas medianas y chicas
    ======================================================= */
 
+@media (max-width: 900px) {
+  .encabezado {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .buscador {
+    order: 10;               /* el buscador va al final, en su propia fila */
+    flex: 1 1 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .marca__texto {
+    font-size: 1.05rem;
+  }
+
+  #boton-actualizar-guia,
+  #boton-vista,
+  #boton-idioma,
+  #boton-recientes,
+  #boton-perfil,
+  #boton-config {
+    font-size: 0.8rem;
+    padding: 7px 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .marca__texto {
+    display: none;           /* en celular muy chico, ocultamos el texto "Guia de Canales" */
+  }
+
+  .marca__numero {
+    font-size: 1rem;
+    padding: 3px 6px;
+  }
+
+  #boton-recientes,
+  #boton-perfil {
+    padding: 7px 9px;
+    font-size: 0.78rem;
+  }
+}
+
 @media (max-width: 480px) {
-  .marca__texto { font-size: 1rem; }
-  .encabezado   { padding: 10px 12px; gap: 8px; }
+  .encabezado   { padding: 8px 10px; gap: 6px; }
   .fila-canal   { padding: 10px 12px; }
+  .fila-canal__logo { width: 40px; height: 40px; margin-right: 10px; }
 }
