@@ -33,6 +33,7 @@
       <button id="boton-vista" class="boton-secundario">☰ Lista</button>
       <button class="boton-icono" id="boton-idioma" aria-label="Cambiar idioma / Change language">ES</button>
       <button class="boton-icono" id="boton-recientes" title="Historial de reproducción">📺 Recientes</button>
+      <button class="boton-icono" id="boton-recordatorios" title="Recordatorios de programas">🔔 Recordatorios</button>
       <button class="boton-icono" id="boton-perfil" title="Cambiar perfil">👤 Yo</button>
       <button class="boton-icono" id="boton-config" data-i18n="cargar_lista">Gestionar Listas</button>
     </header>
@@ -127,6 +128,12 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
           <div style="font-size:13px; opacity:0.8; margin-bottom:6px;">Selecciona las categorías a bloquear:</div>
           <div id="parental-categorias" style="max-height:150px; overflow-y:auto; background:rgba(0,0,0,0.2); padding:8px; border-radius:6px;"></div>
           <button class="boton-secundario" id="boton-guardar-parental" data-i18n="guardar_pin" style="margin-top:10px;">Guardar PIN y Bloqueos</button>
+        </div>
+
+        <!-- Sección de Notificaciones -->
+        <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+          <h3 data-i18n="rec_permiso_titulo" style="margin-bottom:10px; font-size:16px;">Notificaciones del navegador</h3>
+          <div id="notificaciones-contenido"></div>
         </div>
 
         <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
