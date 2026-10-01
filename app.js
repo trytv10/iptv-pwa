@@ -2220,6 +2220,23 @@ function renderSyncUI() {
    ======================================================= */
 
 async function cargarCanalesOficiales() {
+  // 1) Worker (KV) — fuente principal
+  try {
+    const resp = await fetch(`${URL_WORKER}/canales`, { cache: 'no-store' });
+    if (resp.ok) {
+      const datos = await resp.json();
+      const lista = Array.isArray(datos) ? datos : (datos.canales || []);
+      const normalizados = normalizarDesdeJSON(lista);
+      if (normalizados.length > 0) {
+        console.info(`[canales] Fuente: Worker/KV (${normalizados.length} canales) — última actualización: ${datos.actualizado || 'desconocida'}`);
+        return { canales: normalizados, fuente: 'kv' };
+      }
+    }
+  } catch (e) {
+    console.warn('No se pudo leer canales desde el Worker:', e);
+  }
+
+  // 2) Fallback: canales.json local
   try {
     const resp = await fetch(URL_CANALES_JSON, { cache: 'no-store' });
     if (resp.ok) {
@@ -2235,6 +2252,7 @@ async function cargarCanalesOficiales() {
     console.warn('No se pudo leer canales.json:', e);
   }
 
+  // 3) Fallback: canales.m3u8
   try {
     const resp = await fetch(URL_CANALES_M3U8, { cache: 'no-store' });
     if (resp.ok) {
@@ -2249,6 +2267,7 @@ async function cargarCanalesOficiales() {
     console.warn('No se pudo leer canales.m3u8:', e);
   }
 
+  // 4) Fallback: fuentes.json
   try {
     const combinados = await obtenerListaCombinadaDesdeFuentes();
     if (combinados.length > 0) {
