@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Admin · Reportes — Guia de Canales</title>
+<title>Admin · Guia de Canales</title>
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,10 +21,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  .contenedor {
-    max-width: 1100px;
-    margin: 0 auto;
-  }
+  .contenedor { max-width: 1200px; margin: 0 auto; }
 
   header {
     display: flex;
@@ -72,34 +69,17 @@
 
   button:hover { background: rgba(255, 255, 255, 0.15); }
 
-  button.primario {
-    background: #e50914;
-    border-color: #e50914;
-    color: #fff;
-  }
+  button.primario { background: #e50914; border-color: #e50914; color: #fff; }
   button.primario:hover { background: #b80710; }
 
-  button.peligro {
-    color: #ff6b6b;
-    border-color: rgba(255, 107, 107, 0.4);
-  }
+  button.peligro { color: #ff6b6b; border-color: rgba(255, 107, 107, 0.4); }
   button.peligro:hover { background: rgba(255, 107, 107, 0.15); }
 
-  button.exito {
-    color: #4ade80;
-    border-color: rgba(74, 222, 128, 0.4);
-  }
+  button.exito { color: #4ade80; border-color: rgba(74, 222, 128, 0.4); }
   button.exito:hover { background: rgba(74, 222, 128, 0.15); }
 
-  button.chico {
-    padding: 5px 10px;
-    font-size: 0.78rem;
-  }
-
-  button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  button.chico { padding: 5px 10px; font-size: 0.78rem; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
 
   #login {
     max-width: 420px;
@@ -110,18 +90,8 @@
     padding: 28px;
   }
 
-  #login h2 {
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.3rem;
-    margin-bottom: 8px;
-  }
-
-  #login p {
-    font-size: 0.85rem;
-    color: #94a3b8;
-    margin-bottom: 18px;
-    line-height: 1.4;
-  }
+  #login h2 { font-family: 'Oswald', sans-serif; font-size: 1.3rem; margin-bottom: 8px; }
+  #login p { font-size: 0.85rem; color: #94a3b8; margin-bottom: 18px; line-height: 1.4; }
 
   #login input {
     width: 100%;
@@ -146,12 +116,39 @@
 
   #dashboard { display: none; }
 
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+  }
+
+  .tabs button {
+    border: none;
+    background: transparent;
+    border-radius: 0;
+    padding: 10px 16px;
+    border-bottom: 2px solid transparent;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .tabs button:hover { background: rgba(255, 255, 255, 0.04); }
+  .tabs button.activo {
+    color: #fff;
+    border-bottom-color: #e50914;
+    font-weight: 600;
+  }
+
+  .vista { display: none; }
+  .vista.activa { display: block; }
+
   .tarjetas {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 14px;
     margin-bottom: 24px;
-    margin-bottom: 8px;
   }
 
   .tarjeta {
@@ -210,6 +207,7 @@
     padding: 12px 14px;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    vertical-align: middle;
   }
 
   th {
@@ -224,13 +222,8 @@
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
-  tr.es-caido td {
-    background: rgba(229, 9, 20, 0.06);
-  }
-
-  tr.es-caido:hover td {
-    background: rgba(229, 9, 20, 0.1);
-  }
+  tr.es-caido td { background: rgba(229, 9, 20, 0.06); }
+  tr.es-caido:hover td { background: rgba(229, 9, 20, 0.1); }
 
   .pill {
     display: inline-block;
@@ -270,6 +263,17 @@
     letter-spacing: 0.5px;
   }
 
+  .pill--pais {
+    background: rgba(56, 189, 248, 0.18);
+    color: #7dd3fc;
+    font-weight: 600;
+  }
+
+  .pill--grupo {
+    background: rgba(148, 163, 184, 0.18);
+    color: #cbd5e1;
+  }
+
   .comentario-caido {
     font-size: 0.75rem;
     color: #94a3b8;
@@ -284,7 +288,7 @@
   }
 
   .truncar {
-    max-width: 240px;
+    max-width: 260px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -315,6 +319,171 @@
     color: #0b1418;
     border-color: #fff;
     font-weight: 600;
+  }
+
+  .barra-canales {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .barra-canales input,
+  .barra-canales select {
+    font-family: inherit;
+    font-size: 0.88rem;
+    padding: 9px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #fff;
+    outline: none;
+  }
+
+  .barra-canales input:focus,
+  .barra-canales select:focus {
+    border-color: rgba(229, 9, 20, 0.6);
+  }
+
+  .barra-canales input[type="search"] { flex: 1; min-width: 200px; }
+
+  .paginacion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+
+  .paginacion .grupo {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  /* Modal */
+  .modal-fondo {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px;
+    overflow-y: auto;
+  }
+
+  .modal-fondo.visible { display: flex; }
+
+  .modal {
+    background: #111b21;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 640px;
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+
+  .modal h3 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal .cerrar {
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    color: #94a3b8;
+    padding: 2px 8px;
+    cursor: pointer;
+  }
+  .modal .cerrar:hover { color: #fff; background: transparent; }
+
+  .campo {
+    margin-bottom: 14px;
+  }
+
+  .campo label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .campo input[type="text"],
+  .campo input[type="url"],
+  .campo select,
+  .campo textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #fff;
+    outline: none;
+  }
+
+  .campo input:focus,
+  .campo select:focus,
+  .campo textarea:focus {
+    border-color: rgba(229, 9, 20, 0.6);
+  }
+
+  .campo .ayuda {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  .campo-fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .checks {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .checks label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: #cbd5e1;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .checks input { accent-color: #e50914; }
+
+  .modal-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   footer {
@@ -356,6 +525,11 @@
   .toast.ok { border-color: rgba(74, 222, 128, 0.5); }
   .toast.error { border-color: rgba(255, 107, 107, 0.5); }
   .toast.info { border-color: rgba(96, 165, 250, 0.5); }
+
+  @media (max-width: 640px) {
+    .campo-fila { grid-template-columns: 1fr; }
+    .truncar { max-width: 160px; }
+  }
 </style>
 </head>
 <body>
@@ -364,7 +538,7 @@
 
   <div id="login">
     <h2>Panel de admin</h2>
-    <p>Ingresá tu token de administrador para ver los reportes y marcar canales caídos. Se guarda en este navegador.</p>
+    <p>Ingresá tu token de administrador para gestionar reportes, canales caídos y el catálogo de canales. Se guarda en este navegador.</p>
     <input type="password" id="campo-token" placeholder="Token de admin" autocomplete="off">
     <button class="primario" id="boton-entrar">Entrar</button>
     <div class="error-login" id="error-login"></div>
@@ -372,57 +546,173 @@
 
   <div id="dashboard">
     <header>
-      <h1>📊 Reportes <span class="badge">ADMIN</span></h1>
+      <h1>🛠 Panel <span class="badge">ADMIN</span></h1>
       <div style="display:flex; gap:8px;">
         <button id="boton-refrescar">🔄 Refrescar</button>
         <button class="peligro" id="boton-salir">Cerrar sesión</button>
       </div>
     </header>
 
-    <div class="tarjetas">
-      <div class="tarjeta">
-        <div class="tarjeta__label">Total reportes</div>
-        <div class="tarjeta__valor" id="stat-total">–</div>
+    <nav class="tabs">
+      <button data-vista="reportes" class="activo">📊 Reportes</button>
+      <button data-vista="canales">📺 Canales</button>
+    </nav>
+
+    <!-- ============================ -->
+    <!-- VISTA: REPORTES               -->
+    <!-- ============================ -->
+    <section class="vista activa" id="vista-reportes">
+      <div class="tarjetas">
+        <div class="tarjeta">
+          <div class="tarjeta__label">Total reportes</div>
+          <div class="tarjeta__valor" id="stat-total">–</div>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta__label">Canales reportados</div>
+          <div class="tarjeta__valor" id="stat-canales">–</div>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta__label">Canales marcados caídos</div>
+          <div class="tarjeta__valor" id="stat-caidos">–</div>
+        </div>
       </div>
-      <div class="tarjeta">
-        <div class="tarjeta__label">Canales reportados</div>
-        <div class="tarjeta__valor" id="stat-canales">–</div>
+
+      <div class="nota-config" id="nota-config"></div>
+
+      <h2 class="seccion">🏆 Canales más reportados</h2>
+      <div id="ranking-cont"></div>
+
+      <h2 class="seccion">
+        📝 Todos los reportes
+        <span style="font-size: 0.75rem; opacity: 0.6; font-family: 'Inter'; font-weight: 400;">
+          Los 100 más recientes
+        </span>
+      </h2>
+
+      <div class="filtros" id="filtros-motivo">
+        <button class="activo" data-motivo="">Todos</button>
+        <button data-motivo="caido">Caído</button>
+        <button data-motivo="lento">Lento</button>
+        <button data-motivo="sin_audio">Sin audio</button>
+        <button data-motivo="sin_video">Sin video</button>
+        <button data-motivo="calidad_mala">Calidad mala</button>
+        <button data-motivo="otro">Otro</button>
       </div>
-      <div class="tarjeta">
-        <div class="tarjeta__label">Canales marcados caídos</div>
-        <div class="tarjeta__valor" id="stat-caidos">–</div>
+
+      <div id="reportes-cont"></div>
+    </section>
+
+    <!-- ============================ -->
+    <!-- VISTA: CANALES                -->
+    <!-- ============================ -->
+    <section class="vista" id="vista-canales">
+      <h2 class="seccion">
+        📺 Canales en KV
+        <button class="primario" id="boton-nuevo-canal">+ Nuevo canal</button>
+      </h2>
+
+      <div class="barra-canales">
+        <input type="search" id="busqueda-canales" placeholder="Buscar por nombre, URL, grupo o país...">
+        <select id="filtro-grupo">
+          <option value="">Todos los grupos</option>
+        </select>
+        <select id="filtro-pais">
+          <option value="">Todos los países</option>
+        </select>
+        <select id="filtro-limite">
+          <option value="25">25 por página</option>
+          <option value="50" selected>50 por página</option>
+          <option value="100">100 por página</option>
+        </select>
       </div>
-    </div>
 
-    <div class="nota-config" id="nota-config"></div>
+      <div id="canales-cont"></div>
 
-    <h2 class="seccion">🏆 Canales más reportados</h2>
-    <div id="ranking-cont"></div>
-
-    <h2 class="seccion">
-      📝 Todos los reportes
-      <span style="font-size: 0.75rem; opacity: 0.6; font-family: 'Inter'; font-weight: 400;">
-        Los 100 más recientes
-      </span>
-    </h2>
-
-    <div class="filtros" id="filtros-motivo">
-      <button class="activo" data-motivo="">Todos</button>
-      <button data-motivo="caido">Caído</button>
-      <button data-motivo="lento">Lento</button>
-      <button data-motivo="sin_audio">Sin audio</button>
-      <button data-motivo="sin_video">Sin video</button>
-      <button data-motivo="calidad_mala">Calidad mala</button>
-      <button data-motivo="otro">Otro</button>
-    </div>
-
-    <div id="reportes-cont"></div>
+      <div class="paginacion">
+        <div id="info-paginacion" class="mono">–</div>
+        <div class="grupo">
+          <button class="chico" id="boton-prev">← Anterior</button>
+          <span id="pagina-actual" class="mono">1</span>
+          <button class="chico" id="boton-next">Siguiente →</button>
+        </div>
+      </div>
+    </section>
   </div>
 
   <footer>
     Guia de Canales · Panel de administración ·
     <a href="./">← Volver a la guía</a>
   </footer>
+</div>
+
+<!-- ============================ -->
+<!-- MODAL: CANAL                  -->
+<!-- ============================ -->
+<div class="modal-fondo" id="modal-canal">
+  <div class="modal">
+    <h3>
+      <span id="modal-titulo">Nuevo canal</span>
+      <button class="cerrar" id="modal-cerrar" type="button">✕</button>
+    </h3>
+
+    <form id="form-canal" autocomplete="off">
+      <input type="hidden" id="campo-id">
+
+      <div class="campo">
+        <label for="campo-nombre">Nombre *</label>
+        <input type="text" id="campo-nombre" required maxlength="200" placeholder="Ej: ESPN HD">
+      </div>
+
+      <div class="campo">
+        <label for="campo-url">URL del stream *</label>
+        <input type="url" id="campo-url" required maxlength="2000" placeholder="https://.../stream.m3u8">
+        <div class="ayuda">Se usará para generar el id si el canal es nuevo.</div>
+      </div>
+
+      <div class="campo">
+        <label for="campo-logo">Logo (URL)</label>
+        <input type="url" id="campo-logo" maxlength="2000" placeholder="https://.../logo.png">
+      </div>
+
+      <div class="campo-fila">
+        <div class="campo">
+          <label for="campo-grupo">Grupo</label>
+          <input type="text" id="campo-grupo" maxlength="200" placeholder="Ej: Deportes">
+        </div>
+        <div class="campo">
+          <label for="campo-pais">País (código)</label>
+          <input type="text" id="campo-pais" maxlength="4" placeholder="Ej: AR">
+        </div>
+      </div>
+
+      <div class="campo-fila">
+        <div class="campo">
+          <label for="campo-tvgid">TVG ID</label>
+          <input type="text" id="campo-tvgid" maxlength="200" placeholder="Ej: ESPN.ar">
+        </div>
+        <div class="campo">
+          <label for="campo-numero">Número</label>
+          <input type="text" id="campo-numero" maxlength="8" placeholder="Ej: 05">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="campo-estado">Estado (texto libre)</label>
+        <input type="text" id="campo-estado" maxlength="64" placeholder="Ej: estable / inestable">
+      </div>
+
+      <div class="checks">
+        <label><input type="checkbox" id="campo-geobloqueado"> Geobloqueado</label>
+        <label><input type="checkbox" id="campo-inestable"> Inestable</label>
+        <label><input type="checkbox" id="campo-youtube"> Es YouTube</label>
+      </div>
+
+      <div class="modal-acciones">
+        <button type="button" id="modal-cancelar">Cancelar</button>
+        <button type="submit" class="primario" id="modal-guardar">Guardar</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -439,6 +729,15 @@ const ESTADO = {
   ranking: [],
   filtroMotivo: '',
   config: { umbralReportes: 3, ventanaHoras: 24 },
+  // Canales
+  canales: [],
+  canalesTotal: 0,
+  canalesOffset: 0,
+  canalesLimite: 50,
+  canalesQ: '',
+  canalesGrupo: '',
+  canalesPais: '',
+  vista: 'reportes',
 };
 
 const el = {
@@ -449,6 +748,11 @@ const el = {
   errorLogin: document.getElementById('error-login'),
   botonRefrescar: document.getElementById('boton-refrescar'),
   botonSalir: document.getElementById('boton-salir'),
+
+  tabs: document.querySelectorAll('.tabs button'),
+  vistaReportes: document.getElementById('vista-reportes'),
+  vistaCanales: document.getElementById('vista-canales'),
+
   statTotal: document.getElementById('stat-total'),
   statCanales: document.getElementById('stat-canales'),
   statCaidos: document.getElementById('stat-caidos'),
@@ -456,6 +760,39 @@ const el = {
   rankingCont: document.getElementById('ranking-cont'),
   reportesCont: document.getElementById('reportes-cont'),
   filtrosMotivo: document.getElementById('filtros-motivo'),
+
+  // Canales
+  botonNuevoCanal: document.getElementById('boton-nuevo-canal'),
+  busquedaCanales: document.getElementById('busqueda-canales'),
+  filtroGrupo: document.getElementById('filtro-grupo'),
+  filtroPais: document.getElementById('filtro-pais'),
+  filtroLimite: document.getElementById('filtro-limite'),
+  canalesCont: document.getElementById('canales-cont'),
+  infoPaginacion: document.getElementById('info-paginacion'),
+  paginaActual: document.getElementById('pagina-actual'),
+  botonPrev: document.getElementById('boton-prev'),
+  botonNext: document.getElementById('boton-next'),
+
+  // Modal
+  modalCanal: document.getElementById('modal-canal'),
+  modalTitulo: document.getElementById('modal-titulo'),
+  modalCerrar: document.getElementById('modal-cerrar'),
+  modalCancelar: document.getElementById('modal-cancelar'),
+  formCanal: document.getElementById('form-canal'),
+  campoId: document.getElementById('campo-id'),
+  campoNombre: document.getElementById('campo-nombre'),
+  campoUrl: document.getElementById('campo-url'),
+  campoLogo: document.getElementById('campo-logo'),
+  campoGrupo: document.getElementById('campo-grupo'),
+  campoPais: document.getElementById('campo-pais'),
+  campoTvgid: document.getElementById('campo-tvgid'),
+  campoNumero: document.getElementById('campo-numero'),
+  campoEstado: document.getElementById('campo-estado'),
+  campoGeobloqueado: document.getElementById('campo-geobloqueado'),
+  campoInestable: document.getElementById('campo-inestable'),
+  campoYoutube: document.getElementById('campo-youtube'),
+  modalGuardar: document.getElementById('modal-guardar'),
+
   toast: document.getElementById('toast'),
 };
 
@@ -505,6 +842,7 @@ async function intentarLogin(token) {
 function mostrarDashboard() {
   el.login.style.display = 'none';
   el.dashboard.style.display = 'block';
+  cambiarVista('reportes');
 }
 
 function mostrarLogin() {
@@ -522,14 +860,41 @@ el.botonSalir.addEventListener('click', () => {
   ESTADO.token = '';
   ESTADO.reportes = [];
   ESTADO.ranking = [];
+  ESTADO.canales = [];
   mostrarLogin();
 });
 
 // ==========================================
-// Cargar reportes
+// Tabs
 // ==========================================
 
-el.botonRefrescar.addEventListener('click', cargarReportes);
+el.tabs.forEach((btn) => {
+  btn.addEventListener('click', () => cambiarVista(btn.dataset.vista));
+});
+
+function cambiarVista(vista) {
+  ESTADO.vista = vista;
+  el.tabs.forEach((b) => b.classList.toggle('activo', b.dataset.vista === vista));
+  el.vistaReportes.classList.toggle('activa', vista === 'reportes');
+  el.vistaCanales.classList.toggle('activa', vista === 'canales');
+
+  if (vista === 'canales' && ESTADO.canales.length === 0 && ESTADO.canalesTotal === 0) {
+    cargarCanales();
+  }
+}
+
+// ==========================================
+// Refrescar general
+// ==========================================
+
+el.botonRefrescar.addEventListener('click', () => {
+  if (ESTADO.vista === 'reportes') cargarReportes();
+  else cargarCanales();
+});
+
+// ==========================================
+// REPORTES
+// ==========================================
 
 async function cargarReportes() {
   el.botonRefrescar.disabled = true;
@@ -567,14 +932,9 @@ async function cargarReportes() {
   }
 }
 
-// ==========================================
-// Stats
-// ==========================================
-
 function renderStats(total) {
   el.statTotal.textContent = total;
   el.statCanales.textContent = ESTADO.ranking.length;
-
   const marcados = ESTADO.ranking.filter((r) => r.marcadoCaido).length;
   el.statCaidos.textContent = marcados;
 }
@@ -583,17 +943,11 @@ function renderNotaConfig() {
   el.notaConfig.textContent = `Auto-marcado: ${ESTADO.config.umbralReportes} reportes en ${ESTADO.config.ventanaHoras}h`;
 }
 
-// ==========================================
-// Marcar / reactivar caído
-// ==========================================
-
-async function alternarCaido(canalId, canalNombre, marcar) {
 async function alternarCaido(canalId, canalNombre, canalUrl, marcar) {
   try {
     const resp = await fetch(`${URL_WORKER}/admin/marcar-caido?token=${encodeURIComponent(ESTADO.token)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ canalId, marcar, comentario: '' }),
       body: JSON.stringify({ canalId, canalNombre, canalUrl, marcar, comentario: '' }),
     });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
@@ -606,9 +960,7 @@ async function alternarCaido(canalId, canalNombre, canalUrl, marcar) {
           : `✓ "${canalNombre}" reactivado`,
         'ok'
       );
-      // Actualiza en memoria para no tener que recargar todo
       for (const r of ESTADO.ranking) {
-        if (r.canalId === canalId) r.marcadoCaido = marcar;
         if (r.canalId === canalId) {
           r.marcadoCaido = marcar;
           r.origenCaido = marcar ? 'admin' : null;
@@ -626,10 +978,6 @@ async function alternarCaido(canalId, canalNombre, canalUrl, marcar) {
     return false;
   }
 }
-
-// ==========================================
-// Ranking
-// ==========================================
 
 function renderRanking() {
   if (ESTADO.ranking.length === 0) {
@@ -652,31 +1000,6 @@ function renderRanking() {
       </tr>
     </thead>
     <tbody>
-      ${top.map((r, i) => `
-        <tr class="${r.marcadoCaido ? 'es-caido' : ''}">
-          <td>${i + 1}</td>
-          <td>
-            <div style="font-weight: 600;">
-              ${escapeHtml(r.canalNombre)}
-              ${r.marcadoCaido ? '<span class="pill pill--estado-caido">CAÍDO</span>' : ''}
-            </div>
-            <div class="mono truncar" title="${escapeHtml(r.canalUrl)}">${escapeHtml(r.canalUrl)}</div>
-          </td>
-          <td style="text-align: center; font-weight: 700; font-size: 1.1rem;">${r.total}</td>
-          <td>${Object.entries(r.motivos).map(([m, n]) => `<span class="pill pill--${m}">${m} ×${n}</span>`).join('')}</td>
-          <td class="mono">${fechaCorta(r.ultimoReporte)}</td>
-          <td>
-            <button
-              class="chico ${r.marcadoCaido ? 'exito' : 'peligro'}"
-              data-canal-id="${escapeHtml(r.canalId)}"
-              data-canal-nombre="${escapeHtml(r.canalNombre)}"
-              data-marcar="${r.marcadoCaido ? '0' : '1'}"
-            >
-              ${r.marcadoCaido ? '✓ Reactivar' : '⚠ Marcar caído'}
-            </button>
-          </td>
-        </tr>
-      `).join('')}
       ${top.map((r, i) => {
         const origenPill = r.marcadoCaido
           ? (r.origenCaido === 'auto'
@@ -724,7 +1047,6 @@ function renderRanking() {
   el.rankingCont.innerHTML = '';
   el.rankingCont.appendChild(tabla);
 
-  // Listeners de los botones
   tabla.querySelectorAll('button[data-canal-id]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const canalId = btn.dataset.canalId;
@@ -736,7 +1058,6 @@ function renderRanking() {
       btn.disabled = true;
       btn.textContent = '⏳...';
 
-      const ok = await alternarCaido(canalId, canalNombre, marcar);
       const ok = await alternarCaido(canalId, canalNombre, canalUrl, marcar);
       if (!ok) {
         btn.disabled = false;
@@ -745,10 +1066,6 @@ function renderRanking() {
     });
   });
 }
-
-// ==========================================
-// Lista de reportes
-// ==========================================
 
 el.filtrosMotivo.querySelectorAll('button').forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -796,6 +1113,288 @@ function renderReportes() {
   `;
   el.reportesCont.innerHTML = '';
   el.reportesCont.appendChild(tabla);
+}
+
+// ==========================================
+// CANALES
+// ==========================================
+
+el.botonNuevoCanal.addEventListener('click', () => abrirModalCanal(null));
+
+el.filtroLimite.addEventListener('change', () => {
+  ESTADO.canalesLimite = parseInt(el.filtroLimite.value, 10) || 50;
+  ESTADO.canalesOffset = 0;
+  cargarCanales();
+});
+
+let timerBusqueda = null;
+el.busquedaCanales.addEventListener('input', () => {
+  if (timerBusqueda) clearTimeout(timerBusqueda);
+  timerBusqueda = setTimeout(() => {
+    ESTADO.canalesQ = el.busquedaCanales.value.trim();
+    ESTADO.canalesOffset = 0;
+    cargarCanales();
+  }, 350);
+});
+
+el.filtroGrupo.addEventListener('change', () => {
+  ESTADO.canalesGrupo = el.filtroGrupo.value;
+  ESTADO.canalesOffset = 0;
+  cargarCanales();
+});
+
+el.filtroPais.addEventListener('change', () => {
+  ESTADO.canalesPais = el.filtroPais.value;
+  ESTADO.canalesOffset = 0;
+  cargarCanales();
+});
+
+el.botonPrev.addEventListener('click', () => {
+  if (ESTADO.canalesOffset <= 0) return;
+  ESTADO.canalesOffset = Math.max(0, ESTADO.canalesOffset - ESTADO.canalesLimite);
+  cargarCanales();
+});
+
+el.botonNext.addEventListener('click', () => {
+  if (ESTADO.canalesOffset + ESTADO.canalesLimite >= ESTADO.canalesTotal) return;
+  ESTADO.canalesOffset += ESTADO.canalesLimite;
+  cargarCanales();
+});
+
+async function cargarCanales() {
+  el.canalesCont.innerHTML = '<div class="cargando">Cargando canales...</div>';
+
+  const params = new URLSearchParams({
+    token: ESTADO.token,
+    limite: String(ESTADO.canalesLimite),
+    offset: String(ESTADO.canalesOffset),
+  });
+  if (ESTADO.canalesQ) params.set('q', ESTADO.canalesQ);
+  if (ESTADO.canalesGrupo) params.set('grupo', ESTADO.canalesGrupo);
+  if (ESTADO.canalesPais) params.set('pais', ESTADO.canalesPais);
+
+  try {
+    const resp = await fetch(`${URL_WORKER}/admin/canales?${params.toString()}`);
+    if (resp.status === 401) {
+      localStorage.removeItem(CLAVE_TOKEN);
+      ESTADO.token = '';
+      mostrarLogin();
+      el.errorLogin.textContent = '✗ El token ya no es válido';
+      return;
+    }
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+    const data = await resp.json();
+    ESTADO.canales = data.canales || [];
+    ESTADO.canalesTotal = data.total || 0;
+
+    renderCanales();
+    renderPaginacion();
+  } catch (e) {
+    console.error(e);
+    el.canalesCont.innerHTML = '<div class="vacio">✗ Error al cargar canales</div>';
+  }
+}
+
+function renderCanales() {
+  if (ESTADO.canales.length === 0) {
+    el.canalesCont.innerHTML = '<div class="vacio">No hay canales con esos filtros.</div>';
+    return;
+  }
+
+  const tabla = document.createElement('table');
+  tabla.innerHTML = `
+    <thead>
+      <tr>
+        <th style="width: 60px;">Nº</th>
+        <th style="width: 60px;">Logo</th>
+        <th>Canal</th>
+        <th style="width: 140px;">Grupo</th>
+        <th style="width: 80px;">País</th>
+        <th style="width: 160px;">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${ESTADO.canales.map((c) => `
+        <tr>
+          <td class="mono">${escapeHtml(c.numero || '–')}</td>
+          <td>
+            ${c.logo
+              ? `<img src="${escapeHtml(c.logo)}" alt="" style="width:40px; height:40px; object-fit:contain; border-radius:6px; background:#000;">`
+              : '<div style="width:40px; height:40px; border-radius:6px; background:rgba(255,255,255,0.05);"></div>'}
+          </td>
+          <td>
+            <div style="font-weight: 600;">${escapeHtml(c.nombre || 'Sin nombre')}</div>
+            <div class="mono truncar" title="${escapeHtml(c.url || '')}">${escapeHtml(c.url || '')}</div>
+            <div class="mono" style="font-size:0.7rem; opacity:0.6;">id: ${escapeHtml(c.id || '')}</div>
+          </td>
+          <td><span class="pill pill--grupo">${escapeHtml(c.grupo || 'General')}</span></td>
+          <td>${c.pais ? `<span class="pill pill--pais">${escapeHtml(c.pais)}</span>` : '–'}</td>
+          <td>
+            <button class="chico" data-accion="editar" data-id="${escapeHtml(c.id)}">✏ Editar</button>
+            <button class="chico peligro" data-accion="borrar" data-id="${escapeHtml(c.id)}">🗑 Borrar</button>
+          </td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  el.canalesCont.innerHTML = '';
+  el.canalesCont.appendChild(tabla);
+
+  tabla.querySelectorAll('button[data-accion]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const canal = ESTADO.canales.find((c) => c.id === id);
+      if (btn.dataset.accion === 'editar') {
+        abrirModalCanal(canal);
+      } else if (btn.dataset.accion === 'borrar') {
+        borrarCanal(canal);
+      }
+    });
+  });
+}
+
+function renderPaginacion() {
+  const desde = ESTADO.canalesTotal === 0 ? 0 : ESTADO.canalesOffset + 1;
+  const hasta = Math.min(ESTADO.canalesOffset + ESTADO.canalesLimite, ESTADO.canalesTotal);
+  el.infoPaginacion.textContent = `${desde}–${hasta} de ${ESTADO.canalesTotal}`;
+
+  const pagina = Math.floor(ESTADO.canalesOffset / ESTADO.canalesLimite) + 1;
+  el.paginaActual.textContent = String(pagina);
+
+  el.botonPrev.disabled = ESTADO.canalesOffset <= 0;
+  el.botonNext.disabled = (ESTADO.canalesOffset + ESTADO.canalesLimite) >= ESTADO.canalesTotal;
+}
+
+// ==========================================
+// MODAL CANAL
+// ==========================================
+
+function abrirModalCanal(canal) {
+  el.formCanal.reset();
+
+  if (canal) {
+    el.modalTitulo.textContent = 'Editar canal';
+    el.campoId.value = canal.id || '';
+    el.campoNombre.value = canal.nombre || '';
+    el.campoUrl.value = canal.url || '';
+    el.campoLogo.value = canal.logo || '';
+    el.campoGrupo.value = canal.grupo || '';
+    el.campoPais.value = canal.pais || '';
+    el.campoTvgid.value = canal.tvgId || '';
+    el.campoNumero.value = canal.numero || '';
+    el.campoEstado.value = canal.estado || '';
+    el.campoGeobloqueado.checked = !!canal.geobloqueado;
+    el.campoInestable.checked = !!canal.inestable;
+    el.campoYoutube.checked = !!canal.youtube;
+  } else {
+    el.modalTitulo.textContent = 'Nuevo canal';
+    el.campoId.value = '';
+  }
+
+  el.modalCanal.classList.add('visible');
+  setTimeout(() => el.campoNombre.focus(), 50);
+}
+
+function cerrarModalCanal() {
+  el.modalCanal.classList.remove('visible');
+}
+
+el.modalCerrar.addEventListener('click', cerrarModalCanal);
+el.modalCancelar.addEventListener('click', cerrarModalCanal);
+
+el.modalCanal.addEventListener('click', (e) => {
+  if (e.target === el.modalCanal) cerrarModalCanal();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && el.modalCanal.classList.contains('visible')) {
+    cerrarModalCanal();
+  }
+});
+
+el.formCanal.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const id = el.campoId.value;
+  const body = {
+    nombre: el.campoNombre.value.trim(),
+    url: el.campoUrl.value.trim(),
+    logo: el.campoLogo.value.trim(),
+    grupo: el.campoGrupo.value.trim(),
+    pais: el.campoPais.value.trim(),
+    tvgId: el.campoTvgid.value.trim(),
+    numero: el.campoNumero.value.trim(),
+    estado: el.campoEstado.value.trim(),
+    geobloqueado: el.campoGeobloqueado.checked,
+    inestable: el.campoInestable.checked,
+    youtube: el.campoYoutube.checked,
+  };
+
+  if (!body.nombre || !body.url) {
+    mostrarToast('Nombre y URL son obligatorios', 'error');
+    return;
+  }
+
+  el.modalGuardar.disabled = true;
+  el.modalGuardar.textContent = 'Guardando...';
+
+  try {
+    let resp;
+    if (id) {
+      resp = await fetch(`${URL_WORKER}/admin/canal/${encodeURIComponent(id)}?token=${encodeURIComponent(ESTADO.token)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } else {
+      resp = await fetch(`${URL_WORKER}/admin/canal?token=${encodeURIComponent(ESTADO.token)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    }
+
+    const data = await resp.json().catch(() => ({}));
+
+    if (!resp.ok) {
+      throw new Error(data.error || ('HTTP ' + resp.status));
+    }
+
+    mostrarToast(id ? '✓ Canal actualizado' : '✓ Canal creado', 'ok');
+    cerrarModalCanal();
+    cargarCanales();
+  } catch (e) {
+    console.error(e);
+    mostrarToast('✗ ' + e.message, 'error');
+  } finally {
+    el.modalGuardar.disabled = false;
+    el.modalGuardar.textContent = 'Guardar';
+  }
+});
+
+async function borrarCanal(canal) {
+  if (!canal) return;
+  const ok = confirm(`¿Borrar el canal "${canal.nombre}"?\n\nEsta acción no se puede deshacer.`);
+  if (!ok) return;
+
+  try {
+    const resp = await fetch(`${URL_WORKER}/admin/canal/${encodeURIComponent(canal.id)}?token=${encodeURIComponent(ESTADO.token)}`, {
+      method: 'DELETE',
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+
+    mostrarToast(`✓ "${canal.nombre}" borrado`, 'ok');
+    // Si era el último de la página, retrocedemos
+    if (ESTADO.canales.length === 1 && ESTADO.canalesOffset > 0) {
+      ESTADO.canalesOffset = Math.max(0, ESTADO.canalesOffset - ESTADO.canalesLimite);
+    }
+    cargarCanales();
+  } catch (e) {
+    console.error(e);
+    mostrarToast('✗ ' + e.message, 'error');
+  }
 }
 
 // ==========================================
