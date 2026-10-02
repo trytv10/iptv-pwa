@@ -126,6 +126,7 @@ http://stream.mcquack.net/175/index.m3u8
 # [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="10 HD" tvg-logo="https://i.imgur.com/ZjKvXPn.png" tvg-id="10Sydney.au" tvg-chno="5" tvg-country="AU" group-title="Australia",10 HD
 https://i.mjh.nz/.r/10-nsw.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="ABC" tvg-logo="https://i.imgur.com/5CVl5EF.png" tvg-id="ABCTV.au" tvg-chno="1" tvg-country="AU" group-title="Australia",ABC
 https://c.mjh.nz/abc-nsw.m3u8
 # [CAIDO 2026-09-29]
@@ -152,6 +153,7 @@ https://tvsnhlslivetest.akamaized.net/hls/live/2034711/EXPO-MSL4/master.m3u8
 https://c.mjh.nz/abc-kids.m3u8
 #EXTINF:-1 tvg-name="ABC Me" tvg-logo="https://i.imgur.com/gBh54wY.png" tvg-id="ABCMe.au" tvg-chno="4" tvg-country="AU" group-title="Australia",ABC Me
 https://c.mjh.nz/abc-me.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="ABC News" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/d/df/ABC_News_Channel.svg/500px-ABC_News_Channel.svg.png" tvg-id="ABCNews.au" tvg-chno="5" tvg-country="AU" group-title="Australia",ABC News
 https://c.mjh.nz/abc-news.m3u8
 # [CAIDO 2026-09-29]
@@ -210,10 +212,8 @@ https://orfs.mdn.ors.at/out/u/orfs/q8c/manifest.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Servus TV" tvg-logo="https://i.imgur.com/zDWhSxq.png" tvg-id="ServusTVOsterreich.at" tvg-chno="5" tvg-country="AT" group-title="Austria",Servus TV Ⓖ
 https://rbmn-live.akamaized.net/hls/live/2002825/geoSTVATweb/master.m3u8
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="oe24" tvg-logo="https://i.imgur.com/8UTkcPn.png" tvg-id="Oe24TV.at" tvg-chno="6" tvg-country="AT" group-title="Austria",oe24
 https://oe24.mdn.ors.at/live/eds/oe24tv_hd/hls_nodrm/oe24tv_hd-nodrm.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="W24" tvg-logo="https://i.imgur.com/PGb4wYw.png" tvg-id="W24.at" tvg-chno="7" tvg-country="AT" group-title="Austria",W24
 https://ms01.w24.at/W24/smil:liveevent.smil/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -224,14 +224,13 @@ http://iptv.rtv-ooe.at/stream.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="RTS" tvg-logo="https://i.imgur.com/Bhv7lvy.png" tvg-id="TVTV.at" tvg-chno="10" tvg-country="AT" group-title="Austria",RTS Ⓖ
 https://58b42f6c8c9bf.streamlock.net:8080/live/RTS2015/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Tirol TV" tvg-logo="https://i.imgur.com/1E7Nflo.jpg" tvg-id="TirolTV.at" tvg-chno="11" tvg-country="AT" group-title="Austria",Tirol TV Ⓖ
 https://streaming14.huberwebmedia.at/LiveApp/streams/livestream.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="R9" tvg-logo="https://i.imgur.com/2fxVYsL.jpg" tvg-id="R9.at" tvg-chno="12" tvg-country="AT" group-title="Austria",R9
 https://ms01.w24.at/R9/smil:liveeventR9.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="AzStarTV" tvg-logo="https://i.imgur.com/di3XX5L.png" tvg-id="AzStarTV.ca" tvg-country="AZ" group-title="Azerbaijan",AzStarTV
 http://live.azstartv.com/azstar/smil:azstar.smil/playlist.m3u8
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="AZTV" tvg-logo="https://i.imgur.com/snBMMeH.png" tvg-id="AZTV.az" tvg-country="AZ" group-title="Azerbaijan",AZTV Ⓢ
 https://str.yodacdn.net/azertv/index.m3u8
 # [CAIDO 2026-09-29]
@@ -242,9 +241,9 @@ https://rtmp.baku.tv/hls/bakutv.m3u8
 https://mn-nl.mncdn.com/cbcsports_live/cbcsports/playlist.m3u8
 #EXTINF:-1 tvg-name="Kanal S" tvg-logo="https://i.imgur.com/W0JBoSQ.png" tvg-id="KanalS.az" tvg-country="AZ" group-title="Azerbaijan",Kanal S
 https://lives.atv.az:5443/KANAL-S/streams/kanals.m3u8
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="Mədəniyyət TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/f/fc/M%C9%99d%C9%99niyy%C9%99t_TV_logo.png" tvg-id="MedeniyyetTV.az" tvg-country="AZ" group-title="Azerbaijan",Mədəniyyət TV Ⓢ
 https://str.yodacdn.net/medeniyyettele/index.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Xəzər Xəbər" tvg-logo="https://i.imgur.com/AuB8bnq.png" tvg-id="XezerXeber.az" tvg-country="AZ" group-title="Azerbaijan",Xəzər Xəbər
 https://www.xezerxeber.az/stream/index.m3u8
 # [CAIDO 2026-09-29]
@@ -341,7 +340,6 @@ https://bhrtstream.bhtelecom.ba/bhrtportal.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Federalna televizija (FTV)" tvg-logo="https://i.imgur.com/Jpvs4u3.png" tvg-id="FederalnaTV.ba" tvg-chno="2" tvg-country="BA" group-title="Bosnia and Herzegovina",Federalna televizija (FTV) Ⓢ
 http://94.250.2.6:7374/play/a02s/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Televizija Republike Srpske (RTRS)" tvg-logo="https://i.imgur.com/2Sgs5gM.png" tvg-id="RTRSTV.ba" tvg-chno="3" tvg-country="BA" group-title="Bosnia and Herzegovina",Televizija Republike Srpske (RTRS)
 https://parh.rtrs.tv/tv/live/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -395,14 +393,13 @@ http://168.197.104.22/FUTURA/index.m3u8
 https://www.youtube.com/watch?v=oUdd3CsxYaE
 #EXTINF:-1 tvg-name="Record News" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/4/46/Record_News_logo_2023.svg" tvg-id="RecordNews.br" tvg-chno="7" tvg-country="BR" group-title="Brazil",Record News
 https://rnw-rn.otteravision.com/rnw/rn/rnw_rn.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="ISTV" tvg-logo="https://upload.wikimedia.org/wikipedia/pt/b/b5/Logotipo_da_ISTV.png" tvg-id="ISTVHD.br" tvg-chno="8" tvg-country="BR" group-title="Brazil",ISTV
 https://video08.logicahost.com.br/istvnacional/srt.stream/istvnacional.m3u8
 #EXTINF:-1 tvg-name="Rede Brasil" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/d/d1/Marca_rede_brasil_rgb-color.png" tvg-id="RedeBrasil.br" tvg-chno="9" tvg-country="BR" group-title="Brazil",Rede Brasil
 https://video09.logicahost.com.br/redebrasiloficial/redebrasiloficial/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TV Câmara" tvg-logo="https://i.imgur.com/UpV2PRk.png" tvg-id="TVCamara.br" tvg-chno="10" tvg-country="BR" group-title="Brazil",TV Câmara
 https://stream3.camara.gov.br/tv1/manifest.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TVE RS" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/c/c2/Logotipo_da_TVE_RS.png" tvg-id="TVERS.br" tvg-chno="11" tvg-country="BR" group-title="Brazil",TVE RS
 http://streaming.procergs.com.br:1935/tve/stve/playlist.m3u8
 #EXTINF:-1 tvg-name="TV Cultura" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/8/82/Cultura_logo_2013.svg" tvg-id="TVCultura.br" tvg-chno="12" tvg-country="BR" group-title="Brazil",TV Cultura
@@ -510,6 +507,7 @@ https://mdstrm.com/live-stream-playlist/533adcc949386ce765657d7c.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Canal 13" tvg-logo="https://i.imgur.com/JIo1HBs.png" tvg-id="Canal13.cl" tvg-chno="6" tvg-country="CL" group-title="Chile",Canal 13
 https://redirector.dps.live/hls/13cl/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TV+" tvg-logo="https://i.imgur.com/NtuZIEJ.png" tvg-id="TVPlus.cl" tvg-chno="7" tvg-country="CL" group-title="Chile",TV+
 https://jireh-8-hls-video-us-isp.dps.live/hls-video/ey6283je82983je9823je8jowowiekldk9838274/tvmas/tvmas.smil/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -528,8 +526,10 @@ https://origin.dpsgo.com/ssai/event/GI-9cp_bT8KcerLpZwkuhw/master.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="13 Prime" tvg-logo="https://i.imgur.com/YwDFNxs.png" tvg-id="13P.cl" tvg-chno="13" tvg-country="CL" group-title="Chile",13 Prime
 https://origin.dpsgo.com/ssai/event/p4mmBxEzSmKAxY1GusOHrw/master.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="13 Kids" tvg-logo="https://i.imgur.com/m6y9AMe.png" tvg-id="13Kids.cl" tvg-chno="14" tvg-country="CL" group-title="Chile",13 Kids
 https://origin.dpsgo.com/ssai/event/LhHrVtyeQkKZ-Ye_xEU75g/master.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="13 Realities" tvg-logo="https://i.imgur.com/p1Qpljw.png" tvg-id="13Realities.cl" tvg-chno="15" tvg-country="CL" group-title="Chile",13 Realities
 https://origin.dpsgo.com/ssai/event/g7_JOM0ORki9SR5RKHe-Kw/master.m3u8
 #EXTINF:-1 tvg-name="13 Teleseries" tvg-logo="https://i.imgur.com/aJMBnse.png" tvg-id="13T.cl" tvg-chno="16" tvg-country="CL" group-title="Chile",13 Teleseries
@@ -864,6 +864,7 @@ https://ctv.icopts.app/CTV/index.fmp4.m3u8
 https://cdn.bestream.io:19360/elfaro1/elfaro1.m3u8
 #EXTINF:-1 tvg-name="Koogi TV" tvg-logo="" tvg-id="KoogiTV.eg" tvg-chno="8" tvg-country="EG" group-title="Egypt",Koogi TV
 https://5d658d7e9f562.streamlock.net/koogi.tv/koogi.smil/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="MBC Masr 1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/7/7c/MBC_Masr_Logo.png" tvg-id="MBCMasr1.eg" tvg-chno="9" tvg-country="EG" group-title="Egypt",MBC Masr 1
 https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mbc-masr/956eac069c78a35d47245db6cdbb1575/index.m3u8
 #EXTINF:-1 tvg-name="MBC Masr 2" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/5/53/MBC_Masr_2_Logo.svg" tvg-id="MBCMasr2.eg" tvg-chno="10" tvg-country="EG" group-title="Egypt",MBC Masr 2
@@ -881,7 +882,6 @@ http://sb.err.ee/live/etv2.m3u8
 http://sb.err.ee/live/etvpluss.m3u8
 #EXTINF:-1 tvg-name="Riigikogu" tvg-logo="https://i.imgur.com/7uWaZLF.png" tvg-id="Riigikogu.ee" tvg-chno="4" tvg-country="EE" group-title="Estonia",Riigikogu
 https://router.euddn.net/862366dd346d6b6392d5231546f3d179/smil:rk_live_1.smil/playlist.m3u8?c=8005
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Taevas TV7" tvg-logo="https://i.imgur.com/usXedIj.png" tvg-id="TaevasTV7.fi" tvg-chno="5" tvg-country="EE" group-title="Estonia",Taevas TV7
 https://vod.tv7.fi/tv7-ee/_definst_/smil:tv7-ee.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="Life TV Estonia" tvg-logo="https://i.imgur.com/JhrTB82.png" tvg-id="LifeTV.ee" tvg-chno="6" tvg-country="EE" group-title="Estonia",Life TV Estonia
@@ -931,7 +931,6 @@ https://live-fi.tvkaista.net/hero/live.m3u8?src=freetv
 https://live-fi.tvkaista.net/frii/live.m3u8?src=freetv
 #EXTINF:-1 tvg-name="Alfa" tvg-logo="https://upload.wikimedia.org/wikipedia/fi/9/93/IRR-TV-1.png" tvg-id="IRRTV.fi" tvg-chno="17" tvg-country="FI" group-title="Finland",Alfa Ⓢ
 https://irrtv2.digitacdn.net/live/ott/irrtv/playlist.m3u8?organizationId=229401409&suiteItemId=230439940
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TapahtumaTV Eveo" tvg-logo="https://i.imgur.com/sR8nA8w.png" tvg-id="Eveo.fi" tvg-chno="18" tvg-country="FI" group-title="Finland",TapahtumaTV Eveo
 https://live-fi.tvkaista.net/tapahtumatv-eveo/live.m3u8?src=freetv
 # [CAIDO 2026-09-29]
@@ -942,10 +941,8 @@ https://live-fi.tvkaista.net/national-geographic/live.m3u8?src=freetv
 https://live-fi.tvkaista.net/viaplay-tv/live.m3u8?src=freetv
 #EXTINF:-1 tvg-name="OnniTV" tvg-logo="https://i.imgur.com/HzILf2H.png" tvg-id="KotiTV.fi" tvg-chno="33" tvg-country="FI" group-title="Finland",OnniTV
 https://onnitv.digitacdn.net/live/ott/onnitv/playlist.m3u8?organizationId=83459409&suiteItemId=83459780
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Taivas TV7" tvg-logo="https://i.imgur.com/a4iNVXA.png" tvg-id="TaivasTV7.fi" tvg-chno="45" tvg-country="FI" group-title="Finland",Taivas TV7
 https://vod.tv7.fi/tv7-fi/_definst_/smil:tv7-fi.smil/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Himlen TV7" tvg-logo="https://i.imgur.com/a4iNVXA.png" tvg-id="HimlenTV7.fi" tvg-chno="46" tvg-country="FI" group-title="Finland",Himlen TV7
 https://vod.tv7.fi/tv7-se/_definst_/smil:tv7-se.smil/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -1040,7 +1037,6 @@ http://145.239.5.177/314/index.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="LCI" tvg-logo="" tvg-id="LCI.fr" tvg-chno="26" tvg-country="FR" group-title="France",LCI
 http://145.239.5.177/368/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="M6" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Logo_M6_%282020%2C_fond_clair%29.svg/40px-Logo_M6_%282020%2C_fond_clair%29.svg.png" tvg-id="M6.fr" tvg-chno="6" tvg-country="FR" group-title="France",M6
 http://99.27.51.147:8080/M6/index.m3u8
 # [CAIDO 2026-09-29]
@@ -1055,8 +1051,10 @@ https://www.youtube.com/@lequipe/live
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="RMC Life (ex-Chérie 25)" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Ch%C3%A9rie_25_2015_logo.svg/500px-Ch%C3%A9rie_25_2015_logo.svg.png" tvg-id="RMCLife.fr" tvg-chno="25" tvg-country="FR" group-title="France",RMC Life (ex-Chérie 25)
 http://145.239.5.177/333/index.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="First Channel (1TV)" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Pirveli_Arkhi_Logo_2022.svg/500px-Pirveli_Arkhi_Logo_2022.svg.png" tvg-id="1TV.ge" tvg-chno="1" tvg-country="GE" group-title="Georgia",First Channel (1TV)
 https://tv.cdn.xsg.ge/gpb-1tv/index.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="First Channel /Education/ (2TV)" tvg-logo="https://upload.wikimedia.org/wikipedia/ka/c/c9/2_Tv_Logo.jpg" tvg-id="2TV.ge" tvg-chno="2" tvg-country="GE" group-title="Georgia",First Channel /Education/ (2TV)
 https://tv.cdn.xsg.ge/gpb-2tv/index.m3u8
 #EXTINF:-1 tvg-name="Imedi TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/2/2a/Imlogo_2020.png" tvg-id="ImediTV.ge" tvg-chno="3" tvg-country="GE" group-title="Georgia",Imedi TV
@@ -1081,7 +1079,6 @@ https://live.postv.media/stream/index.m3u8
 https://live20.bozztv.com/dvrfl05/gin-obieqtivitv/index.m3u8
 #EXTINF:-1 tvg-name="Euronews Georgia" tvg-logo="https://i.imgur.com/VNJ4soR.png" tvg-id="EuroNewsGeorgia.ge" tvg-chno="999" tvg-country="GE" group-title="Georgia",Euronews Georgia Ⓖ
 http://nue01-edge01.itdc.ge/euronewsgeorgia/mpegts
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="Das Erste" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Das_Erste_2014.svg/500px-Das_Erste_2014.svg.png" tvg-id="DasErste.de" tvg-chno="1" tvg-country="DE" group-title="Germany",Das Erste Ⓖ
 https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8
 # [CAIDO 2026-09-29]
@@ -1090,7 +1087,6 @@ http://zdf-hls-15.akamaized.net/hls/live/2016498/de/veryhigh/master.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="3sat" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/3sat_2019.svg/500px-3sat_2019.svg.png" tvg-id="3sat.de" tvg-chno="3" tvg-country="DE" group-title="Germany",3sat Ⓖ
 https://zdf-hls-18.akamaized.net/hls/live/2016501/dach/veryhigh/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="ARD Alpha" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/ARD_alpha.svg/500px-ARD_alpha.svg.png" tvg-id="ARDalpha.de" tvg-chno="4" tvg-country="DE" group-title="Germany",ARD Alpha Ⓖ
 https://mcdn.br.de/br/fs/ard_alpha/hls/de/master.m3u8
 # [CAIDO 2026-09-29]
@@ -1098,6 +1094,7 @@ https://mcdn.br.de/br/fs/ard_alpha/hls/de/master.m3u8
 https://artesimulcast.akamaized.net/hls/live/2030993/artelive_de/index.m3u8
 #EXTINF:-1 tvg-name="DELUXE MUSIC" tvg-logo="https://i.imgur.com/E65GQN9.png" tvg-id="DeluxeMusic.de" tvg-chno="6" tvg-country="DE" group-title="Germany",DELUXE MUSIC
 https://sdn-global-live-streaming-packager-cache.3qsdn.com/13456/13456_264_live.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="DELUXE MUSIC DANCE BY KONTOR" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Deluxe_Dance_by_Kontor_Logo_2023.svg/500px-Deluxe_Dance_by_Kontor_Logo_2023.svg.png" tvg-id="DeluxeMusicDanceByKontor.de" tvg-chno="7" tvg-country="DE" group-title="Germany",DELUXE MUSIC DANCE BY KONTOR
 https://sdn-global-live-streaming-packager-cache.3qsdn.com/64733/64733_264_live.m3u8
 # [CAIDO 2026-10-02]
@@ -1109,7 +1106,6 @@ https://sdn-global-live-streaming-packager-cache.3qsdn.com/26658/26658_264_live.
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Euronews Deutsch" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Euronews_2022.svg/500px-Euronews_2022.svg.png" tvg-id="EuronewsGerman.fr" tvg-chno="10" tvg-country="DE" group-title="Germany",Euronews Deutsch Ⓨ
 https://www.youtube.com/euronewsde/live
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="KiKa" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Kika_2012.svg/500px-Kika_2012.svg.png" tvg-id="KIKA.de" tvg-chno="11" tvg-country="DE" group-title="Germany",KiKa Ⓖ
 https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master.m3u8
 # [CAIDO 2026-09-29]
@@ -1129,13 +1125,10 @@ https://zdf-hls-17.akamaized.net/hls/live/2016500/de/veryhigh/master.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="ZDFneo" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/ZDFneo2017_Logo.svg/500px-ZDFneo2017_Logo.svg.png" tvg-id="ZDFneo.de" tvg-chno="19" tvg-country="DE" group-title="Germany",ZDFneo Ⓖ
 https://zdf-hls-16.akamaized.net/hls/live/2016499/de/veryhigh/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="BR Nord" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Logo_BR_Fernsehen_2021.svg/500px-Logo_BR_Fernsehen_2021.svg.png" tvg-id="BRFernsehenNord.de" tvg-chno="1" tvg-country="DE" group-title="Germany",BR Nord Ⓖ
 https://mcdn.br.de/br/fs/bfs_nord/hls/de/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="BR Süd" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Logo_BR_Fernsehen_2021.svg/500px-Logo_BR_Fernsehen_2021.svg.png" tvg-id="BRFernsehenSud.de" tvg-chno="2" tvg-country="DE" group-title="Germany",BR Süd Ⓖ
 https://mcdn.br.de/br/fs/bfs_sued/hls/de/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="HR" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/HR-Fernsehen_Logo_2023.svg/500px-HR-Fernsehen_Logo_2023.svg.png" tvg-id="HRFernsehen.de" tvg-chno="3" tvg-country="DE" group-title="Germany",HR Ⓖ
 https://hrhls.akamaized.net/hls/live/2024525/hrhls/master.m3u8
 # [CAIDO 2026-09-29]
@@ -1147,16 +1140,12 @@ https://mdrtvsahls.akamaized.net/hls/live/2016879/mdrtvsa/master.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="MDR Thüringen" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/MDR_Logo_2017.svg/500px-MDR_Logo_2017.svg.png" tvg-id="MDRFernsehenThuringen.de" tvg-chno="6" tvg-country="DE" group-title="Germany",MDR Thüringen Ⓖ
 https://mdrtvthhls.akamaized.net/hls/live/2016880/mdrtvth/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="NDR Hamburg" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-id="NDRFernsehenHamburg.de" tvg-chno="7" tvg-country="DE" group-title="Germany",NDR Hamburg Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_hh/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="NDR Mecklenburg-Vorpommern" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-id="NDRFernsehenMecklenburgVorpommern.de" tvg-chno="8" tvg-country="DE" group-title="Germany",NDR Mecklenburg-Vorpommern Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_mv/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="NDR Niedersachsen" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-id="NDRFernsehenNiedersachsen.de" tvg-chno="9" tvg-country="DE" group-title="Germany",NDR Niedersachsen Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_nds/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="NDR Schleswig-Holstein" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Logo_NDR_Fernsehen_2017.svg/500px-Logo_NDR_Fernsehen_2017.svg.png" tvg-id="NDRFernsehenSchleswigHolstein.de" tvg-chno="10" tvg-country="DE" group-title="Germany",NDR Schleswig-Holstein Ⓖ
 https://mcdn.ndr.de/ndr/hls/ndr_fs/ndr_sh/master.m3u8
 # [CAIDO 2026-09-29]
@@ -1263,6 +1252,7 @@ http://eu2.tv4e.gr:1935/live/myStream.sdp/playlist.m3u8
 https://www.youtube.com/@diontileorash/live
 #EXTINF:-1 tvg-name="Egnatia" tvg-logo="https://i.imgur.com/zuyYIca.png" tvg-id="egnatiatv.gr" tvg-chno="53" tvg-country="GR" group-title="Greece",Egnatia
 https://video.streams.ovh:1936/egnatiatv/egnatiatv/index.m3u
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Euro" tvg-logo="https://i.imgur.com/mHCk05E.png" tvg-id="eurotv.gr" tvg-chno="54" tvg-country="GR" group-title="Greece",Euro
 https://live20.bozztv.com/akamaissh101/ssh101/eurotvlive/playlist.m3u8
 #EXTINF:-1 tvg-name="Gnomi" tvg-logo="https://i.imgur.com/mHCk05E.png" tvg-id="gnomitv.gr" tvg-chno="55" tvg-country="GR" group-title="Greece",Gnomi
@@ -1392,7 +1382,6 @@ http://88.212.15.19/live/viasat6/index.m3u8
 https://hls.iptvservice.eu/hls/ewtn-hd.m3u8
 #EXTINF:-1 tvg-name="Apostol TV" tvg-logo="https://www.apostoltv.hu/images/header-logo.png" tvg-id="ApostolTV.hu" tvg-chno="2" tvg-country="HU" group-title="Hungary",Apostol TV
 https://live.apostoltv.hu/live/playlist.m3u8
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="Oxygen Music" tvg-logo="" tvg-id="" tvg-chno="1" tvg-country="HU" group-title="Hungary",Oxygen Music
 https://oxygenmusic.hu:2443/hls/oxygenmusic.m3u8
 #EXTINF:-1 tvg-name="Dance TV" tvg-logo="" tvg-id="" tvg-chno="2" tvg-country="HU" group-title="Hungary",Dance TV
@@ -1529,6 +1518,7 @@ https://dyjmyiv3bp2ez.cloudfront.net/pub-iotv9marlygv8h/liveabr/playlist.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Republic Bharat" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Republic_Bharat_logo.svg/500px-Republic_Bharat_logo.svg.png" tvg-id="RepublicBharat.in" tvg-chno="17" tvg-country="IN" group-title="India",Republic Bharat Ⓨ
 https://www.youtube.com/@RepublicBharat/live
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="NDTV Profit" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/1/18/NDTV_Profit.svg/1280px-NDTV_Profit.svg.png" tvg-id="NDTVProfit.com" tvg-chno="18" tvg-country="IN" group-title="India",NDTV Profit
 https://ndtvprofit.akamaized.net/hls/live/2107404/ndtvprofit/master_1.m3u8
 # [CAIDO 2026-09-29]
@@ -1591,7 +1581,6 @@ https://ncdn.telewebion.ir/tv2/live/playlist.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="IRIB TV3" tvg-logo="https://i.imgur.com/6cIaH0c.png" tvg-id="IRIB3.ir" tvg-chno="3" tvg-country="IR" group-title="Iran",IRIB TV3
 https://ncdn.telewebion.ir/tv3/live/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="IRIB TV4" tvg-logo="https://i.imgur.com/fsdz81l.png" tvg-id="IRIB4.ir" tvg-chno="4" tvg-country="IR" group-title="Iran",IRIB TV4 Ⓢ
 https://ncdn.telewebion.ir/tv4/live/playlist.m3u8
 # [CAIDO 2026-10-01]
@@ -1599,7 +1588,6 @@ https://ncdn.telewebion.ir/tv4/live/playlist.m3u8
 https://ncdn.telewebion.ir/tehran/live/playlist.m3u8
 #EXTINF:-1 tvg-name="IRINN" tvg-logo="https://i.imgur.com/7HL4joq.png" tvg-id="IRINN.ir" tvg-chno="6" tvg-country="IR" group-title="Iran",IRINN
 http://185.9.2.18/chid_926/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="IRIB Amoozesh" tvg-logo="https://i.imgur.com/qox2azH.png" tvg-id="AmouzeshTV.ir" tvg-chno="7" tvg-country="IR" group-title="Iran",IRIB Amoozesh Ⓢ
 https://ncdn.telewebion.ir/amouzesh/live/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -1620,7 +1608,6 @@ https://ncdn.telewebion.ir/varzesh/live/playlist.m3u8
 # [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="IRIB Pooya & Nahal" tvg-logo="https://i.imgur.com/hjeQUtg.png" tvg-id="PooyaTV.ir" tvg-chno="13" tvg-country="IR" group-title="Iran",IRIB Pooya & Nahal
 https://ncdn.telewebion.ir/pooya/live/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="IRIB Salamat" tvg-logo="https://i.imgur.com/K0YUhne.png" tvg-id="SalamatTV.ir" tvg-chno="14" tvg-country="IR" group-title="Iran",IRIB Salamat Ⓢ
 https://ncdn.telewebion.ir/salamat/live/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -1729,7 +1716,6 @@ https://live-virginmedia.simplestreamcdn.com/s3/rewrite/virgin_three/index.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Virgin Media 4" tvg-logo="https://i.imgur.com/x4VsyIm.png" tvg-id="VirginMediaFour.ie" tvg-chno="7" tvg-country="IE" group-title="Ireland",Virgin Media 4
 https://live-virginmedia.simplestreamcdn.com/s3/rewrite/virgin_four/index.m3u8
-# [CAIDO 2026-09-30]
 #EXTINF:-1 tvg-name="RTE News" tvg-logo="https://upload.wikimedia.org/wikipedia/en/7/78/Updated_RT%C3%89_News_and_Current_Affairs_Logo.png" tvg-id="RTENews.ie" tvg-chno="21" tvg-country="IE" group-title="Ireland",RTE News
 https://live.rte.ie/live/a/channel3/channel3.isml/channel3.m3u8
 # [CAIDO 2026-09-29]
@@ -1830,7 +1816,6 @@ https://live02-seg.msf.cdn.mediaset.net/live/ch-b6/b6-clr.isml/index.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Focus" tvg-logo="https://i.imgur.com/M4smqpF.png" tvg-id="Focus.it" tvg-chno="35" tvg-country="IT" group-title="Italy",Focus Ⓖ
 https://live02-seg.msf.cdn.mediaset.net/live/ch-fu/fu-clr.isml/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="RTL 102.5" tvg-logo="https://i.imgur.com/KdissvS.png" tvg-id="RTL.102.5.HD.it" tvg-chno="36" tvg-country="IT" group-title="Italy",RTL 102.5
 https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist.m3u8
 #EXTINF:-1 tvg-name="Discovery Channel" tvg-logo="https://i.imgur.com/5IxIFJ0.png" tvg-id="Discovery.Channel.it" tvg-chno="37" tvg-country="IT" group-title="Italy",Discovery Channel
@@ -1896,22 +1881,17 @@ https://streaming.aurora.enhanced.live/live/mpc/enl0eG1mLmVncmVzcy5mZDJ2eHI=/out
 https://sportsitalia-samsungitaly.amagi.tv/playlist.m3u8
 #EXTINF:-1 tvg-name="Travel TV" tvg-logo="https://i.imgur.com/aXAUyLN.png" tvg-id="TravelTV.it" tvg-chno="61" tvg-country="IT" group-title="Italy",Travel TV
 https://5a1178b42cc03.streamlock.net/travel/travel/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Donna TV" tvg-logo="https://i.imgur.com/Aa1Abme.png" tvg-id="DonnaTV.it" tvg-chno="62" tvg-country="IT" group-title="Italy",Donna TV Ⓢ
 https://5f11919dca3bd.streamlock.net/donnatv/donnatv/playlist.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="SuperTennis" tvg-logo="https://i.imgur.com/GzsPlbX.png" tvg-id="SuperTennis.it" tvg-chno="64" tvg-country="IT" group-title="Italy",SuperTennis
 https://live-embed.supertennix.hiway.media/restreamer/supertennix_client/gpu-a-c0-16/restreamer/outgest/aa3673f1-e178-44a9-a947-ef41db73211a/manifest.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Alma TV" tvg-logo="https://i.imgur.com/Y8JiDwN.png" tvg-id="AlmaTV.it" tvg-chno="65" tvg-country="IT" group-title="Italy",Alma TV
 https://5f11919dca3bd.streamlock.net/almatv/almatv/playlist.m3u8
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="Radio 105 TV" tvg-logo="https://i.imgur.com/3NiLKvj.png" tvg-id="Radio105TV.it" tvg-chno="66" tvg-country="IT" group-title="Italy",Radio 105 TV Ⓖ
 https://live02-seg.msr.cdn.mediaset.net/live/ch-ec/ec-clr.isml/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="R101 TV" tvg-logo="https://i.imgur.com/mWeEa9T.png" tvg-id="R101TV.it" tvg-chno="67" tvg-country="IT" group-title="Italy",R101 TV Ⓖ
 https://live02-seg.msr.cdn.mediaset.net/live/ch-er/er-clr.isml/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Deejay TV" tvg-logo="https://i.imgur.com/rlaKH6k.png" tvg-id="DeejayTV.it" tvg-chno="69" tvg-country="IT" group-title="Italy",Deejay TV
 https://4c4b867c89244861ac216426883d1ad0.msvdn.net/live/S85984808/sMO0tz9Sr2Rk/playlist.m3u8
 #EXTINF:-1 tvg-name="RadioItaliaTV" tvg-logo="https://i.imgur.com/4VCEJuJ.png" tvg-id="RadioItaliaTV.it" tvg-chno="70" tvg-country="IT" group-title="Italy",RadioItaliaTV
@@ -1932,12 +1912,10 @@ https://ilsole24ore-radiovisual.akamaized.net/hls/live/2035302/persidera/master.
 https://stream.paroledivita.org/bejoy.m3u8
 #EXTINF:-1 tvg-name="Gambero Rosso" tvg-logo="https://i.imgur.com/RApMW5x.png" tvg-id="GamberoRosso.it" tvg-chno="257" tvg-country="IT" group-title="Italy",Gambero Rosso
 https://cdndirector.dailymotion.com/cdn/live/video/x9us6y4.m3u8?sec=h5bGwJYFZy9AO66NpfTxbhTni9e637DUu_SUPhn3MewWKmiD4Rmw0UuwfufSVb3G
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="RadioFreccia" tvg-logo="https://i.imgur.com/J5N9F7Z.png" tvg-id="RadioFrecciaTV.it" tvg-chno="258" tvg-country="IT" group-title="Italy",RadioFreccia
 https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S3160845/0tuSetc8UFkF/playlist.m3u8
 #EXTINF:-1 tvg-name="RDS Social TV" tvg-logo="https://i.imgur.com/TY6FhqI.png" tvg-id="RDSSocialTV.it" tvg-chno="265" tvg-country="IT" group-title="Italy",RDS Social TV
 https://stream.rdstv.radio/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Radio ZETA" tvg-logo="https://i.imgur.com/0MgCm1n.png" tvg-id="RadioZetaTV.it" tvg-chno="266" tvg-country="IT" group-title="Italy",Radio ZETA
 https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S9346184/XEx1LqlYbNic/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -1962,10 +1940,8 @@ https://d3k8wzt41aflvx.cloudfront.net/RAIP/Live.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Sportitalia SOLOCALCIO" tvg-logo="https://i.imgur.com/hu56Ya5.png" tvg-id="SportitaliaSolocalcio.it" tvg-chno="58" tvg-country="IT" group-title="Italy",Sportitalia SOLOCALCIO Ⓖ
 https://distribution.sportitalialive.it/sportitalia/sisolocalcio_abr/playlist.m3u8
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="Radio Montecarlo TV" tvg-logo="https://i.imgur.com/3TMMXmS.png" tvg-id="RadioMonteCarloTV.it" tvg-chno="67" tvg-country="IT" group-title="Italy",Radio Montecarlo TV Ⓖ
 https://live02-seg.msr.cdn.mediaset.net/live/ch-bb/bb-clr.isml/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Virgin Radio TV" tvg-logo="https://i.imgur.com/7Im3HI1.png" tvg-id="VirginRadioTV.it" tvg-chno="68" tvg-country="IT" group-title="Italy",Virgin Radio TV Ⓖ
 https://live02-seg.msr.cdn.mediaset.net/live/ch-ew/ew-clr.isml/index.m3u8
 #EXTINF:-1 tvg-name="Senato TV" tvg-logo="https://i.imgur.com/FoQoNZW.png" tvg-id="SenatoTV.it" tvg-chno="89" tvg-country="IT" group-title="Italy",Senato TV
@@ -2001,6 +1977,7 @@ https://stream9.xdevel.com/video0s976364-1176/stream/playlist.m3u8
 https://58f12ffd2447a.streamlock.net/Antenna2/livestream/playlist.m3u8
 #EXTINF:-1 tvg-name="Antenna 3 Massa" tvg-logo="https://i.imgur.com/CHDU86j.png" tvg-country="IT" group-title="Italy",Antenna 3 Massa
 https://media2021.rtvweb.com/antenna3massa/a3/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Antenna 3 Veneto Nord Est" tvg-logo="https://i.imgur.com/NiVHLwp.png" tvg-id="AntennaTreNordest.it" tvg-country="IT" group-title="Italy",Antenna 3 Veneto Nord Est
 https://59d7d6f47d7fc.streamlock.net/antennatreveneto/antennatreveneto.stream/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2096,6 +2073,7 @@ https://59d7d6f47d7fc.streamlock.net/elivebresciatv/elivebresciatv/playlist.m3u8
 https://diretta.arcapuglia.it:8080/live/easytv/index.m3u8
 #EXTINF:-1 tvg-name="Enjoy Television" tvg-logo="https://hostux.pics/images/2026/09/11/04_enjoy_television1ad11f59484e0115.png" tvg-country="IT" group-title="Italy",Enjoy Television
 https://str27.fluid.stream/EnjoyTelevision/livestream/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Entella Tv" tvg-logo="https://i.imgur.com/1VPXKrW.png" tvg-country="IT" group-title="Italy",Entella Tv
 https://5f22d76e220e1.streamlock.net:443/EntellaTV/EntellaTV/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2145,7 +2123,6 @@ https://media2021.rtvweb.com/giovannipaolotv/web/chunklist_w663456797.m3u8
 https://nrvideo1.newradio.it:1936/awrgaebshj/awrgaebshj/playlist.m3u8
 #EXTINF:-1 tvg-name="Globus Television" tvg-logo="https://i.imgur.com/yUTYqCv.png" tvg-country="IT" group-title="Italy",Globus Television
 https://cdn.cubws.com/live/globus.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Gold Tv" tvg-logo="https://i.imgur.com/3rVi4kD.png" tvg-id="GoldTV.it" tvg-country="IT" group-title="Italy",Gold Tv
 https://5f11919dca3bd.streamlock.net/goldtv/goldtv/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2163,7 +2140,6 @@ https://rst.saiuzwebnetwork.it:19360/teleidea/teleidea.m3u8
 https://5a1178b42cc03.streamlock.net/travel/travel/playlist.m3u8
 #EXTINF:-1 tvg-name="Italia 2 Tv" tvg-logo="https://i.imgur.com/ISbxfY0.png" tvg-id="Italia2TV.it" tvg-country="IT" group-title="Italy",Italia 2 Tv
 https://59d7d6f47d7fc.streamlock.net/italia2/italia2/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Italia 7" tvg-logo="https://i.imgur.com/YBXkY4w.png" tvg-country="IT" group-title="Italy",Italia 7
 https://5f11919dca3bd.streamlock.net/italia7/italia7/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2188,9 +2164,9 @@ https://tsw.streamingwebtv24.it:1936/eslife1/eslife1/playlist.m3u8
 https://f5842579ff984c1c98d63b8d789673eb.msvdn.net/live/S27391994/HVvPMzy/playlist.m3u8
 #EXTINF:-1 tvg-name="LaC Tv Calabria" tvg-logo="https://i.imgur.com/2Ef6crS.png" tvg-country="IT" group-title="Italy",LaC Tv Calabria
 https://f5842579ff984c1c98d63b8d789673eb.msvdn.net/live/S47282891/JWjL3xqPf4bX/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Lab Tv" tvg-logo="https://i.imgur.com/OpRS6Fl.png" tvg-country="IT" group-title="Italy",Lab Tv
 https://customer-yzibk50951uq418a.cloudflarestream.com/a58893dee4b9922a75e41b4ec4243f84/manifest/video.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Lazio Tv" tvg-logo="https://i.imgur.com/DAj5Uwb.png" tvg-country="IT" group-title="Italy",Lazio Tv
 https://5f11919dca3bd.streamlock.net/laziotv/laziotv/playlist.m3u8
 #EXTINF:-1 tvg-name="Le Cronache Lucane Tv" tvg-logo="https://i.imgur.com/EBY3IZL.jpg" tvg-country="IT" group-title="Italy",Le Cronache Lucane Tv
@@ -2234,9 +2210,9 @@ https://dc3.telesveva.com:4433/news24.mp4
 https://stream4.xdevel.com/video0s975955-782/stream/playlist.m3u8
 #EXTINF:-1 tvg-name="Nuova Tv 1" tvg-logo="https://i.imgur.com/1yqTZhR.png" tvg-country="IT" group-title="Italy",Nuova Tv 1
 https://nuovatv.net:8443/tv/stream.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Nuova Tv 2" tvg-logo="https://i.imgur.com/0vauyV3.png" tvg-country="IT" group-title="Italy",Nuova Tv 2
 https://nuovatv.net:8443/tv2/stream.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Nuvola Tv" tvg-logo="https://i.imgur.com/EDGez2x.png" tvg-country="IT" group-title="Italy",Nuvola Tv
 https://stream.nuvola.tv:8181/memfs/4aaa6328-1879-4ebf-b18a-498146d0c61c.m3u8
 # [CAIDO 2026-09-29]
@@ -2311,7 +2287,6 @@ https://w1.mediastreaming.it/digiesse/livestream/playlist.m3u8
 https://str48.fluid.stream/RadioIbizaTV/livestream/playlist.m3u8
 #EXTINF:-1 tvg-name="Radio Iglesias Visual Radio" tvg-logo="https://hostux.pics/images/2026/09/11/09_radio_iglesias_visual_radio0c4227f7a483885d.png" tvg-country="IT" group-title="Italy",Radio Iglesias Visual Radio
 https://59d7d6f47d7fc.streamlock.net/visualradio/visualradio/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Radio Immagine Tv" tvg-logo="https://i.imgur.com/iQlXRAB.png" tvg-country="IT" group-title="Italy",Radio Immagine Tv
 https://media.velcom.it:8081/RadioImmagineTV/index.fmp4.m3u8
 #EXTINF:-1 tvg-name="Radio Italia Cina Tv" tvg-logo="https://i.imgur.com/QGkyrO3.png" tvg-country="IT" group-title="Italy",Radio Italia Cina Tv
@@ -2324,7 +2299,6 @@ https://58f12ffd2447a.streamlock.net/KKTV01/livestream/playlist.m3u8
 https://58f12ffd2447a.streamlock.net/KKTVNapoli/livestream/playlist.m3u8
 #EXTINF:-1 tvg-name="Radio Libertà" tvg-logo="https://i.imgur.com/HRvPlf5.png" tvg-country="IT" group-title="Italy",Radio Libertà
 https://router.xdevel.com/video0s975360-67/stream/playlist_dvr.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Radio m2o Tv" tvg-logo="https://i.imgur.com/wl30UFj.png" tvg-id="m2oTV.it" tvg-country="IT" group-title="Italy",Radio m2o Tv
 https://4c4b867c89244861ac216426883d1ad0.msvdn.net/live/S62628868/uhdWBlkC1AoO/playlist.m3u8
 #EXTINF:-1 tvg-name="Radio Monte Kronio Tv (R.M.K.)" tvg-logo="https://i.imgur.com/t0I2Shi.jpg" tvg-country="IT" group-title="Italy",Radio Monte Kronio Tv (R.M.K.)
@@ -2375,7 +2349,6 @@ https://5f22d76e220e1.streamlock.net/reitv/reitv/playlist.m3u8
 https://live1.giocabet.tv/stream/6/index.m3u8
 #EXTINF:-1 tvg-name="Rete 7 Tv" tvg-logo="https://i.imgur.com/lUTxfoh.png" tvg-country="IT" group-title="Italy",Rete 7 Tv
 https://stream.ets-sistemi.it:2020/hls/rete7-live/rete7-live.m3u8
-# [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Rete 8 Vga" tvg-logo="https://i.imgur.com/3wF2AJX.jpg" tvg-country="IT" group-title="Italy",Rete 8 Vga
 https://64b16f23efbee.streamlock.net/rete8/rete8/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2394,6 +2367,7 @@ https://5926fc9c7c5b2.streamlock.net/9094/9094/playlist.m3u8
 https://5926fc9c7c5b2.streamlock.net/9332/9332/playlist.m3u8
 #EXTINF:-1 tvg-name="Rete Tv Italia" tvg-logo="https://i.imgur.com/lXGWoV9.png" tvg-country="IT" group-title="Italy",Rete Tv Italia
 https://57068da1deb21.streamlock.net/retetvitalia/retetvitalia/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Rete Veneta" tvg-logo="https://i.imgur.com/cInhQFp.png" tvg-country="IT" group-title="Italy",Rete Veneta
 http://wms.shared.streamshow.it/reteveneta/reteveneta/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2409,6 +2383,7 @@ https://w1.mediastreaming.it/calabriachannel/livestream/playlist.m3u8
 https://stream.ets-sistemi.it:8081/rticalabria/index.m3u8
 #EXTINF:-1 tvg-name="RTL 102.5 + Plus" tvg-logo="https://i.imgur.com/mPqDtCO.png" tvg-id="RTL1025Plus.it" tvg-country="IT" group-title="Italy",RTL 102.5 + Plus
 https://streamcdng14-dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S82929343/cAcsSu4Wecc5/chunklist_b5256000.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="RTM Manduria" tvg-logo="https://i.imgur.com/WwzU0EP.png" tvg-country="IT" group-title="Italy",RTM Manduria
 https://5f22d76e220e1.streamlock.net/rtm/rtm/playlist.m3u8
 #EXTINF:-1 tvg-name="RTN Napoli" tvg-logo="https://hostux.pics/images/2026/09/11/22_rtn_napoli29538077f1c13762.png" tvg-country="IT" group-title="Italy",RTN Napoli
@@ -2435,6 +2410,7 @@ https://7e1cc2454f2242afabe05cc0a2f483cd.msvdn.net/live/S30721796/ZS3Xu8mn5f0J/p
 https://stream1.aswifi.it/settv/live/index.m3u8
 #EXTINF:-1 tvg-name="Sesta Rete" tvg-logo="https://i.imgur.com/0B0S2gI.png" tvg-country="IT" group-title="Italy",Sesta Rete
 https://stream10.xdevel.com/video0s977089-1792/stream/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Sicilia 24 Tv" tvg-logo="https://i.imgur.com/GhQX36O.png" tvg-country="IT" group-title="Italy",Sicilia 24 Tv
 https://5f22d76e220e1.streamlock.net/sicilia24/sicilia24/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2454,7 +2430,6 @@ https://59d39900ebfb8.streamlock.net/SuperJtv/SuperJtv/playlist.m3u8
 https://5db313b643fd8.streamlock.net/SUPERSIXLombardia/SUPERSIXLombardia/playlist.m3u8
 #EXTINF:-1 tvg-name="Supertv" tvg-logo="https://i.imgur.com/7gUZcEh.png" tvg-country="IT" group-title="Italy",Supertv
 http://wms.shared.streamshow.it:1935/supertv/supertv/live.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="T9" tvg-logo="https://i.imgur.com/XzL05Py.png" tvg-country="IT" group-title="Italy",T9
 https://streaming.softwarecreation.it/tnove/tnove/playlist.m3u8
 #EXTINF:-1 tvg-name="TRC Santeramo" tvg-logo="https://i.imgur.com/VbYdS8P.jpg" tvg-country="IT" group-title="Italy",TRC Santeramo
@@ -2553,7 +2528,6 @@ http://185.202.128.1:1935/Telemolise4K/Telemolise4K/playlist.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Tele Nord Genova" tvg-logo="https://i.imgur.com/I6yegEK.png" tvg-country="IT" group-title="Italy",Tele Nord Genova
 https://64b16f23efbee.streamlock.net/telenord/telenord/playlist.m3u8
-# [CAIDO 2026-09-30]
 #EXTINF:-1 tvg-name="TG Norba 24" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Tg_norba24.png/500px-Tg_norba24.png" tvg-id="TGNorba24.it" tvg-country="IT" group-title="Italy",TG Norba 24
 https://live-telenorba.cdn.netrw.it/telenorba/hls/ccr/tgnorba/master.m3u8
 #EXTINF:-1 tvg-name="TGS Telegiornale di Sicilia" tvg-logo="https://hostux.pics/images/2026/09/11/29_tgs_telegiornale_di_sicilia6c915db0091ed7a6.png" tvg-chno="12" tvg-country="IT" group-title="Italy",TGS Telegiornale di Sicilia
@@ -2585,6 +2559,7 @@ https://stream3.xdevel.com/video0s975441-151/stream/playlist_dvr.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Tele Pordenone" tvg-logo="https://i.imgur.com/dbYwXwg.png" tvg-country="IT" group-title="Italy",Tele Pordenone
 https://video.wifi4all.it/telepn/telepn.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Tele Quattro Trieste" tvg-logo="https://i.imgur.com/MFxQxve.png" tvg-country="IT" group-title="Italy",Tele Quattro Trieste
 http://wms.shared.streamshow.it/telequattro/telequattro/playlist.m3u8
 #EXTINF:-1 tvg-name="Tele Radio Ercolano" tvg-logo="https://i.imgur.com/YPuoy8N.jpg" tvg-country="IT" group-title="Italy",Tele Radio Ercolano
@@ -2662,7 +2637,6 @@ https://64b16f23efbee.streamlock.net/telegenova/telegenova/playlist.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Teleiblea" tvg-logo="https://i.imgur.com/n1THygZ.png" tvg-country="IT" group-title="Italy",Teleiblea
 https://64b16f23efbee.streamlock.net/teleiblea/teleiblea/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Teleitalia 41" tvg-logo="https://i.imgur.com/lTuPSOn.png" tvg-country="IT" group-title="Italy",Teleitalia 41
 https://streaming.softwarecreation.it/teleitalia/teleitalia/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2724,6 +2698,7 @@ https://stream4.xdevel.com/video0s976062-1263/stream/playlist_dvr.m3u8
 https://5e73cf528f404.streamlock.net/TrentinoTV/livestream/playlist.m3u8
 #EXTINF:-1 tvg-name="Tuscia Sabina 2000Tv" tvg-logo="https://i.imgur.com/Tq5nEAy.png" tvg-country="IT" group-title="Italy",Tuscia Sabina 2000Tv
 http://ts2000tv.streaming.nextware.it:8081/ts2000tv/ts2000tv/chunks.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Tv 12" tvg-logo="https://i.imgur.com/oxv08pJ.png" tvg-country="IT" group-title="Italy",Tv 12
 https://59d7d6f47d7fc.streamlock.net/tv12/tv12/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2837,9 +2812,9 @@ https://fujitv4.mov3.co/hls/fujitv.m3u8
 https://naori-test.netgenx.site/pxx.php?shk_cid=bs02#.m3u8
 #EXTINF:-1 tvg-name="NHK BSP4K" tvg-logo="https://i.imgur.com/uvPpFo5.png" tvg-id="NHKBSP4K.jp" tvg-chno="BS4K101" tvg-country="JP" group-title="日本 / Japan",NHK BSP4K
 https://naori-test.netgenx.site/pxx.php?shk_cid=bs01#.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="BS日テレ" tvg-logo="https://i.imgur.com/26ATUNc.png" tvg-id="BSNipponTV.jp" tvg-chno="BS141" tvg-country="JP" group-title="日本 / Japan",BS日テレ
 https://naori-test.netgenx.site/pxx.php?shk_cid=bs03#.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="BS朝日" tvg-logo="https://i.imgur.com/Cl68ZMA.png" tvg-id="BSAsahi.jp" tvg-chno="BS151" tvg-country="JP" group-title="日本 / Japan",BS朝日
 https://naori-test.netgenx.site/pxx.php?shk_cid=bs04#.m3u8
 # [CAIDO 2026-10-02]
@@ -2863,6 +2838,7 @@ https://naori-test.netgenx.site/pxx.php?shk_cid=bs08#.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="BS10" tvg-logo="https://i.imgur.com/KPZiuHl.png" tvg-id="jcom_120_110_4" tvg-chno="BS200" tvg-country="JP" group-title="日本 / Japan",BS10
 https://naori-test.netgenx.site/pxx.php?shk_cid=bs10#.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="BS10スターチャンネル" tvg-logo="https://i.imgur.com/SN0ED0U.png" tvg-id="jcom_120_200_4" tvg-chno="BS201" tvg-country="JP" group-title="日本 / Japan",BS10スターチャンネル
 https://naori-test.netgenx.site/pxx.php?shk_cid=bs07#.m3u8
 # [CAIDO 2026-09-29]
@@ -2891,8 +2867,10 @@ https://gstv-tnz-gsmediastreaming.preview-jpea.channel.media.azure.net/dfd06b62-
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="NHK WORLD JAPAN" tvg-logo="https://i.imgur.com/Mhw1Ihk.png" tvg-id="NHKWorldJapan.jp" tvg-chno="JCOM307" tvg-country="JP" group-title="日本 / Japan",NHK WORLD JAPAN
 https://master.nhkworld.jp/nhkworld-tv/playlist/live.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="ウェザーニュースLiVE" tvg-logo="https://channel.rakuten.co.jp/service/img/logo/chlogo-with-number/106_whethernews.png" tvg-id="rch_45" tvg-chno="CH 106" tvg-country="JP" group-title="日本 / Japan",ウェザーニュースLiVE
 https://rch01e-alive-hls.akamaized.net/38fb45b25cdb05a1/out/v1/4e907bfabc684a1dae10df8431a84d21/index.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TOKYO MX チャンネル" tvg-logo="https://channel.rakuten.co.jp/service/img/logo/chlogo-with-number/108_mx.png" tvg-id="" tvg-chno="CH 108" tvg-country="JP" group-title="日本 / Japan",TOKYO MX チャンネル
 https://cdn-uw2-prod.tsv2.amagi.tv/linear/amg01287-rakutentvjapan-tokyomx-cmaf-rakutenjp/playlist.m3u8
 #EXTINF:-1 tvg-name="日テレNEWS" tvg-logo="https://channel.rakuten.co.jp/service/img/logo/chlogo-with-number/104_ntvnews.png" tvg-id="rch_47" tvg-chno="rch_47" tvg-country="JP" group-title="日本 / Japan",日テレNEWS
@@ -2938,7 +2916,6 @@ https://allanf181.github.io/adaptive-streams/streams/kr/SBSTV.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="KNN TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/KNN_logo.svg/500px-KNN_logo.svg.png" tvg-id="KNNTV.kr" tvg-chno="8" tvg-country="KR" group-title="Korea",KNN TV
 http://211.220.195.200:1935/live/mp4:KnnTV.sdp/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="KBC TV" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/KBC_Gwangju_Broadcasting_logo.svg/500px-KBC_Gwangju_Broadcasting_logo.svg.png" tvg-id="KBCTV.kr" tvg-chno="10" tvg-country="KR" group-title="Korea",KBC TV
 https://vod.ikbc.co.kr/KBCTV/tv/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -2952,11 +2929,13 @@ https://61ff3340258d2.streamlock.net/jtv_live/myStream/playlist.m3u8
 http://1.222.207.80:1935/live/cjbtv/playlist.m3u8
 #EXTINF:-1 tvg-name="G1 TV" tvg-logo="https://i.imgur.com/TYYffUe.png" tvg-id="G1TV.kr" tvg-chno="15" tvg-country="KR" group-title="Korea",G1 TV
 http://61.82.49.4:1935/live/_definst_/tv.stream/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="JIBS TV" tvg-logo="https://i.imgur.com/RVWpBoz.png" tvg-id="JIBSTV.kr" tvg-chno="16" tvg-country="KR" group-title="Korea",JIBS TV
 http://123.140.197.22/stream/1/play.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="OBS TV" tvg-logo="https://i.imgur.com/oWB3ApR.png" tvg-id="OBSGyeonginTV.kr" tvg-chno="17" tvg-country="KR" group-title="Korea",OBS TV
 https://allanf181.github.io/adaptive-streams/streams/kr/OBSGyeonginTV.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Arirang" tvg-logo="https://i.imgur.com/RuHZ6Dx.png" tvg-id="ArirangTV.kr" tvg-chno="18" tvg-country="KR" group-title="Korea",Arirang
 http://amdlive.ctnd.com.edgesuite.net/arirang_1ch/smil:arirang_1ch.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="EBS Kids" tvg-logo="https://i.imgur.com/62oo8Bx.png" tvg-id="EBSKids.kr" tvg-chno="19" tvg-country="KR" group-title="Korea",EBS Kids Ⓢ
@@ -2996,7 +2975,6 @@ https://shd-gcp-live.edgenextcdn.net/live/bitmovin-mtv-lebanon/b8ebb2a5affb812f1
 # [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="Tele Liban" tvg-logo="" tvg-id="TeleLiban.lb" tvg-chno="2" group-title="Lebanon",Tele Liban
 https://cdn.catiacast.video/abr/ed8f807e2548db4507d2a6f4ba0c4a06/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Al Manar" tvg-logo="" tvg-id="AlManar.lb" tvg-chno="3" group-title="Lebanon",Al Manar
 https://edge.fastpublish.me/live/index.m3u8
 #EXTINF:-1 tvg-name="Al Mayadeen" tvg-logo="" tvg-id="AlMayadeenTV.lb" tvg-chno="4" group-title="Lebanon",Al Mayadeen
@@ -3017,6 +2995,7 @@ https://svs.itworkscdn.net/alimanlive/imantv.smil/playlist.m3u8
 http://185.105.4.151:8080/_defapp_/ittihad/index.m3u8
 #EXTINF:-1 tvg-name="CharityTV" tvg-logo="" tvg-id="CharityTV.lb" tvg-chno="12" group-title="Lebanon",CharityTV
 http://185.105.4.236:1935/live/ngrp:livestream_all/live.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Falestinona Channel" tvg-logo="" tvg-id="FalestinonaChannel.lb" tvg-chno="13" group-title="Lebanon",Falestinona Channel
 https://ffs3.gulfsat.com/Falestinona-TV/index.fmp4.m3u8
 #EXTINF:-1 tvg-name="LRT TV" tvg-logo="https://i.imgur.com/FL2ZuGC.png" tvg-id="LRTTV.lt" tvg-chno="1" tvg-country="LT" group-title="Lithuania",LRT TV
@@ -3110,7 +3089,6 @@ https://v0.trm.md/static/streaming-playlists/hls/9b79338b-1870-4cd7-91d4-0f6ce5c
 https://v0.trm.md/static/streaming-playlists/hls/d5fafab0-9c37-4746-9e7a-b2d6c0427015/master.m3u8
 #EXTINF:-1 tvg-name="TVR Moldova" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/TVR_Moldova_Logo_2022.svg/500px-TVR_Moldova_Logo_2022.svg.png" tvg-id="TVRMoldova.md" tvg-chno="7" tvg-country="MD" group-title="Moldova",TVR Moldova Ⓖ
 https://tvr-moldova.lg.mncdn.com/tvrmoldova/smil:tvrmoldova.smil/chunklist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Sor TV" tvg-logo="https://i.imgur.com/BcfZgD8.png" tvg-id="SorTV.md" tvg-chno="1" tvg-country="MD" group-title="Moldova",Sor TV
 http://188.237.212.16:8888/live/cameraFeed.m3u8
 #EXTINF:-1 tvg-name="Vocea Basarabiei" tvg-logo="https://i.imgur.com/irP8QLs.png" tvg-id="VoceaBasarabieiTV.md" tvg-chno="5" tvg-country="MD" group-title="Moldova",Vocea Basarabiei
@@ -3253,7 +3231,6 @@ https://rtcg-live-open-geo.morescreens.com/RTCG_1_002/playlist.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="TVCG 3" tvg-logo="https://i.imgur.com/XC7zVog.png" tvg-id="TVCG3.me" tvg-chno="3" tvg-country="ME" group-title="Montenegro",TVCG 3 Ⓖ
 https://rtcg-live-open-geo.morescreens.com/RTCG_1_003/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TVCG MNE" tvg-logo="https://i.imgur.com/pf8VEwf.png" tvg-id="TVCGMNE.me" tvg-chno="99" tvg-country="ME" group-title="Montenegro",TVCG MNE
 https://rtcg-live-open.morescreens.com/RTCG_1_004/playlist.m3u8
 #EXTINF:-1 tvg-name="Omrop Fryslân" tvg-logo="https://i.imgur.com/0VKJLAK.png" tvg-id="OmropFryslanTV.nl" tvg-chno="1" tvg-country="NL" group-title="Netherlands",Omrop Fryslân
@@ -3304,7 +3281,6 @@ https://video1.getstreamhosting.com:1936/8398/8398/playlist.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="TVC News" tvg-logo="https://i.imgur.com/jaSq18B.png" tvg-id="TVCNews.ng" tvg-chno="9" tvg-country="NG" group-title="Nigeria",TVC News Ⓨ
 https://www.youtube.com/tvcnewsnigeria/live
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Waffi TV" tvg-logo="https://i.imgur.com/ejlCb5g.png" tvg-id="WaffiTV.ng" tvg-chno="10" tvg-country="NG" group-title="Nigeria",Waffi TV
 https://oqgdro3xd4rm-hls-live.5centscdn.com/waffiitvstreaminglivetfmediacast/e0885d428bea69e372309657f3bd895f.sdp/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -3475,6 +3451,7 @@ https://streaming-live.rtp.pt/liverepeater/rtp2HD.smil/playlist.m3u8
 https://streaming-live.rtp.pt/livetvhlsDVR/rtpnHDdvr.smil/playlist.m3u8?DVR=
 #EXTINF:-1 tvg-name="SIC" tvg-logo="https://i.imgur.com/SPMqiDG.png" tvg-id="SIC.pt" tvg-chno="4" tvg-country="PT" group-title="Portugal",SIC
 https://production-fast-sic.content.okast.tv/fa2e8c4385712f9aa54bbe52b1bd9b6b/channels/d9070446-8448-455e-8075-773b1ba12562/fc831b20-f252-4e7d-8cc5-2d05f4d43c1c/media_.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TVI" tvg-logo="https://upload.wikimedia.org/wikipedia/en/6/63/TVI_logo_2017.png" tvg-id="TVI.pt" tvg-chno="5" tvg-country="PT" group-title="Portugal",TVI
 https://raw.githubusercontent.com/thomraider12/canaistvpt/main/m3u8s/tvi.m3u8
 # [CAIDO 2026-09-29]
@@ -3514,7 +3491,6 @@ https://qatartv.akamaized.net/hls/live/20000612/qtvquran/master1080p.m3u8
 https://alrayyancdn.vidgyor.com/pub-noalrayy3pwz0l/liveabr/playlist_dvr.m3u8
 #EXTINF:-1 tvg-name="Al Rayyan Old TV" tvg-logo="https://i.imgur.com/4qB5iN0.png" tvg-id="AlRayyanOldTV.qa" tvg-chno="5" tvg-country="QA" group-title="Qatar",Al Rayyan Old TV
 https://alrayyancdn.vidgyor.com/pub-nooldraybinbdh/liveabr/playlist_dvr.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Al Jazeera Mubasher" tvg-logo="https://upload.wikimedia.org/wikipedia/en/9/90/Al_Jazeera_Mubasher_logo.png" tvg-id="AlJazeeraMubasher.qa" tvg-chno="6" tvg-country="QA" group-title="Qatar",Al Jazeera Mubasher
 https://live-hls-web-ajm.getaj.net/AJM/index.m3u8
 #EXTINF:-1 tvg-name="Al Jazeera 2" tvg-logo="https://i.imgur.com/BB93NQP.png" tvg-id="AlJazeeraChannel2.qa" tvg-chno="7" tvg-country="QA" group-title="Qatar",Al Jazeera 2
@@ -3533,14 +3509,12 @@ https://liveeu-gcp.alkassdigital.net/alkass3-p/main.m3u8
 https://liveeu-gcp.alkassdigital.net/alkass4-p/main.m3u8
 #EXTINF:-1 tvg-name="Al Araby TV" tvg-logo="https://i.imgur.com/YMqWEe4.png" tvg-id="AlArabyTV.qa" tvg-chno="12" tvg-country="QA" group-title="Qatar",Al Araby TV
 https://live.kwikmotion.com/alaraby1live/alaraby_abr/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TVR 1" tvg-logo="https://i.imgur.com/CKQ7mpB.png" tvg-id="TVR1.ro" tvg-chno="1" tvg-country="RO" group-title="Romania",TVR 1 Ⓖ
 https://tvr-1.lg.mncdn.com/tvr1/smil:tvr1.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="TVR 2" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/4/4c/TVR_2_2022_logo.png" tvg-id="TVR2.ro" tvg-chno="2" tvg-country="RO" group-title="Romania",TVR 2 Ⓖ
 https://tvr-2.lg.mncdn.com/tvr2/smil:tvr2.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="TVR 3" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/0/0d/TVR3_2022.png" tvg-id="TVR3.ro" tvg-chno="3" tvg-country="RO" group-title="Romania",TVR 3 Ⓖ
 https://tvr-3.lg.mncdn.com/tvr3/smil:tvr3.smil/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TVR Info" tvg-logo="https://i.imgur.com/7oE7ThR.png" tvg-id="TVRInfo.ro" tvg-chno="4" tvg-country="RO" group-title="Romania",TVR Info Ⓖ
 https://tvr-info.lg.mncdn.com/tvrinfo/smil:tvrinfo.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="TVR International" tvg-logo="https://i.imgur.com/AlW8jyl.png" tvg-id="TVRInternational.ro" tvg-chno="5" tvg-country="RO" group-title="Romania",TVR International Ⓖ
@@ -3564,6 +3538,7 @@ https://tvr-craiova.lg.mncdn.com/tvrcraiova/smil:tvrcraiova.smil/playlist.m3u8
 http://82.208.141.70:8778/1.m3u8
 #EXTINF:-1 tvg-name="TVR Timișoara" tvg-logo="https://i.imgur.com/Db3DV6H.png" tvg-id="TVRTimisoara.ro" tvg-chno="4" tvg-country="RO" group-title="Romania",TVR Timișoara Ⓖ
 https://tvr-timisoara.lg.mncdn.com/tvrtimisoara/smil:tvrtimisoara.smil/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TVR Tîrgu-Mureș" tvg-logo="https://i.imgur.com/9Hptdqj.png" tvg-id="TVRTarguMures.ro" tvg-chno="5" tvg-country="RO" group-title="Romania",TVR Tîrgu-Mureș Ⓖ
 https://tvr-tgmures.lg.mncdn.com/tvrtgmures/smil:tvrtgmures.smil/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -3580,7 +3555,6 @@ http://ott-cdn.ucom.am/s17/index.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Пятый канал" tvg-logo="https://i.imgur.com/u8Q69D9.png" tvg-id="5Kanal.ru" tvg-chno="5" tvg-country="RU" group-title="Russia",Пятый канал Ⓢ
 https://streaming.televizor-24-tochka.ru/live/8.m3u8
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="Россия-Культура" tvg-logo="https://i.imgur.com/S12gaLc.png" tvg-id="RussiaK.ru" tvg-chno="6" tvg-country="RU" group-title="Russia",Россия-Культура Ⓢ
 https://live.smotrim.ru/vgtrk/0/kultura-hd/index.m3u8
 # [CAIDO 2026-09-29]
@@ -3628,7 +3602,6 @@ http://ott-cdn.ucom.am/s19/index.m3u8
 https://streaming102.interskytech.com/live/618.m3u8
 #EXTINF:-1 tvg-name="РБК" tvg-logo="https://i.imgur.com/P2Qii5B.png" tvg-id="RBKTV.ru" tvg-chno="22" tvg-country="RU" group-title="Russia",РБК
 http://92.50.128.180/utv/1358/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="RT Д Русский" tvg-logo="https://i.imgur.com/v5fpEBo.png" tvg-id="RTD.ru" tvg-chno="23" tvg-country="RU" group-title="Russia",RT Д Русский Ⓖ
 https://hls.rt.com/hls/rtdru.m3u8
 # [CAIDO 2026-09-29]
@@ -3667,6 +3640,7 @@ https://vgtrkregion-reg.cdnvideo.ru/vgtrk/kaliningrad/russia1-hd/index.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Катунь 24" tvg-logo="https://i.imgur.com/mr2Peqj.png" tvg-id="Katun24.ru" tvg-country="RU" group-title="Russia",Катунь 24 Ⓞ
 https://ok.ru/video/1166706155179
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Крым 24" tvg-logo="https://i.imgur.com/k4C0uvp.png" tvg-id="Crimea24.ru" tvg-country="RU" group-title="Russia",Крым 24
 https://cdn.1tvcrimea.ru/24tvcrimea.m3u8
 # [CAIDO 2026-09-29]
@@ -3732,10 +3706,8 @@ https://d2hrvno5bw6tg2.cloudfront.net/smrtv-ch01/smil:ch-01.smil/chunklist.m3u8
 https://d2hrvno5bw6tg2.cloudfront.net/smrtv-ch02/smil:ch-02.smil/master.m3u8
 #EXTINF:-1 tvg-name="Al Saudiya" tvg-logo="https://i.imgur.com/GRQTndk.png" tvg-id="AlSaudiya.sa" tvg-chno="1" tvg-country="SA" group-title="Saudi Arabia",Al Saudiya
 https://shd-gcp-live.edgenextcdn.net/live/bitmovin-saudi-tv/2ad66056b51fd8c1b624854623112e43/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="SBC Saudi Arabia" tvg-logo="https://i.imgur.com/9JSQglj.png" tvg-id="SBC.sa" tvg-chno="2" tvg-country="SA" group-title="Saudi Arabia",SBC Saudi Arabia
 https://shd-gcp-live.edgenextcdn.net/live/bitmovin-sbc/90e09c0c28db26435799b4a14892a167/index.m3u8
-# [CAIDO 2026-09-30]
 #EXTINF:-1 tvg-name="Thikrayat" tvg-logo="https://i.imgur.com/AKa1X9d.png" tvg-id="ThikrayatTV.sa" tvg-chno="3" tvg-country="SA" group-title="Saudi Arabia",Thikrayat
 https://shd-gcp-live.edgenextcdn.net/live/bitmovin-thikrayat/8cfa8fe0c96275735745b89c683b27e3/index.m3u8
 # [CAIDO 2026-10-02]
@@ -3811,6 +3783,7 @@ https://cdnsk003.panaccess.com/local/Markiza_Klasik/index.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Markíza TN Live" tvg-logo="https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/slovakia/markiza-sk.png" tvg-id="" tvg-chno="6" tvg-country="SK" group-title="Slovakia",Markíza TN Live
 https://sktv.mxnticek.eu/new/stream.php?ch=Mark%C3%ADza%20TN%20Live
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="JOJ" tvg-logo="https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/slovakia/joj-sk.png" tvg-id="JOJ.sk" tvg-chno="7" tvg-country="SK" group-title="Slovakia",JOJ
 https://sktv.mxnticek.eu/new/stream.php?ch=JOJ
 # [CAIDO 2026-10-02]
@@ -3819,11 +3792,13 @@ https://sktv.mxnticek.eu/new/stream.php?ch=JOJ%20Plus
 # [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Wau" tvg-logo="https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/slovakia/joj-wau-sk.png" tvg-id="JOJWau.sk" tvg-chno="9" tvg-country="SK" group-title="Slovakia",Wau
 https://sktv.mxnticek.eu/new/stream.php?ch=Wau
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="JOJ 24" tvg-logo="https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/slovakia/joj-24-sk.png" tvg-id="JOJ24.sk" tvg-chno="10" tvg-country="SK" group-title="Slovakia",JOJ 24
 https://sktv.mxnticek.eu/new/stream.php?ch=JOJ%2024
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="JOJ Šport" tvg-logo="https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/slovakia/joj-sport-sk.png" tvg-id="JOJSport.sk" tvg-chno="11" tvg-country="SK" group-title="Slovakia",JOJ Šport
 https://sktv.mxnticek.eu/new/stream.php?ch=JOJ%20%C5%A0port
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Jojko" tvg-logo="https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/slovakia/jojko-sk.png" tvg-id="Jojko.sk" tvg-chno="12" tvg-country="SK" group-title="Slovakia",Jojko
 https://sktv.mxnticek.eu/new/stream.php?ch=Jojko
 # [CAIDO 2026-09-29]
@@ -3843,8 +3818,10 @@ https://sktv.mxnticek.eu/new/stream.php?ch=%C5%A0port
 https://sktv.mxnticek.eu/new/stream.php?ch=STVR%20%3AO
 #EXTINF:-1 tvg-name="NR SR" tvg-logo="" tvg-id="" tvg-chno="18" tvg-country="SK" group-title="Slovakia",NR SR
 https://n11.stv.livebox.sk/stv-tv/stv4.stream/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="STVR Live" tvg-logo=" Liv" tvg-id="" tvg-chno="19" tvg-country="SK" group-title="Slovakia",STVR Live
 https://sktv.mxnticek.eu/new/stream.php?ch=STVR%20Live
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="TA3" tvg-logo="https://raw.githubusercontent.com/tv-logo/tv-logos/main/countries/slovakia/ta3-sk.png" tvg-id="TA3.sk" tvg-chno="20" tvg-country="SK" group-title="Slovakia",TA3
 https://sktv.mxnticek.eu/new/stream.php?ch=TA3
 # [CAIDO 2026-09-29]
@@ -3906,7 +3883,6 @@ https://www.youtube.com/c/SLNTVLIVESTREAM/live
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="La 1" tvg-logo="https://i.imgur.com/NbesiPn.png" tvg-id="La1.es" tvg-chno="1" tvg-country="ES" group-title="Spain",La 1
 https://rtvelivestream.rtve.es/rtvesec/la1/la1_main_dvr.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="La 2" tvg-logo="https://i.imgur.com/DmuTwDw.png" tvg-id="La2.es" tvg-chno="2" tvg-country="ES" group-title="Spain",La 2
 https://rtvelivestream.rtve.es/rtvesec/la2/la2_main_dvr.m3u8
 #EXTINF:-1 tvg-name="24h" tvg-logo="https://i.imgur.com/ZKR2jKr.png" tvg-id="24h.es" tvg-chno="7" tvg-country="ES" group-title="Spain",24h
@@ -3999,18 +3975,14 @@ https://d2ymuyhevki1a1.cloudfront.net/wct-ddd2992e-86fc-4611-a491-7f392259e9ba/c
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Aragón TV" tvg-logo="https://i.imgur.com/8H3Q07b.png" tvg-id="AragonTV.es" tvg-chno="9" tvg-country="ES" group-title="Spain",Aragón TV Ⓢ
 https://cartv.streaming.aranova.es/hls/live/aragontv_canal1.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="ETB1" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/ETB1_2022_logo.svg/500px-ETB1_2022_logo.svg.png" tvg-id="ETB1.es" tvg-chno="10" tvg-country="ES" group-title="Spain",ETB1
 https://multimedia.eitb.eus/live-content/etb1hd-hls/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="ETB2" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/ETB2_2022_logo.svg/500px-ETB2_2022_logo.svg.png" tvg-id="ETB2.es" tvg-chno="11" tvg-country="ES" group-title="Spain",ETB2
 https://multimedia.eitb.eus/live-content/etb2hd-hls/master.m3u8
 #EXTINF:-1 tvg-name="TV3Cat" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/TV3CAT.svg/500px-TV3CAT.svg.png" tvg-id="TV3CAT.es" tvg-chno="12" tvg-country="ES" group-title="Spain",TV3Cat Ⓖ
 https://directes3-tv-int.3catdirectes.cat/live-content/tvi-hls/master.m3u8
-# [CAIDO 2026-10-01]
 #EXTINF:-1 tvg-name="3/24" tvg-logo="https://raw.githubusercontent.com/tv-logo/tv-logos/refs/heads/main/countries/spain/3-24-es.png" tvg-id="324.es" tvg-chno="13" tvg-country="ES" group-title="Spain",3/24
 https://directes-tv-int.3catdirectes.cat/live-origin/canal324-hls/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Bon Dia" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/4/4f/Logo_Bon_Dia_TV.png" tvg-id="BonDiaTV.es" tvg-chno="14" tvg-country="ES" group-title="Spain",Bon Dia
 https://directes-tv-int.3catdirectes.cat/live-content/bondia-hls/master.m3u8
 # [CAIDO 2026-09-29]
@@ -4042,7 +4014,6 @@ https://rtvelivestream.rtve.es/rtvesec/can/la1_can_main_dvr.m3u8
 # [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="La 2 (Catalunya)" tvg-logo="https://i.imgur.com/DmuTwDw.png" tvg-id="La2Catalunya.es" tvg-chno="20" tvg-country="ES" group-title="Spain",La 2 (Catalunya)
 https://rtvelivestream.rtve.es/rtvesec/cat/la2_cat_main_dvr.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="La 2 (Canarias)" tvg-logo="https://i.imgur.com/DmuTwDw.png" tvg-id="La2Canarias.es" tvg-chno="21" tvg-country="ES" group-title="Spain",La 2 (Canarias)
 https://ztnr.rtve.es/ztnr/5468585.m3u8
 # [CAIDO 2026-09-29]
@@ -4063,7 +4034,6 @@ https://svt-live-channel.akamaized.net/l6/se/svtb/manifest.mpd?format=dash&defau
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Kunskapskanalen" tvg-logo="https://i.imgur.com/9YBxoGc.png" tvg-id="Kunskapskanalen.se" tvg-chno="99" tvg-country="SE" group-title="Sweden",Kunskapskanalen Ⓖ
 https://svt-live-channel.akamaized.net/l6/se/svtk/manifest.mpd?format=dash&defaultSubLang=1
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Di TV" tvg-logo="https://i.imgur.com/zApTDWn.png" tvg-id="DiTV.se" tvg-chno="121" tvg-country="SE" group-title="Sweden",Di TV
 https://cdn0-03837-liveedge0.dna.ip-only.net/03837-liveedge0/smil:03837-tx4/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -4274,10 +4244,8 @@ https://live.blaze.tv/live7/blaze/bitrate1.isml/live.m3u8
 https://live-tbn-ssai.simplestreamcdn.com/v1/master/774d979dd66704abea7c5b62cb34c6815fda0d35/tbn-live/manifest.m3u8
 #EXTINF:-1 tvg-name="True Crime" tvg-logo="https://raw.githubusercontent.com/dp247/mediaportal-uk-logos/master/TV/True-Crime-UK.png" tvg-id="TrueCrime.uk" tvg-chno="67" tvg-country="GB" group-title="UK",True Crime Ⓢ
 https://b6cca454.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/U2Ftc3VuZy1nYl9UcnVlQ3JpbWVVS2Zyb21DQlNSZWFsaXR5X0hMUw/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Jewellery Maker" tvg-logo="https://i.imgur.com/O7SdkBh.png" tvg-id="JewelleryMaker.uk" tvg-chno="72" tvg-country="GB" group-title="UK",Jewellery Maker
 https://lo3.gemporia.com/abrjewellerymaker/smil:livestreamFullHD.smil/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Hobby Maker" tvg-logo="https://i.imgur.com/VWHp5Tl.png" tvg-id="HobbyMaker.uk" tvg-chno="73" tvg-country="GB" group-title="UK",Hobby Maker
 https://lo3.gemporia.com/abrhobbymakerukgfx/smil:livestreamFullHD.smil/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -4333,6 +4301,7 @@ https://lightning-now80s-samsunguk.amagi.tv/playlist.m3u8
 https://lightning-now90s-samsungnz.amagi.tv/playlist.m3u8
 #EXTINF:-1 tvg-name="BBC Radio 1" tvg-logo="https://experiencersinternational.github.io/tvsetup/tvg-ico/bbcrd1-epg.png" tvg-id="BBCRadio1.uk" tvg-chno="1" tvg-country="GB" group-title="UK",BBC Radio 1
 https://lsn.lv/bbcradio.m3u8?station=bbc_radio_one&bitrate=320000
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="BBC Radio 2" tvg-logo="https://experiencersinternational.github.io/tvsetup/tvg-ico/bbcrd2-epg.png" tvg-id="BBCRadio2.uk" tvg-chno="2" tvg-country="GB" group-title="UK",BBC Radio 2
 https://lsn.lv/bbcradio.m3u8?station=bbc_radio_two&bitrate=320000
 #EXTINF:-1 tvg-name="BBC Radio 3" tvg-logo="https://experiencersinternational.github.io/tvsetup/tvg-ico/bbcrd3-epg.png" tvg-id="BBCRadio3.uk" tvg-chno="3" tvg-country="GB" group-title="UK",BBC Radio 3
@@ -4493,7 +4462,6 @@ https://stream.skynewsarabia.com/hls/sna.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Baynounah TV" tvg-logo="https://static.wikia.nocookie.net/logopedia/images/6/60/Baynounah_tv_2023.png" tvg-id="BaynounahTV.ae" tvg-chno="15" tvg-country="AE" group-title="United Arab Emirates",Baynounah TV
 https://vo-live.cdb.cdn.orange.com/Content/Channel/Baynounah/HLS/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Ajman TV" tvg-logo="https://pbs.twimg.com/profile_images/1085187553563561990/KRKuK_iW_400x400.jpg" tvg-id="AjmanTV.ae" tvg-chno="16" tvg-country="AE" group-title="United Arab Emirates",Ajman TV
 https://cdn1.logichost.in/ajmantv/live/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -4511,7 +4479,6 @@ https://vo-live.cdb.cdn.orange.com/Content/Channel/AbuDhabiSportsChannel2/HLS/in
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="National Geographic Abu Dhabi" tvg-logo="https://i.imgur.com/fNA00VF.png" tvg-id="NationalGeographicAbuDhabi.ae" tvg-chno="4" tvg-country="AE" group-title="United Arab Emirates",National Geographic Abu Dhabi
 https://admdn2.cdn.mangomolo.com/nagtv/smil:nagtv.stream.smil/playlist.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Ajman TV" tvg-logo="https://www.lyngsat.com/logo/tv/aa/ajman-tv-ae.png" tvg-id="AjmanTV.ae" tvg-chno="1" tvg-country="AE" group-title="United Arab Emirates",Ajman TV
 https://cdn1.logichost.in/ajmantv/live/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -4621,7 +4588,6 @@ https://live.gideo.video/americateve2/master.m3u8
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Venevisión" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Venevisi%C3%B3n2007.svg/500px-Venevisi%C3%B3n2007.svg.png" tvg-id="Venevision.ve" tvg-chno="1" tvg-country="VE" group-title="Venezuela",Venevisión
 http://177.234.249.178:8888/VENEVISION/index.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Televen" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/c/c0/Televen_logo.PNG" tvg-id="Televen.ve" tvg-chno="4" tvg-country="VE" group-title="Venezuela",Televen
 http://181.78.8.199:8000/play/a09j/index.m3u8
 #EXTINF:-1 tvg-name="Globovisión" tvg-logo="https://upload.wikimedia.org/wikipedia/en/4/47/Globovisi%C3%B3n_logo_2013.png" tvg-id="Globovision.ve" tvg-chno="6" tvg-country="VE" group-title="Venezuela",Globovisión
@@ -4702,7 +4668,6 @@ http://service-stitcher.clusters.pluto.tv/stitch/hls/channel/591105034c1806b4743
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Film Detective" tvg-logo="https://i.imgur.com/4aFLH9g.png" group-title="VOD Movies (EN)",Film Detective
 https://dai.google.com/linear/hls/event/OYH9J7rZSK2fabKXWAYcfA/master.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Action Hollywood Movies" tvg-logo="" tvg-id="" group-title="VOD Movies (EN)",Action Hollywood Movies
 https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg01076-lightningintern-actionhollywood-samsungnz/playlist.m3u8
 #EXTINF:-1 tvg-name="Now 70's" tvg-logo="" tvg-id="" group-title="Music (EN)",Now 70's
@@ -4727,7 +4692,6 @@ https://dwamdstream103.akamaized.net/hls/live/2015526/dwstream103/index.m3u8
 https://arabic-livews.cgtn.com/hls/LSveq57bErWLinBnxosqjisZ220802LSTefTAS9zc9mpU08y3np9TH220802cd/playlist.m3u8
 #EXTINF:-1 tvg-name="Sky News العربية" tvg-logo="https://upload.wikimedia.org/wikipedia/en/thumb/5/57/Sky_News_logo.svg/500px-Sky_News_logo.svg.png" tvg-id="SkyNewsArabia.ae" tvg-chno="7" group-title="News (AR)",Sky News العربية
 https://stream.skynewsarabia.com/hls/sna.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="RT العربية" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Russia-today-logo.svg/500px-Russia-today-logo.svg.png" tvg-id="RTArabic.ru" tvg-chno="8" group-title="News (AR)",RT العربية
 https://rt-arb.rttv.com/dvr/rtarab/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -4823,7 +4787,6 @@ https://www.youtube.com/channelstelevision/live
 https://i.mjh.nz/sky-news-now.m3u8
 #EXTINF:-1 tvg-name="Global News" tvg-logo="https://i.imgur.com/xk1QOhW.png" tvg-id="GlobalNews.ca" tvg-chno="33" group-title="News",Global News
 https://live.corusdigitaldev.com/groupd/live/49a91e7f-1023-430f-8d66-561055f3d0f7/live.isml/.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Russia Today" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Russia-today-logo.svg/500px-Russia-today-logo.svg.png" tvg-id="RT.ru" tvg-chno="34" group-title="News",Russia Today Ⓖ
 https://rt-glb.rttv.com/live/rtnews/playlist.m3u8
 # [CAIDO 2026-09-29]
@@ -4884,7 +4847,6 @@ https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/stream04/strea
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="CGTN Español" tvg-logo="https://i.imgur.com/fMsJYzl.png" tvg-id="CGTNSpanish.cn" tvg-chno="4" group-title="News (ES)",CGTN Español
 https://news.cgtn.com/resource/live/espanol/cgtn-e.m3u8
-# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="RT Español" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Russia-today-logo.svg/500px-Russia-today-logo.svg.png" tvg-id="RTenEspanol.ru" tvg-chno="5" group-title="News (ES)",RT Español Ⓖ
 https://rt-esp.rttv.com/dvr/rtesp/playlist.m3u8
 #EXTINF:-1 tvg-name="RTVE 24H" tvg-logo="https://i.imgur.com/WTDKOoM.png" tvg-id="rtve.es" tvg-chno="6" group-title="News (ES)",RTVE 24H
@@ -4917,6 +4879,7 @@ https://b8bc6c4b9be64bd6aeb3b92aa8521ed4.mediatailor.eu-west-1.amazonaws.com/v1/
 # [CAIDO 2026-09-29]
 #EXTINF:-1 tvg-name="Documentari – Rakuten TV" tvg-logo="https://i.imgur.com/rAHBiO8.jpg" tvg-chno="4229" group-title="VOD Italy",Documentari – Rakuten TV
 https://rakuten-documentaries-6-eu.rakuten.wurl.tv/playlist.m3u8
+# [CAIDO 2026-10-02]
 #EXTINF:-1 tvg-name="Family – Rakuten TV" tvg-logo="https://i.imgur.com/BCC123A.jpg" tvg-chno="4966" group-title="VOD Italy",Family – Rakuten TV
 https://3315fc3e7276420f895e19cf807dbee1.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6215/master.m3u8
 #EXTINF:-1 tvg-name="Romance – Rakuten TV" tvg-logo="https://i.imgur.com/TiXrzJZ.jpeg" tvg-chno="4985" group-title="VOD Italy",Romance – Rakuten TV
