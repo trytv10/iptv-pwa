@@ -524,6 +524,117 @@ textarea:focus,
 }
 
 /* =======================================================
+   Botón "Ver más canales" (estilo cargar más de YouTube)
+   ======================================================= */
+
+.ver-mas-cont {
+  grid-column: 1 / -1;      /* en modo grilla ocupa todo el ancho */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 16px 32px 16px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.boton-ver-mas {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  min-width: 220px;
+}
+
+.boton-ver-mas:hover:not(:disabled) {
+  background-color: rgba(229, 9, 20, 0.15);
+  border-color: rgba(229, 9, 20, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.2);
+}
+
+.boton-ver-mas:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.boton-ver-mas:focus {
+  outline: 3px solid #e50914 !important;
+  outline-offset: 3px !important;
+  transform: scale(1.02);
+}
+
+.boton-ver-mas:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.boton-ver-mas__icono {
+  display: inline-block;
+  font-size: 0.7rem;
+  color: #e50914;
+  transition: transform 0.3s ease;
+}
+
+.boton-ver-mas:hover:not(:disabled) .boton-ver-mas__icono {
+  transform: translateY(3px);
+}
+
+.boton-ver-mas__contador {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-left: 4px;
+}
+
+/* Spinner dentro del botón cuando está cargando */
+.boton-ver-mas__spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #e50914;
+  border-radius: 50%;
+  animation: ver-mas-spin 0.7s linear infinite;
+}
+
+@keyframes ver-mas-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mensaje de "no hay más canales" */
+.fin-canales {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 32px 20px 40px 20px;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-style: italic;
+  letter-spacing: 0.5px;
+}
+
+/* Indicador de carga general dentro de la guía */
+.cargando {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+/* =======================================================
    Pantalla de Configuración
    ======================================================= */
 
@@ -877,6 +988,7 @@ textarea:focus,
   .fila-canal__numero { font-size: 1.1rem; }
   .fila-canal__caido  { font-size: 1rem; }
   .filtro             { font-size: 0.95rem; padding: 8px 20px; }
+  .boton-ver-mas      { font-size: 1.05rem; padding: 16px 32px; }
 }
 
 /* =======================================================
@@ -909,6 +1021,12 @@ textarea:focus,
     font-size: 0.8rem;
     padding: 7px 10px;
   }
+
+  .boton-ver-mas {
+    padding: 12px 22px;
+    font-size: 0.9rem;
+    min-width: 180px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -925,6 +1043,16 @@ textarea:focus,
   #boton-perfil {
     padding: 7px 9px;
     font-size: 0.78rem;
+  }
+
+  .boton-ver-mas {
+    width: 100%;
+    min-width: 0;
+    padding: 14px 20px;
+  }
+
+  .ver-mas-cont {
+    padding: 20px 8px 28px 8px;
   }
 }
 
