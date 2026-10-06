@@ -38,7 +38,8 @@ GUARDADO_INCREMENTAL = 500
 CANALES_JSON = os.environ.get('CANALES_JSON', 'canales.json')
 ESTADO_JSON = os.environ.get('ESTADO_JSON', 'estado-canales.json')
 M3U8_SALIDA = os.environ.get('M3U8_SALIDA', 'canales.m3u8')
-LIMITE_CANALES = int(os.environ.get('LIMITE_CANALES', '0'))  # 0 = sin límite
+_valor_limite = (os.environ.get('LIMITE_CANALES') or '0').strip()
+LIMITE_CANALES = int(_valor_limite) if _valor_limite.isdigit() else 0
 
 # Reglas de estado
 FALLOS_PARA_CAIDO = 3         # 3 fallos consecutivos → caido
