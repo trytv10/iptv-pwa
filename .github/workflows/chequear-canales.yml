@@ -1,0 +1,80 @@
+name: Chequear canales caídos
+
+on:
+  schedule:
+    # 03:00 UTC = 00:00 Uruguay (medianoche)
+    - cron: '0 3 * * *'
+    # 15:00 UTC = 12:00 Uruguay (mediodía)
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+    inputs:
+      limite:
+        description: 'Limitar a N canales (para testing). Vacío = todos'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  chequear:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Verificar FFmpeg
+        run: ffmpeg -version | head -1
+
+      - name: Correr chequeo
+        env:
+          LIMITE_CANALES: ${{ github.event.inputs.limite }}
+        run: |
+          python scripts/check_channels.py
+
+      - name: Ver cambios
+        id: verificar
+        run: |
+          git diff --quiet estado-canales.json canales.m3u8 && echo "cambios=false" >> $GITHUB_OUTPUT || echo "cambios=true" >> $GITHUB_OUTPUT
+
+      - name: Commit y push
+        if: steps.verificar.outputs.cambios == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add estado-canales.json canales.m3u8
+          git commit -m "chore: chequeo automático de canales [skip ci]"
+          git push
+
+      - name: Resumen
+        if: always()
+        run: |
+          echo "### Resultado del chequeo" >> $GITHUB_STEP_SUMMARY
+          if [ -f estado-canales.json ]; then
+            python -c "
+          import json
+          with open('estado-canales.json') as f:
+              d = json.load(f)
+          r = d.get('resumen', {})
+          print(f\"- Actualizado: {d.get('actualizado', 'N/A')}\")
+          print(f\"- Total: {d.get('total', 0)}\")
+          print(f\"- Estables: {r.get('estable', 0)}\")
+          print(f\"- Inestables: {r.get('inestable', 0)}\")
+          print(f\"- Caídos: {r.get('caido', 0)}\")
+          print(f\"- Lentos: {r.get('lento', 0)}\")
+          " >> $GITHUB_STEP_SUMMARY
+          fi
