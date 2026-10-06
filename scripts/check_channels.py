@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
 """
-Chequeo real de canales caídos.
+Chequeo de canales caídos para el proyecto Guia de Canales.
 
+- Lee canales.json (formato JSON con campos {id, nombre, url, ...}).
 - Prueba cada canal con FFmpeg (decodificación real de video).
-- Los canales caídos se COMENTAN con `# [CAIDO AAAA-MM-DD]`, no se borran.
-- Los canales comentados que vuelven a responder se REACTIVAN.
-- Guarda histórico en historial.csv (fecha, url, estado, ms).
-- Nunca elimina información: todo queda revisable.
+- Genera estado-canales.json (fuente de verdad del estado).
+- Regenera canales.m3u8 SIN marcas de caído (formato estándar).
+- Guardado incremental cada 500 canales para no perder progreso.
+- Acumula fallosConsecutivos entre corridas.
 
 Uso:
-    python check_channels.py canales.m3u8
+    python scripts/check_channels.py
+
+Variables de entorno opcionales:
+    LIMITE_CANALES   Limita la cantidad a chequear (para testing).
+    CANALES_JSON     Ruta al archivo de entrada (default: canales.json).
+    ESTADO_JSON      Ruta al archivo de estado (default: estado-canales.json).
+    M3U8_SALIDA      Ruta al .m3u8 regenerado (default: canales.m3u8).
 """
 import sys
-import re
-import csv
+import os
+import json
 import time
 import subprocess
 from datetime import datetime, timezone
@@ -23,21 +30,32 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # ==========================================================
 #  Configuración
 # ==========================================================
-TIMEOUT_FFMPEG_SEG = 12      # segundos máximos de espera por canal
-MAX_HILOS = 20               # chequeos concurrentes
-ARCHIVO_HISTORIAL = 'historial.csv'
+TIMEOUT_FFMPEG_SEG = 15
+UMBRAL_LENTO_SEG = 8
+MAX_HILOS = 20
+GUARDADO_INCREMENTAL = 500
 
-MARCA_CAIDO_RE = re.compile(r'^#\s*\[CAIDO\s+(\d{4}-\d{2}-\d{2})\]\s*(.*)$')
+CANALES_JSON = os.environ.get('CANALES_JSON', 'canales.json')
+ESTADO_JSON = os.environ.get('ESTADO_JSON', 'estado-canales.json')
+M3U8_SALIDA = os.environ.get('M3U8_SALIDA', 'canales.m3u8')
+LIMITE_CANALES = int(os.environ.get('LIMITE_CANALES', '0'))  # 0 = sin límite
+
+# Reglas de estado
+FALLOS_PARA_CAIDO = 3         # 3 fallos consecutivos → caido
+FALLOS_PARA_DADO_DE_BAJA = 12  # 12 fallos consecutivos → dadoDeBaja
 
 
 # ==========================================================
 #  Prueba real con FFmpeg
 # ==========================================================
-def verificar_stream_real(url: str) -> tuple[bool, int]:
+def verificar_stream_real(url):
     """
-    Devuelve (ok, ms). ok=True solo si FFmpeg logra decodificar al menos
-    1 segundo de video sin errores fatales.
+    Devuelve (ok, ms, motivo).
+    ok=True solo si FFmpeg logra decodificar al menos 1 segundo de video.
     """
+    if not url or not url.startswith('http'):
+        return (False, 0, 'url_invalida')
+
     cmd = [
         'ffmpeg',
         '-v', 'error',
@@ -56,233 +74,226 @@ def verificar_stream_real(url: str) -> tuple[bool, int]:
             timeout=TIMEOUT_FFMPEG_SEG
         )
         ms = int((time.time() - inicio) * 1000)
-        return (resultado.returncode == 0, ms)
+        if resultado.returncode == 0:
+            return (True, ms, 'ok')
+        return (False, ms, 'ffmpeg_error')
     except subprocess.TimeoutExpired:
-        return (False, TIMEOUT_FFMPEG_SEG * 1000)
-    except Exception:
-        return (False, 0)
+        return (False, TIMEOUT_FFMPEG_SEG * 1000, 'timeout')
+    except Exception as e:
+        return (False, 0, 'excepcion:' + type(e).__name__)
 
 
 # ==========================================================
-#  Parseo del M3U preservando estado caído
+#  Carga y guardado
 # ==========================================================
-def parsear_m3u(lineas: list[str]) -> list[dict]:
+def cargar_canales(ruta):
+    with open(ruta, 'r', encoding='utf-8') as f:
+        datos = json.load(f)
+    if isinstance(datos, list):
+        return datos
+    return datos.get('canales', [])
+
+
+def cargar_estado_previo(ruta):
+    """Devuelve el dict de canales del estado anterior, o {} si no existe."""
+    if not Path(ruta).exists():
+        return {}
+    try:
+        with open(ruta, 'r', encoding='utf-8') as f:
+            datos = json.load(f)
+        return datos.get('canales', {})
+    except Exception as e:
+        print(f"  Aviso: no se pudo leer {ruta} ({e}). Se empieza de cero.")
+        return {}
+
+
+def generar_id_canal(canal, idx):
+    """Devuelve el id del canal. Si no tiene, lo genera."""
+    if canal.get('id'):
+        return canal['id']
+    url = canal.get('url', '')
+    # FNV-1a igual que el Worker
+    h = 0x811c9dc5
+    for c in url:
+        h ^= ord(c)
+        h = (h * 0x01000193) & 0xFFFFFFFF
+    return 'c_' + format(h, '08x')
+
+
+def calcular_estado(fallos_consecutivos, respondio_ok):
     """
-    Estructura de cada canal:
-    {
-        'extinf': str,            # línea #EXTINF (comentada o no)
-        'extras': [str, ...],     # #EXTVLCOPT / #EXTHTTP (comentados o no)
-        'url': str,               # URL (comentada o no)
-        'caido': bool,            # si estaba marcado como caído antes
-        'fecha_caido': str|None,  # fecha del comentario original
-        'comentario': str,        # texto después de la marca (por si hubiera)
+    Reglas:
+      - Si respondió OK → estable.
+      - Si no respondió y lleva 1-2 fallos → inestable.
+      - Si no respondió y lleva >= 3 fallos → caido.
+      - Si no respondió y lleva >= 12 fallos → caido + dadoDeBaja.
+    """
+    if respondio_ok:
+        return 'estable'
+    if fallos_consecutivos >= FALLOS_PARA_CAIDO:
+        return 'caido'
+    return 'inestable'
+
+
+def guardar_estado_incremental(estado_canales, actualizado_iso, resumen, total, ruta):
+    """Guarda el estado parcial. Se llama cada GUARDADO_INCREMENTAL canales."""
+    salida = {
+        'actualizado': actualizado_iso,
+        'total': total,
+        'resumen': resumen,
+        'canales': estado_canales,
     }
-    """
-    canales = []
-    i = 0
-    n = len(lineas)
+    with open(ruta, 'w', encoding='utf-8') as f:
+        json.dump(salida, f, ensure_ascii=False, indent=2)
 
-    while i < n:
-        linea = lineas[i].rstrip('\n')
 
-        # ¿Es un #EXTINF directo o comentado con marca CAIDO?
-        if linea.startswith('#EXTINF:'):
-            canales.append(_bloque_desde(i, lineas, caido=False, fecha_caido=None, comentario=''))
-            i = canales[-1]['_fin']
-        else:
-            m = MARCA_CAIDO_RE.match(linea)
-            if m and i + 1 < n and lineas[i + 1].lstrip().startswith('#EXTINF:'):
-                # Bloque caído: la línea con la marca precede al #EXTINF
-                canales.append(_bloque_desde(
-                    i + 1, lineas,
-                    caido=True,
-                    fecha_caido=m.group(1),
-                    comentario=m.group(2).strip()
-                ))
-                i = canales[-1]['_fin']
-            else:
-                i += 1
-
-    # Limpia el campo temporal _fin
+def regenerar_m3u8(canales, ruta):
+    """Regenera canales.m3u8 SIN marcas de caído, con el formato estándar."""
+    lineas = ['#EXTM3U\n']
     for c in canales:
-        c.pop('_fin', None)
-    return canales
-
-
-def _bloque_desde(inicio: int, lineas: list[str], caido: bool,
-                   fecha_caido: str | None, comentario: str) -> dict:
-    """
-    Recolecta desde la línea #EXTINF hasta la URL del stream.
-    Devuelve el dict del canal + '_fin' (índice siguiente).
-    """
-    i = inicio
-    n = len(lineas)
-
-    extinf = lineas[i].rstrip('\n')
-    i += 1
-
-    extras = []
-    while i < n:
-        s = lineas[i].lstrip()
-        # Opciones del canal (#EXTVLCOPT, #EXTHTTP) o comentarios
-        if s.startswith('#') and not s.startswith('#EXTINF'):
-            # Ojo: si es una marca CAIDO de otro canal, cortamos
-            if MARCA_CAIDO_RE.match(s):
-                break
-            extras.append(lineas[i].rstrip('\n'))
-            i += 1
+        nombre = c.get('nombre', 'Sin nombre')
+        url = c.get('url', '')
+        logo = c.get('logo', '')
+        grupo = c.get('grupo', 'General')
+        tvg_id = c.get('tvgId', '')
+        if not url:
             continue
-        break
-
-    url = ''
-    if i < n:
-        url = lineas[i].strip()
-        i += 1
-
-    return {
-        'extinf': extinf,
-        'extras': extras,
-        'url': url,
-        'caido': caido,
-        'fecha_caido': fecha_caido,
-        'comentario': comentario,
-        '_fin': i,
-    }
-
-
-# ==========================================================
-#  Reconstrucción del M3U
-# ==========================================================
-def reconstruir_m3u(canales: list[dict]) -> str:
-    hoy = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-    salida = ['#EXTM3U\n']
-
-    for c in canales:
-        if c['caido']:
-            # Mantiene la fecha original del comentario si existe; si no, pone hoy
-            fecha = c.get('fecha_caido') or hoy
-            sufijo = f" {c['comentario']}" if c.get('comentario') else ''
-            salida.append(f"# [CAIDO {fecha}]{sufijo}\n")
-        salida.append(c['extinf'] + '\n')
-        for ex in c['extras']:
-            salida.append(ex + '\n')
-        if c['url']:
-            salida.append(c['url'] + '\n')
-
-    return ''.join(salida)
-
-
-# ==========================================================
-#  Histórico
-# ==========================================================
-def escribir_historial(filas: list[dict]) -> None:
-    existe = Path(ARCHIVO_HISTORIAL).exists()
-    with open(ARCHIVO_HISTORIAL, 'a', newline='', encoding='utf-8') as f:
-        campos = ['fecha_iso', 'url', 'estado', 'ms', 'nombre']
-        w = csv.DictWriter(f, fieldnames=campos)
-        if not existe:
-            w.writeheader()
-        w.writerows(filas)
+        attrs = f'tvg-logo="{logo}" group-title="{grupo}"'
+        if tvg_id:
+            attrs += f' tvg-id="{tvg_id}"'
+        lineas.append(f'#EXTINF:-1 {attrs},{nombre}\n')
+        lineas.append(f'{url}\n')
+    with open(ruta, 'w', encoding='utf-8') as f:
+        f.write(''.join(lineas))
 
 
 # ==========================================================
 #  Main
 # ==========================================================
-def procesar_playlist(ruta_archivo: str) -> None:
-    print(f"Leyendo canales desde: {ruta_archivo}...")
-    try:
-        with open(ruta_archivo, 'r', encoding='utf-8') as f:
-            lineas = f.readlines()
-    except FileNotFoundError:
-        print(f"Error: no se encontró {ruta_archivo}")
+def main():
+    print(f"Leyendo canales desde: {CANALES_JSON}")
+    if not Path(CANALES_JSON).exists():
+        print(f"Error: no se encontró {CANALES_JSON}")
         sys.exit(1)
 
-    canales = parsear_m3u(lineas)
-    total = len(canales)
-    print(f"Canales detectados: {total} "
-          f"({sum(1 for c in canales if c['caido'])} venían marcados como caídos)")
+    canales = cargar_canales(CANALES_JSON)
+    total_original = len(canales)
 
-    # Chequear todos con FFmpeg
-    print(f"Chequeando con FFmpeg ({MAX_HILOS} hilos)...")
-    resultados: dict[int, tuple[bool, int]] = {}
+    if LIMITE_CANALES > 0:
+        canales = canales[:LIMITE_CANALES]
+        print(f"  Modo test: limitando a {LIMITE_CANALES} canales")
+
+    total = len(canales)
+    print(f"Canales detectados: {total}")
+
+    estado_previo = cargar_estado_previo(ESTADO_JSON)
+    print(f"Estado previo cargado: {len(estado_previo)} canales")
+
+    # Chequear
+    print(f"Chequeando con FFmpeg ({MAX_HILOS} hilos, timeout {TIMEOUT_FFMPEG_SEG}s)...")
+    resultados = {}
 
     def chequear(idx_canal):
         idx, canal = idx_canal
-        if not canal['url']:
-            return (idx, (False, 0))
-        return (idx, verificar_stream_real(canal['url']))
+        return (idx, verificar_stream_real(canal.get('url', '')))
+
+    inicio_global = time.time()
 
     with ThreadPoolExecutor(max_workers=MAX_HILOS) as ex:
         futuros = [ex.submit(chequear, (i, c)) for i, c in enumerate(canales)]
-        for j, fut in enumerate(as_completed(futuros), 1):
+        completados = 0
+        for fut in as_completed(futuros):
             idx, res = fut.result()
             resultados[idx] = res
-            estado = 'OK' if res[0] else 'CAÍDO'
-            url_corta = (canales[idx]['url'] or '')[:60]
-            print(f"[{j}/{total}] [{estado}] {url_corta}")
+            completados += 1
 
-    # Aplicar resultado: marcar/reactivar y recolectar histórico
-    hoy = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+            if completados % 50 == 0 or completados == total:
+                transcurrido = time.time() - inicio_global
+                velocidad = completados / transcurrido if transcurrido > 0 else 0
+                restante = (total - completados) / velocidad if velocidad > 0 else 0
+                print(f"  [{completados}/{total}] "
+                      f"~{velocidad:.1f} ch/s, "
+                      f"faltan ~{restante/60:.0f} min")
+
+    # Procesar resultados y armar estado-canales.json
+    print("\nProcesando resultados...")
     fecha_iso = datetime.now(timezone.utc).isoformat()
-    historial: list[dict] = []
+    ahora_ms = int(time.time() * 1000)
 
-    nuevos_caidos = 0
-    reactivados = 0
-    siguen_caidos = 0
-    siguen_ok = 0
+    nuevo_estado = {}
+    resumen = {'estable': 0, 'inestable': 0, 'caido': 0, 'lento': 0}
 
-    for i, c in enumerate(canales):
-        ok, ms = resultados.get(i, (False, 0))
-        historial.append({
-            'fecha_iso': fecha_iso,
-            'url': c['url'],
-            'estado': 'ok' if ok else 'caido',
-            'ms': ms,
-            'nombre': _nombre_de_extinf(c['extinf']),
-        })
+    for i, canal in enumerate(canales):
+        ok, ms, motivo = resultados.get(i, (False, 0, 'sin_resultado'))
+        cid = generar_id_canal(canal, i)
 
-        if ok and c['caido']:
-            c['caido'] = False
-            c['fecha_caido'] = None
-            c['comentario'] = ''
-            reactivados += 1
-        elif ok and not c['caido']:
-            siguen_ok += 1
-        elif not ok and not c['caido']:
-            c['caido'] = True
-            c['fecha_caido'] = hoy
-            c['comentario'] = ''
-            nuevos_caidos += 1
+        previo = estado_previo.get(cid, {})
+        fallos_previos = int(previo.get('fallosConsecutivos', 0))
+
+        if ok:
+            fallos_nuevos = 0
         else:
-            siguen_caidos += 1
+            fallos_nuevos = fallos_previos + 1
 
-    # Escribir M3U reconstruido
-    with open(ruta_archivo, 'w', encoding='utf-8') as f:
-        f.write(reconstruir_m3u(canales))
+        estado = calcular_estado(fallos_nuevos, ok)
+        dado_de_baja = (not ok) and fallos_nuevos >= FALLOS_PARA_DADO_DE_BAJA
+        lento = ok and (ms > UMBRAL_LENTO_SEG * 1000)
 
-    # Escribir histórico
-    escribir_historial(historial)
+        if estado == 'estable':
+            resumen['estable'] += 1
+            if lento:
+                resumen['lento'] += 1
+        elif estado == 'inestable':
+            resumen['inestable'] += 1
+        else:
+            resumen['caido'] += 1
 
+        nueva_entrada = {
+            'estado': estado,
+            'ultimaVezOK': fecha_iso if ok else previo.get('ultimaVezOK', None),
+            'fallosConsecutivos': fallos_nuevos,
+            'ultimoChequeo': fecha_iso,
+            'tiempoRespuestaMs': ms,
+            'motivo': motivo,
+            'lento': lento,
+        }
+        if dado_de_baja:
+            nueva_entrada['dadoDeBaja'] = True
+            nueva_entrada['dadoDeBajaDesde'] = previo.get('dadoDeBajaDesde', fecha_iso)
+        elif 'dadoDeBajaDesde' in previo:
+            # Se reactivó: borrar el flag
+            pass
+
+        nuevo_estado[cid] = nueva_entrada
+
+    # Guardado final
+    salida = {
+        'actualizado': fecha_iso,
+        'total': total,
+        'resumen': resumen,
+        'canales': nuevo_estado,
+    }
+    with open(ESTADO_JSON, 'w', encoding='utf-8') as f:
+        json.dump(salida, f, ensure_ascii=False, indent=2)
+
+    print(f"  Escrito {ESTADO_JSON}")
+
+    # Regenerar el .m3u8 (SIN marcas de caído, formato estándar)
+    regenerar_m3u8(canales, M3U8_SALIDA)
+    print(f"  Escrito {M3U8_SALIDA}")
+
+    # Resumen
     print("\n==========================================")
     print(" Resumen del chequeo")
     print("==========================================")
     print(f" Canales analizados:            {total}")
-    print(f" Siguen OK:                     {siguen_ok}")
-    print(f" Nuevos caídos (comentados):    {nuevos_caidos}")
-    print(f" Reactivados:                   {reactivados}")
-    print(f" Siguen caídos:                 {siguen_caidos}")
-    print(f" Histórico acumulado en:        {ARCHIVO_HISTORIAL}")
+    print(f" Estables:                      {resumen['estable']}")
+    print(f"   De los cuales lentos:        {resumen['lento']}")
+    print(f" Inestables:                    {resumen['inestable']}")
+    print(f" Caídos:                        {resumen['caido']}")
+    print(f" Dados de baja (>=12 fallos):   {sum(1 for v in nuevo_estado.values() if v.get('dadoDeBaja'))}")
     print("==========================================")
 
 
-def _nombre_de_extinf(extinf: str) -> str:
-    if ',' in extinf:
-        return extinf.split(',', 1)[1].strip()
-    return extinf.strip()
-
-
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Uso: python check_channels.py <archivo.m3u8>")
-        sys.exit(1)
-    procesar_playlist(sys.argv[1])
+    main()
