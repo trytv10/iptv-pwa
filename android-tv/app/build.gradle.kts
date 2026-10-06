@@ -45,6 +45,11 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    // ⬇️⬇️⬇️ ESTO ES LO QUE FALTA ⬇️⬇️⬇️
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
