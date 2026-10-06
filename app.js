@@ -69,6 +69,9 @@ const IDIOMAS = {
     actualizar_toast: 'Guía actualizada correctamente desde el servidor.',
     canal_caido: 'Canal caído',
     limpiar_filtros: '🧹 Limpiar filtros',
+    ver_mas_canales: 'Ver más canales',
+    cargando_mas: 'Cargando más...',
+    no_hay_mas: 'No hay más canales',
     sync_titulo: 'Sincronizar favoritos entre dispositivos',
     sync_descripcion: 'Generá un código y usá el mismo en todos tus dispositivos (celu, TV, tablet) para compartir favoritos.',
     sync_generar: 'Generar código nuevo',
@@ -228,6 +231,9 @@ const IDIOMAS = {
     actualizar_toast: 'Guide successfully updated.',
     canal_caido: 'Channel offline',
     limpiar_filtros: '🧹 Clear filters',
+    ver_mas_canales: 'Load more channels',
+    cargando_mas: 'Loading more...',
+    no_hay_mas: 'No more channels',
     sync_titulo: 'Sync favorites across devices',
     sync_descripcion: 'Generate a code and use the same one on all your devices.',
     sync_generar: 'Generate new code',
@@ -456,6 +462,9 @@ const URL_WORKER = 'https://iptv-proxy.eolivera119600.workers.dev';
 
 const HISTORIAL_MAX = 30;
 
+// --- Paginación server-side ---
+const PAGINA_TAMANO = 75;
+
 /* =======================================================
    Estado
    ======================================================= */
@@ -493,6 +502,20 @@ const estado = {
 
   syncTimeout: null,
   syncEnProgreso: false,
+
+  // --- Paginación server-side ---
+  paginacion: {
+    offset: 0,          // offset actual (para la siguiente request)
+    total: 0,           // total de canales en el Worker
+    cargando: false,    // flag para no duplicar requests
+    hayMas: true,       // si quedan canales por traer
+    modoServidor: false, // true cuando se está usando paginación del Worker
+    q: '',              // búsqueda actual en el servidor
+    grupo: '',          // filtro de grupo en el servidor
+  },
+
+  // Timer para debounce del buscador
+  debounceBusqueda: null,
 };
 
 /* =======================================================
@@ -2216,51 +2239,99 @@ function renderSyncUI() {
 }
 
 /* =======================================================
-   Carga de canales
+   Carga de canales — CON PAGINACIÓN SERVER-SIDE
    ======================================================= */
 
+/**
+ * Pide una página de canales al Worker.
+ * @param {Object} opciones
+ * @param {number} opciones.offset   - desde qué canal empezar
+ * @param {number} opciones.limit    - cuántos traer
+ * @param {string} opciones.q        - búsqueda (opcional)
+ * @param {string} opciones.grupo    - filtro de grupo (opcional)
+ * @returns {Promise<{canales:Array, total:number, offset:number, limit:number}>}
+ */
+async function pedirCanalesAlWorker({ offset = 0, limit = PAGINA_TAMANO, q = '', grupo = '' } = {}) {
+  const params = new URLSearchParams();
+  params.set('limit', String(limit));
+  params.set('offset', String(offset));
+  if (q) params.set('q', q);
+  if (grupo) params.set('grupo', grupo);
+
+  const url = `${URL_WORKER}/canales?${params.toString()}`;
+
+  const resp = await fetch(url, { cache: 'no-store' });
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+  const datos = await resp.json();
+  const lista = Array.isArray(datos) ? datos : (datos.canales || []);
+  const normalizados = normalizarDesdeJSON(lista, offset);
+
+  return {
+    canales: normalizados,
+    total: typeof datos.total === 'number' ? datos.total : normalizados.length,
+    offset: typeof datos.offset === 'number' ? datos.offset : offset,
+    limit: typeof datos.limit === 'number' ? datos.limit : limit,
+  };
+}
+
+/**
+ * Carga la PRIMERA página de canales.
+ * Se usa al arrancar la app, o al limpiar filtros.
+ * También cae a otros orígenes (JSON local, M3U8, fuentes.json) si el Worker falla.
+ */
 async function cargarCanalesOficiales() {
-  // 1) Worker (KV) — fuente principal
+  // 1) Worker con paginación (fuente principal)
   try {
-    const resp = await fetch(`${URL_WORKER}/canales`, { cache: 'no-store' });
-    if (resp.ok) {
-      const datos = await resp.json();
-      const lista = Array.isArray(datos) ? datos : (datos.canales || []);
-      const normalizados = normalizarDesdeJSON(lista);
-      if (normalizados.length > 0) {
-        console.info(`[canales] Fuente: Worker/KV (${normalizados.length} canales) — última actualización: ${datos.actualizado || 'desconocida'}`);
-        return { canales: normalizados, fuente: 'kv' };
-      }
+    const resultado = await pedirCanalesAlWorker({ offset: 0, limit: PAGINA_TAMANO });
+    if (resultado.canales.length > 0) {
+      console.info(`[canales] Fuente: Worker/KV paginado (${resultado.canales.length}/${resultado.total} canales)`);
+      return {
+        canales: resultado.canales,
+        fuente: 'kv',
+        paginado: true,
+        total: resultado.total,
+      };
     }
   } catch (e) {
-    console.warn('No se pudo leer canales desde el Worker:', e);
+    console.warn('No se pudo leer canales paginados del Worker:', e);
   }
 
-  // 2) Fallback: canales.json local
+  // 2) Fallback: canales.json local (sin paginación, todo de una)
   try {
     const resp = await fetch(URL_CANALES_JSON, { cache: 'no-store' });
     if (resp.ok) {
       const datos = await resp.json();
       const lista = Array.isArray(datos) ? datos : (datos.canales || []);
-      const normalizados = normalizarDesdeJSON(lista);
+      const normalizados = normalizarDesdeJSON(lista, 0);
       if (normalizados.length > 0) {
-        console.info(`[canales] Fuente: canales.json (${normalizados.length} canales)`);
-        return { canales: normalizados, fuente: 'json' };
+        console.info(`[canales] Fuente: canales.json local (${normalizados.length} canales)`);
+        return {
+          canales: normalizados,
+          fuente: 'json',
+          paginado: false,
+          total: normalizados.length,
+        };
       }
     }
   } catch (e) {
     console.warn('No se pudo leer canales.json:', e);
   }
 
-  // 3) Fallback: canales.m3u8
+  // 3) Fallback: canales.m3u8 local
   try {
     const resp = await fetch(URL_CANALES_M3U8, { cache: 'no-store' });
     if (resp.ok) {
       const texto = await resp.text();
       const normalizados = normalizarCanales(parsearM3U(texto));
       if (normalizados.length > 0) {
-        console.info(`[canales] Fuente: canales.m3u8 (${normalizados.length} canales)`);
-        return { canales: normalizados, fuente: 'm3u8' };
+        console.info(`[canales] Fuente: canales.m3u8 local (${normalizados.length} canales)`);
+        return {
+          canales: normalizados,
+          fuente: 'm3u8',
+          paginado: false,
+          total: normalizados.length,
+        };
       }
     }
   } catch (e) {
@@ -2272,17 +2343,220 @@ async function cargarCanalesOficiales() {
     const combinados = await obtenerListaCombinadaDesdeFuentes();
     if (combinados.length > 0) {
       console.info(`[canales] Fuente: fuentes.json (${combinados.length} canales)`);
-      return { canales: combinados, fuente: 'fuentes' };
+      return {
+        canales: combinados,
+        fuente: 'fuentes',
+        paginado: false,
+        total: combinados.length,
+      };
     }
   } catch (e) {
     console.warn('No se pudo leer fuentes.json:', e);
   }
 
   console.warn('[canales] No se encontró ninguna fuente válida');
-  return { canales: [], fuente: null };
+  return { canales: [], fuente: null, paginado: false, total: 0 };
 }
 
-function normalizarDesdeJSON(lista) {
+/**
+ * Carga la SIGUIENTE página y la agrega a la lista actual.
+ * Se llama desde el botón "Ver más canales".
+ */
+async function cargarMasCanales() {
+  const p = estado.paginacion;
+
+  // Evitar doble carga
+  if (p.cargando) return;
+
+  // Si estamos en modo fallback (no hay paginación del Worker), no hacer nada
+  if (!p.modoServidor) return;
+
+  // Si no hay más canales, no hacer nada
+  if (!p.hayMas) return;
+
+  p.cargando = true;
+  actualizarBotonCargarMas();
+
+  try {
+    const siguienteOffset = p.offset + PAGINA_TAMANO;
+    const resultado = await pedirCanalesAlWorker({
+      offset: siguienteOffset,
+      limit: PAGINA_TAMANO,
+      q: p.q,
+      grupo: p.grupo,
+    });
+
+    // Filtrar duplicados por id (por si el Worker devuelve alguno repetido)
+    const idsExistentes = new Set(estado.canales.map(c => c.id));
+    const nuevos = resultado.canales.filter(c => !idsExistentes.has(c.id));
+
+    estado.canales = estado.canales.concat(nuevos);
+    p.offset = resultado.offset;
+    p.total = resultado.total;
+    p.hayMas = (estado.canales.length < resultado.total) && (nuevos.length > 0);
+
+    // Actualizar la lista guardada activa
+    const listaActiva = estado.listasGuardadas.find(l => l.id === estado.listaActivaId);
+    if (listaActiva) {
+      listaActiva.canales = estado.canales;
+      guardarListasEnStorage();
+    }
+
+    // Re-render de filtros (para que aparezcan los nuevos grupos) y de la guía
+    renderFiltros();
+    renderGuia();
+  } catch (e) {
+    console.warn('No se pudieron cargar más canales:', e);
+    mostrarToastSimple('No se pudieron cargar más canales');
+  } finally {
+    p.cargando = false;
+    actualizarBotonCargarMas();
+  }
+}
+
+/**
+ * Aplica una búsqueda server-side. Reemplaza toda la lista actual.
+ */
+async function buscarEnServidor(query) {
+  const p = estado.paginacion;
+
+  // Si no hay Worker paginando, no hacer nada (modo fallback local)
+  if (!p.modoServidor) return;
+
+  p.cargando = true;
+  p.q = query;
+  p.offset = 0;
+  p.grupo = ''; // Búsqueda global ignora el grupo
+  estado.filtro = 'Todos';
+
+  renderFiltros();
+  renderGuia(); // Para que muestre "cargando"
+
+  try {
+    const resultado = await pedirCanalesAlWorker({
+      offset: 0,
+      limit: PAGINA_TAMANO,
+      q: query,
+      grupo: '',
+    });
+
+    estado.canales = resultado.canales;
+    p.offset = resultado.offset;
+    p.total = resultado.total;
+    p.hayMas = estado.canales.length < resultado.total;
+
+    const listaActiva = estado.listasGuardadas.find(l => l.id === estado.listaActivaId);
+    if (listaActiva) {
+      listaActiva.canales = estado.canales;
+      guardarListasEnStorage();
+    }
+
+    renderFiltros();
+    renderGuia();
+  } catch (e) {
+    console.warn('Error en búsqueda server-side:', e);
+    mostrarToastSimple('Error al buscar');
+  } finally {
+    p.cargando = false;
+    actualizarBotonCargarMas();
+  }
+}
+
+/**
+ * Aplica un filtro de grupo server-side. Reemplaza toda la lista actual.
+ */
+async function filtrarPorGrupoEnServidor(grupo) {
+  const p = estado.paginacion;
+
+  if (!p.modoServidor) return;
+
+  p.cargando = true;
+  p.grupo = grupo || '';
+  p.q = ''; // Filtro de grupo ignora la búsqueda
+  p.offset = 0;
+  estado.busqueda = '';
+
+  const inputBusqueda = document.getElementById('campo-busqueda');
+  if (inputBusqueda) inputBusqueda.value = '';
+
+  renderFiltros();
+  renderGuia();
+
+  try {
+    const resultado = await pedirCanalesAlWorker({
+      offset: 0,
+      limit: PAGINA_TAMANO,
+      q: '',
+      grupo: grupo || '',
+    });
+
+    estado.canales = resultado.canales;
+    p.offset = resultado.offset;
+    p.total = resultado.total;
+    p.hayMas = estado.canales.length < resultado.total;
+
+    const listaActiva = estado.listasGuardadas.find(l => l.id === estado.listaActivaId);
+    if (listaActiva) {
+      listaActiva.canales = estado.canales;
+      guardarListasEnStorage();
+    }
+
+    renderFiltros();
+    renderGuia();
+  } catch (e) {
+    console.warn('Error en filtro por grupo:', e);
+    mostrarToastSimple('Error al filtrar');
+  } finally {
+    p.cargando = false;
+    actualizarBotonCargarMas();
+  }
+}
+
+/**
+ * Resetea el estado de paginación y recarga la primera página.
+ * Se usa al limpiar filtros o cambiar de lista.
+ */
+async function recargarDesdeElPrincipio() {
+  const p = estado.paginacion;
+
+  if (!p.modoServidor) return;
+
+  p.q = '';
+  p.grupo = '';
+  p.offset = 0;
+  p.total = 0;
+  p.hayMas = true;
+  estado.filtro = 'Todos';
+  estado.busqueda = '';
+  estado.soloFavoritos = false;
+  estado.soloDestacados = false;
+
+  const inputBusqueda = document.getElementById('campo-busqueda');
+  if (inputBusqueda) inputBusqueda.value = '';
+
+  try {
+    const resultado = await pedirCanalesAlWorker({ offset: 0, limit: PAGINA_TAMANO });
+
+    estado.canales = resultado.canales;
+    p.offset = resultado.offset;
+    p.total = resultado.total;
+    p.hayMas = estado.canales.length < resultado.total;
+
+    const listaActiva = estado.listasGuardadas.find(l => l.id === estado.listaActivaId);
+    if (listaActiva) {
+      listaActiva.canales = estado.canales;
+      guardarListasEnStorage();
+    }
+
+    renderFiltros();
+    renderGuia();
+  } catch (e) {
+    console.warn('Error recargando desde el principio:', e);
+  }
+}
+
+function normalizarDesdeJSON(lista, offsetBase) {
+  const offset = typeof offsetBase === 'number' ? offsetBase : 0;
   return lista
     .filter((c) => c && (c.url || c.stream))
     .map((c, i) => {
@@ -2295,7 +2569,7 @@ function normalizarDesdeJSON(lista) {
       const estadoCanal = c.estado || '';
       return {
         id: 'c_' + hashUrl(url),
-        numero: String(i + 1).padStart(2, '0'),
+        numero: String(offset + i + 1).padStart(2, '0'),
         nombre,
         url,
         logo,
@@ -2691,7 +2965,6 @@ function renderFiltros() {
 
   if (estado.canales.length === 0) return;
 
-  // Chip limpiar filtros al principio (solo si hay filtros activos)
   if (hayFiltrosActivos()) {
     const chipLimpiar = document.createElement('button');
     chipLimpiar.className = 'filtro';
@@ -2745,9 +3018,14 @@ function renderFiltros() {
   chipTodos.textContent = t('todos');
   chipTodos.tabIndex = 0;
   chipTodos.addEventListener('click', () => {
-    estado.filtro = 'Todos';
-    renderFiltros();
-    renderGuia();
+    // Si estamos en modo servidor, usamos el filtro server-side
+    if (estado.paginacion.modoServidor && estado.filtro !== 'Todos') {
+      filtrarPorGrupoEnServidor('');
+    } else {
+      estado.filtro = 'Todos';
+      renderFiltros();
+      renderGuia();
+    }
   });
   el.filtros.appendChild(chipTodos);
 
@@ -2757,9 +3035,14 @@ function renderFiltros() {
     b.textContent = etiquetaGrupo(g);
     b.tabIndex = 0;
     b.addEventListener('click', () => {
-      estado.filtro = g;
-      renderFiltros();
-      renderGuia();
+      // Si estamos en modo servidor, filtramos server-side
+      if (estado.paginacion.modoServidor) {
+        filtrarPorGrupoEnServidor(g);
+      } else {
+        estado.filtro = g;
+        renderFiltros();
+        renderGuia();
+      }
     });
     el.filtros.appendChild(b);
   }
@@ -2823,6 +3106,13 @@ function hayFiltrosActivos() {
 }
 
 function limpiarFiltros() {
+  // Si estamos en modo servidor, recargar desde el principio
+  if (estado.paginacion.modoServidor) {
+    recargarDesdeElPrincipio();
+    return;
+  }
+
+  // Modo local (fallback)
   estado.busqueda = '';
   estado.filtro = 'Todos';
   estado.soloFavoritos = false;
@@ -2843,11 +3133,19 @@ function renderGuia() {
   el.guia.className = 'guia-contenedor modo-' + estado.modoVista;
 
   if (estado.canales.length === 0) {
+    if (estado.paginacion.cargando) {
+      el.guia.innerHTML = `<div class="cargando">${t('cargando')}</div>`;
+      return;
+    }
     el.guia.appendChild(vistaVacia(t('guia_vacia_titulo'), t('guia_vacia_texto'), true));
     return;
   }
 
   if (lista.length === 0) {
+    if (estado.paginacion.cargando) {
+      el.guia.innerHTML = `<div class="cargando">${t('cargando')}</div>`;
+      return;
+    }
     el.guia.appendChild(vistaVacia(t('sin_resultados_titulo'), t('sin_resultados_texto'), false));
     return;
   }
@@ -2857,6 +3155,17 @@ function renderGuia() {
     frag.appendChild(estado.modoVista === 'grilla' ? filaCanalGrid(canal) : filaCanalLista(canal));
   }
   el.guia.appendChild(frag);
+
+  // Agregar el botón "Ver más canales" si corresponde
+  if (estado.paginacion.modoServidor && estado.paginacion.hayMas) {
+    frag.appendChild(botonVerMas());
+  } else if (estado.paginacion.modoServidor && !estado.paginacion.hayMas && estado.paginacion.total > PAGINA_TAMANO) {
+    // Mensaje de "no hay más"
+    const fin = document.createElement('div');
+    fin.className = 'fin-canales';
+    fin.textContent = t('no_hay_mas');
+    frag.appendChild(fin);
+  }
 }
 
 function vistaVacia(titulo, texto, mostrarBoton) {
@@ -2871,6 +3180,49 @@ function vistaVacia(titulo, texto, mostrarBoton) {
     div.querySelector('#boton-vacio-cargar').addEventListener('click', irAConfig);
   }
   return div;
+}
+
+function botonVerMas() {
+  const cont = document.createElement('div');
+  cont.className = 'ver-mas-cont';
+
+  const btn = document.createElement('button');
+  btn.id = 'boton-ver-mas';
+  btn.className = 'boton-ver-mas';
+  btn.type = 'button';
+
+  if (estado.paginacion.cargando) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="boton-ver-mas__spinner"></span> ${t('cargando_mas')}`;
+  } else {
+    btn.innerHTML = `
+      <span class="boton-ver-mas__icono" aria-hidden="true">▼</span>
+      <span>${t('ver_mas_canales')}</span>
+      <span class="boton-ver-mas__contador">(${estado.canales.length} / ${estado.paginacion.total})</span>
+    `;
+    btn.addEventListener('click', () => {
+      cargarMasCanales();
+    });
+  }
+
+  cont.appendChild(btn);
+  return cont;
+}
+
+function actualizarBotonCargarMas() {
+  const btn = document.getElementById('boton-ver-mas');
+  if (!btn) return;
+  if (estado.paginacion.cargando) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="boton-ver-mas__spinner"></span> ${t('cargando_mas')}`;
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = `
+      <span class="boton-ver-mas__icono" aria-hidden="true">▼</span>
+      <span>${t('ver_mas_canales')}</span>
+      <span class="boton-ver-mas__contador">(${estado.canales.length} / ${estado.paginacion.total})</span>
+    `;
+  }
 }
 
 function filaCanalLista(canal) {
@@ -3150,7 +3502,14 @@ function actualizarProgramaReproductor(tvgId) {
 
 function reproducirCanalPorId(id) {
   const canal = estado.canales.find((c) => c.id === id);
-  if (!canal) return;
+  if (!canal) {
+    // El canal no está en la lista cargada. Puede pasar si:
+    // - Es un favorito de una página que no está cargada
+    // - Es un canal del historial que no está en la página actual
+    // Buscamos si está en otra lista guardada o avisamos.
+    mostrarToastSimple('Canal no disponible en la lista actual. Cargá más canales o buscá de nuevo.');
+    return;
+  }
 
   if (estado.categoriasBloqueadas.includes(canal.grupo) && estado.parentalPin) {
     const pinIngresado = prompt(t('ingrese_pin'));
@@ -3730,9 +4089,16 @@ async function forzarActualizacionServidor() {
     localStorage.removeItem(CLAVE_MULTIPLE_LISTAS);
     localStorage.removeItem(CLAVE_LISTA_ACTIVA_ID);
 
-    const { canales: canalesOficiales } = await cargarCanalesOficiales();
+    const { canales: canalesOficiales, total } = await cargarCanalesOficiales();
     estado.listasGuardadas = [{ id: 'oficial', nombre: 'Oficial', canales: canalesOficiales }];
     estado.listaActivaId = 'oficial';
+
+    // Resetear estado de paginación
+    estado.paginacion.offset = 0;
+    estado.paginacion.total = total || canalesOficiales.length;
+    estado.paginacion.hayMas = canalesOficiales.length < estado.paginacion.total;
+    estado.paginacion.q = '';
+    estado.paginacion.grupo = '';
 
     guardarListasEnStorage();
     cambiarListaActiva('oficial');
@@ -3802,9 +4168,20 @@ document.getElementById('boton-idioma').addEventListener('click', () => {
 });
 
 el.busqueda.addEventListener('input', (e) => {
-  estado.busqueda = e.target.value;
-  renderFiltros();
-  renderGuia();
+  const valor = e.target.value;
+  estado.busqueda = valor;
+
+  // Debounce para búsqueda server-side
+  if (estado.paginacion.modoServidor) {
+    if (estado.debounceBusqueda) clearTimeout(estado.debounceBusqueda);
+    estado.debounceBusqueda = setTimeout(() => {
+      buscarEnServidor(valor.trim());
+    }, 400);
+  } else {
+    // Modo local
+    renderFiltros();
+    renderGuia();
+  }
 });
 
 document.addEventListener('keydown', (e) => {
@@ -3890,10 +4267,31 @@ async function iniciar() {
     estado.listasGuardadas = listasLocales;
     estado.hayMetadatos = listasLocales.some(l => l.canales.some(c => 'estado' in c));
   } else {
-    const { canales: canalesOficiales, fuente } = await cargarCanalesOficiales();
+    const { canales: canalesOficiales, fuente, paginado, total } = await cargarCanalesOficiales();
     estado.listasGuardadas = [{ id: 'oficial', nombre: 'Oficial', canales: canalesOficiales }];
     estado.hayMetadatos = fuente === 'json';
     guardarListasEnStorage();
+
+    // Guardar info de paginación
+    estado.paginacion.modoServidor = !!paginado;
+    estado.paginacion.offset = 0;
+    estado.paginacion.total = total || canalesOficiales.length;
+    estado.paginacion.hayMas = paginado ? (canalesOficiales.length < estado.paginacion.total) : false;
+  }
+
+  // Si venimos de localStorage y la fuente era el Worker, activar modo servidor.
+  // No podemos saberlo con certeza, así que lo intentamos igual: si el Worker responde,
+  // se activa paginación. Si no, cae a modo local.
+  if (!estado.paginacion.modoServidor) {
+    try {
+      const primerTest = await pedirCanalesAlWorker({ offset: 0, limit: 1 });
+      if (primerTest.total > 0) {
+        estado.paginacion.modoServidor = true;
+        estado.paginacion.total = primerTest.total;
+      }
+    } catch {
+      // Sin Worker, seguimos en modo local
+    }
   }
 
   cambiarListaActiva(estado.listaActivaId);
