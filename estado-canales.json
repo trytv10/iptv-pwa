@@ -1,0 +1,192 @@
+{
+  "actualizado": "2026-10-06T19:54:48.655244+00:00",
+  "total": 20,
+  "resumen": {
+    "estable": 13,
+    "inestable": 7,
+    "caido": 0,
+    "lento": 0
+  },
+  "canales": {
+    "c_89f7307b": {
+      "estado": "inestable",
+      "ultimaVezOK": null,
+      "fallosConsecutivos": 1,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 472,
+      "motivo": "ffmpeg_error",
+      "lento": false
+    },
+    "c_9d7d0ed1": {
+      "estado": "inestable",
+      "ultimaVezOK": null,
+      "fallosConsecutivos": 1,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 5288,
+      "motivo": "ffmpeg_error",
+      "lento": false
+    },
+    "c_9d7f9eab": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 3018,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_a200b370": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 3146,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_878cde8e": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 3005,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_865943d5": {
+      "estado": "inestable",
+      "ultimaVezOK": null,
+      "fallosConsecutivos": 1,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 15000,
+      "motivo": "timeout",
+      "lento": false
+    },
+    "c_2b9be0b6": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 5350,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_758e4ea2": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 6006,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_065d5843": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 7866,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_8c466311": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 3846,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_28b8c2b6": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 4036,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_2ace4a45": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 3065,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_e0f691bd": {
+      "estado": "inestable",
+      "ultimaVezOK": null,
+      "fallosConsecutivos": 1,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 393,
+      "motivo": "ffmpeg_error",
+      "lento": false
+    },
+    "c_af7f94b2": {
+      "estado": "inestable",
+      "ultimaVezOK": null,
+      "fallosConsecutivos": 1,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 5601,
+      "motivo": "ffmpeg_error",
+      "lento": false
+    },
+    "c_ffd53a44": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 2247,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_82847270": {
+      "estado": "inestable",
+      "ultimaVezOK": null,
+      "fallosConsecutivos": 1,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 374,
+      "motivo": "ffmpeg_error",
+      "lento": false
+    },
+    "c_49ad6563": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 3294,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_69c6438a": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 3804,
+      "motivo": "ok",
+      "lento": false
+    },
+    "c_fddd48fa": {
+      "estado": "inestable",
+      "ultimaVezOK": null,
+      "fallosConsecutivos": 1,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 15000,
+      "motivo": "timeout",
+      "lento": false
+    },
+    "c_94dd7b3c": {
+      "estado": "estable",
+      "ultimaVezOK": "2026-10-06T19:54:48.655244+00:00",
+      "fallosConsecutivos": 0,
+      "ultimoChequeo": "2026-10-06T19:54:48.655244+00:00",
+      "tiempoRespuestaMs": 3732,
+      "motivo": "ok",
+      "lento": false
+    }
+  }
+}
