@@ -3156,15 +3156,14 @@ function renderGuia() {
   }
   el.guia.appendChild(frag);
 
-  // Agregar el botón "Ver más canales" si corresponde
+  // Agregar el botón "Ver más canales" DIRECTAMENTE al DOM (no al frag, que ya está vacío)
   if (estado.paginacion.modoServidor && estado.paginacion.hayMas) {
-    frag.appendChild(botonVerMas());
+    el.guia.appendChild(botonVerMas());
   } else if (estado.paginacion.modoServidor && !estado.paginacion.hayMas && estado.paginacion.total > PAGINA_TAMANO) {
-    // Mensaje de "no hay más"
     const fin = document.createElement('div');
     fin.className = 'fin-canales';
     fin.textContent = t('no_hay_mas');
-    frag.appendChild(fin);
+    el.guia.appendChild(fin);
   }
 }
 
