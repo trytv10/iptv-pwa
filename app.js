@@ -487,7 +487,9 @@ const estado = {
   programacion: {},
   reintentosCanalActual: 0,
   hayMetadatos: false,
-  caidosRemotos: {},
+    caidosRemotos: {},
+  estadoCanales: {},
+  estadoCanalesResumen: null,
 
   perfiles: [],
   perfilActivoId: '',
@@ -1660,6 +1662,55 @@ async function cargarCaidosDelWorker() {
     console.warn('No se pudieron cargar los canales caídos del Worker:', e);
     return false;
   }
+}
+
+async function cargarEstadoCanales() {
+  try {
+    const resp = await fetch(`${URL_WORKER}/estado-canales`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    estado.estadoCanales = data.canales || {};
+    estado.estadoCanalesResumen = data.resumen || null;
+    console.info(`[estado-canales] Cargados ${Object.keys(estado.estadoCanales).length} estados (resumen: ${JSON.stringify(data.resumen)})`);
+    return true;
+  } catch (e) {
+    console.warn('No se pudo cargar el estado de canales del Worker:', e);
+    return false;
+  }
+}
+
+/**
+ * Devuelve el estado del canal mezclando las 3 fuentes en este orden:
+ *   1. estado.canales (Worker /estado-canales) → fuente de verdad del chequeo automático
+ *   2. estado.caidosRemotos (Worker /caidos) → reportes manuales / admin
+ *   3. canal.estado (JSON del canal) → legacy
+ *
+ * Valores posibles: 'estable' | 'inestable' | 'caido' | 'lento' | ''
+ */
+function estadoDeCanal(canal) {
+  if (!canal) return '';
+
+  // 1. Estado del chequeo automático (más confiable)
+  const info = estado.estadoCanales && estado.estadoCanales[canal.id];
+  if (info && info.estado) {
+    if (info.lento && info.estado === 'estable') return 'lento';
+    return info.estado;
+  }
+
+  // 2. Reportes manuales / admin
+  if (estado.caidosRemotos && estado.caidosRemotos[canal.id]) return 'caido';
+
+  // 3. Legacy del JSON del canal
+  if (canal.estado === 'sin_respuesta' || canal.estado === 'dudoso') return 'caido';
+
+  return '';
+}
+
+function esCanalCaido(canal) {
+  return estadoDeCanal(canal) === 'caido';
 }
 
 function esCanalCaido(canal) {
@@ -3227,7 +3278,8 @@ function actualizarBotonCargarMas() {
 function filaCanalLista(canal) {
   const fila = document.createElement('div');
   fila.className = 'fila-canal modo-lista';
-  if (esCanalCaido(canal)) fila.classList.add('canal-caido');
+  const estadoCanal = estadoDeCanal(canal);
+  if (estadoCanal) fila.classList.add(`estado-${estadoCanal}`);
   fila.dataset.id = canal.id;
   fila.setAttribute('role', 'button');
   fila.tabIndex = 0;
@@ -3239,13 +3291,18 @@ function filaCanalLista(canal) {
 
   const banderaHtml = canal.pais ? `<span class="fila-canal__bandera">${bandera(canal.pais)}</span>` : '';
   const enCurso = programaActual(canal.tvgId);
-  const marcaCaido = esCanalCaido(canal) ? `<span class="fila-canal__caido" title="${t('canal_caido')}">⚠</span>` : '';
+
+  // Pill según el estado (solo para inestable/caido/lento)
+  let pillEstado = '';
+  if (estadoCanal === 'inestable') pillEstado = '<span class="pill-estado pill-estado--inestable" title="Falló en el último chequeo">🟡 Inestable</span>';
+  else if (estadoCanal === 'caido') pillEstado = '<span class="pill-estado pill-estado--caido" title="No responde">🔴 Caído</span>';
+  else if (estadoCanal === 'lento') pillEstado = '<span class="pill-estado pill-estado--lento" title="Tarda en abrir">⏱ Lento</span>';
 
   fila.innerHTML = `
     <span class="fila-canal__numero">${canal.numero}</span>
     <span class="fila-canal__logo">${logoHtml}</span>
     <span class="fila-canal__info">
-      <span class="fila-canal__nombre">${canal.nombre} ${marcaCaido}</span>
+      <span class="fila-canal__nombre">${canal.nombre} ${pillEstado}</span>
       <span class="fila-canal__grupo">${banderaHtml}${canal.grupo} ${enCurso ? '\u00b7 ' + enCurso.titulo : ''}</span>
     </span>
     <button class="fila-canal__favorito ${esFavorito(canal.id) ? 'activo' : ''}" aria-label="Favorito" data-id="${canal.id}" tabIndex="-1">${esFavorito(canal.id) ? '\u2605' : '\u2606'}</button>
@@ -3270,7 +3327,8 @@ function filaCanalLista(canal) {
 function filaCanalGrid(canal) {
   const fila = document.createElement('div');
   fila.className = 'fila-canal modo-grilla';
-  if (esCanalCaido(canal)) fila.classList.add('canal-caido');
+  const estadoCanal = estadoDeCanal(canal);
+  if (estadoCanal) fila.classList.add(`estado-${estadoCanal}`);
   fila.dataset.id = canal.id;
   fila.setAttribute('role', 'button');
   fila.tabIndex = 0;
@@ -3310,13 +3368,17 @@ function filaCanalGrid(canal) {
     epgGridHtml = `<span class="fila-canal__sin-epg">${t('sin_epg')}</span>`;
   }
 
-  const marcaCaido = esCanalCaido(canal) ? `<span class="fila-canal__caido" title="${t('canal_caido')}">⚠</span>` : '';
+  // Pill según el estado (solo para inestable/caido/lento)
+  let pillEstado = '';
+  if (estadoCanal === 'inestable') pillEstado = '<span class="pill-estado pill-estado--inestable" title="Falló en el último chequeo">🟡 Inestable</span>';
+  else if (estadoCanal === 'caido') pillEstado = '<span class="pill-estado pill-estado--caido" title="No responde">🔴 Caído</span>';
+  else if (estadoCanal === 'lento') pillEstado = '<span class="pill-estado pill-estado--lento" title="Tarda en abrir">⏱ Lento</span>';
 
   fila.innerHTML = `
     <span class="fila-canal__numero">${canal.numero}</span>
     <span class="fila-canal__logo">${logoHtml}</span>
     <span class="fila-canal__info">
-      <span class="fila-canal__nombre">${canal.nombre} ${marcaCaido}</span>
+      <span class="fila-canal__nombre">${canal.nombre} ${pillEstado}</span>
       <span class="fila-canal__grupo">${banderaHtml}${canal.grupo}</span>
       ${epgGridHtml}
     </span>
@@ -4304,7 +4366,10 @@ async function iniciar() {
 
   aplicarIdioma();
 
-  cargarCaidosDelWorker().then(() => renderGuia());
+  Promise.all([
+    cargarCaidosDelWorker(),
+    cargarEstadoCanales(),
+  ]).then(() => renderGuia());
 
   detectarInvitacionSync().then(() => {
     if (estado.syncId) {

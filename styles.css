@@ -1061,3 +1061,72 @@ textarea:focus,
   .fila-canal   { padding: 10px 12px; }
   .fila-canal__logo { width: 40px; height: 40px; margin-right: 10px; }
 }
+/* =======================================================
+   Estados de canal (borde izquierdo + pills)
+   ======================================================= */
+
+/* Borde izquierdo de color según el estado (4px, sutil) */
+.fila-canal.estado-estable {
+  border-left: 4px solid #22c55e;
+}
+
+.fila-canal.estado-inestable {
+  border-left: 4px solid #eab308;
+}
+
+.fila-canal.estado-caido {
+  border-left: 4px solid #ef4444;
+  opacity: 0.7;
+}
+
+.fila-canal.estado-lento {
+  border-left: 4px solid #f97316;
+}
+
+/* Pill de estado junto al nombre */
+.pill-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 6px;
+  vertical-align: middle;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+}
+
+.pill-estado--inestable {
+  background: rgba(234, 179, 8, 0.18);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.4);
+}
+
+.pill-estado--caido {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.pill-estado--lento {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fdba74;
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}
+
+/* En modo grilla, el pill puede romper línea; permitirlo */
+.modo-grilla .fila-canal__nombre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+/* El canal caído se ve semi-transparente incluso sin el estado-caido explícito */
+.fila-canal.canal-caido {
+  opacity: 0.7;
+  border-left: 4px solid #ef4444;
+}
