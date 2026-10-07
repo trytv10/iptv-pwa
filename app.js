@@ -4164,7 +4164,10 @@ async function forzarActualizacionServidor() {
     guardarListasEnStorage();
     cambiarListaActiva('oficial');
 
-    await cargarCaidosDelWorker();
+    await Promise.all([
+      cargarCaidosDelWorker(),
+      cargarEstadoCanales(),
+    ]);
     renderGuia();
 
     if ('caches' in window) {
