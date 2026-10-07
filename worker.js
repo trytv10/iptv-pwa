@@ -13,17 +13,14 @@
  *   GET  /reportes             → listar reportes (requiere token admin)
  *   GET  /caidos               → lista de canales marcados como caídos (público)
  *   POST /admin/marcar-caido   → marcar/desmarcar canal como caído (requiere token)
- *   POST /admin/migrar-canales → migrar canales.json a KV (requiere token, una sola vez)
+ *   POST /admin/migrar-canales → migrar canales.json a KV (requiere token)
  *   POST /admin/migrar-estado  → migrar estado-canales.json a KV (requiere token)
  *   GET  /admin/canales        → listar canales del KV (requiere token)
+ *   GET  /admin/estado         → listar estado de canales con paginación (requiere token)
+ *   POST /admin/canal          → crear canal (requiere token)
+ *   PUT  /admin/canal/:id      → editar canal (requiere token)
+ *   DELETE /admin/canal/:id    → borrar canal (requiere token)
  *   GET  /health               → chequeo rápido
- *
- * Variables de entorno (Settings → Variables del Worker):
- *   CANALES_URL      (opcional) URL remota a canales.json; si no, usa el del repo por defecto
- *   ADMIN_TOKEN      (requerido para endpoints /admin) token secreto
- *
- * Bindings KV:
- *   FAVORITOS        namespace KV (ej. IPTV_FAVORITOS)
  */
 
 // ============================================================
@@ -50,7 +47,6 @@ const TTL_STREAM = 30;
 const TTL_MANIFIESTO = 10;
 const TTL_CANALES = 300;
 const TTL_ESTADO = 300;
-const TTL_FAVORITOS = 0;
 
 const AUTO_MARCADO_UMBRAL_REPORTES = 3;
 const AUTO_MARCADO_VENTANA_HORAS = 24;
@@ -157,7 +153,7 @@ function normalizarCanal(c, i) {
   const estado = c.estado || '';
 
   return {
-    id: 'c_' + hashUrl(url),
+    id: c.id || ('c_' + hashUrl(url)),
     numero: String(i + 1).padStart(2, '0'),
     nombre,
     url,
@@ -172,23 +168,32 @@ function normalizarCanal(c, i) {
   };
 }
 
+function limpiarCanalEntrada(body) {
+  const canal = {};
+  canal.nombre = (body.nombre || '').toString().trim().slice(0, 200);
+  canal.url = (body.url || '').toString().trim().slice(0, 2000);
+  canal.logo = (body.logo || '').toString().trim().slice(0, 2000);
+  canal.grupo = (body.grupo || '').toString().trim().slice(0, 200) || 'General';
+  canal.pais = (body.pais || '').toString().trim().toUpperCase().slice(0, 4);
+  canal.tvgId = (body.tvgId || '').toString().trim().slice(0, 200);
+  canal.estado = (body.estado || '').toString().trim().slice(0, 64);
+  canal.geobloqueado = !!body.geobloqueado;
+  canal.inestable = !!body.inestable;
+  canal.youtube = !!body.youtube;
+  canal.numero = (body.numero || '').toString().trim().slice(0, 8);
+  return canal;
+}
+
 // ============================================================
 //  RUTA: /proxy
 // ============================================================
 
 async function manejarProxy(request, url) {
   const target = url.searchParams.get('url');
-  if (!target) {
-    return json({ error: 'Falta el parámetro ?url=' }, 400);
-  }
+  if (!target) return json({ error: 'Falta el parámetro ?url=' }, 400);
 
   let targetUrl;
-  try {
-    targetUrl = new URL(target);
-  } catch {
-    return json({ error: 'URL inválida' }, 400);
-  }
-
+  try { targetUrl = new URL(target); } catch { return json({ error: 'URL inválida' }, 400); }
   if (!['http:', 'https:'].includes(targetUrl.protocol)) {
     return json({ error: 'Solo se permiten URLs http/https' }, 400);
   }
@@ -205,13 +210,8 @@ async function manejarProxy(request, url) {
   let upstream;
   try {
     upstream = await fetch(targetUrl.toString(), {
-      method: 'GET',
-      headers,
-      redirect: 'follow',
-      cf: {
-        cacheTtl: pareceStream(target) ? TTL_STREAM : TTL_MANIFIESTO,
-        cacheEverything: true,
-      },
+      method: 'GET', headers, redirect: 'follow',
+      cf: { cacheTtl: pareceStream(target) ? TTL_STREAM : TTL_MANIFIESTO, cacheEverything: true },
     });
   } catch (e) {
     return json({ error: 'No se pudo conectar al origen', detalle: e.message }, 502);
@@ -227,86 +227,55 @@ async function manejarProxy(request, url) {
   const contentType = upstream.headers.get('Content-Type') || '';
   const ext = extDeUrl(target);
 
-  if (
-    ext === 'm3u8' || ext === 'm3u' ||
-    contentType.includes('mpegurl') ||
-    contentType.includes('x-mpegURL')
-  ) {
+  if (ext === 'm3u8' || ext === 'm3u' || contentType.includes('mpegurl') || contentType.includes('x-mpegURL')) {
     const texto = await upstream.text();
     const reescrito = reescribirManifiesto(texto, targetUrl);
     return new Response(reescrito, {
       status: 200,
-      headers: {
-        'Content-Type': MIME_STREAM.m3u8,
-        'Cache-Control': `public, max-age=${TTL_MANIFIESTO}`,
-        ...corsHeaders(),
-      },
+      headers: { 'Content-Type': MIME_STREAM.m3u8, 'Cache-Control': `public, max-age=${TTL_MANIFIESTO}`, ...corsHeaders() },
     });
   }
 
   const headersSalida = new Headers(corsHeaders());
   headersSalida.set('Content-Type', contentType || mimeDeExt(ext));
-  const contentLength = upstream.headers.get('Content-Length');
-  if (contentLength) headersSalida.set('Content-Length', contentLength);
-  const contentRange = upstream.headers.get('Content-Range');
-  if (contentRange) headersSalida.set('Content-Range', contentRange);
-  const acceptRanges = upstream.headers.get('Accept-Ranges');
-  if (acceptRanges) headersSalida.set('Accept-Ranges', acceptRanges);
+  const cl = upstream.headers.get('Content-Length');
+  if (cl) headersSalida.set('Content-Length', cl);
+  const cr = upstream.headers.get('Content-Range');
+  if (cr) headersSalida.set('Content-Range', cr);
+  const ar = upstream.headers.get('Accept-Ranges');
+  if (ar) headersSalida.set('Accept-Ranges', ar);
   headersSalida.set('Cache-Control', `public, max-age=${TTL_STREAM}`);
 
-  return new Response(upstream.body, {
-    status: upstream.status,
-    headers: headersSalida,
-  });
+  return new Response(upstream.body, { status: upstream.status, headers: headersSalida });
 }
 
 function reescribirManifiesto(texto, baseUrl) {
   const lineas = texto.split(/\r?\n/);
   const salida = [];
-
-  const proxyAbsoluta = (absoluta) => {
-    if (!/^https?:\/\//i.test(absoluta)) return absoluta;
-    return `/proxy?url=${encodeURIComponent(absoluta)}`;
-  };
-
+  const proxyAbsoluta = (abs) => /^https?:\/\//i.test(abs) ? `/proxy?url=${encodeURIComponent(abs)}` : abs;
   const proxificarUrl = (uri) => {
-    try {
-      const absoluta = new URL(uri, baseUrl).toString();
-      return proxyAbsoluta(absoluta);
-    } catch {
-      return uri;
-    }
+    try { return proxyAbsoluta(new URL(uri, baseUrl).toString()); } catch { return uri; }
   };
 
   for (let i = 0; i < lineas.length; i++) {
     let linea = lineas[i];
     const recortada = linea.trim();
-
     if (recortada.startsWith('#EXT-X-KEY') || recortada.startsWith('#EXT-X-MAP') ||
         recortada.startsWith('#EXT-X-MEDIA') || recortada.startsWith('#EXT-X-PART') ||
         recortada.startsWith('#EXT-X-PRELOAD-HINT')) {
-      linea = recortada.replace(/URI="([^"]+)"/g, (_m, uri) => {
-        return `URI="${proxificarUrl(uri)}"`;
-      });
+      linea = recortada.replace(/URI="([^"]+)"/g, (_m, uri) => `URI="${proxificarUrl(uri)}"`);
       salida.push(linea);
     } else if (recortada.startsWith('#EXT-X-STREAM-INF')) {
       salida.push(recortada);
       let j = i + 1;
-      while (j < lineas.length && (!lineas[j].trim() || lineas[j].trim().startsWith('#'))) {
-        salida.push(lineas[j]);
-        j++;
-      }
-      if (j < lineas.length) {
-        salida.push(proxificarUrl(lineas[j].trim()));
-        i = j;
-      }
+      while (j < lineas.length && (!lineas[j].trim() || lineas[j].trim().startsWith('#'))) { salida.push(lineas[j]); j++; }
+      if (j < lineas.length) { salida.push(proxificarUrl(lineas[j].trim())); i = j; }
     } else if (recortada && !recortada.startsWith('#')) {
       salida.push(proxificarUrl(recortada));
     } else {
       salida.push(linea);
     }
   }
-
   return salida.join('\n');
 }
 
@@ -323,13 +292,10 @@ async function manejarCanales(request, env) {
       if (kv && Array.isArray(kv.canales) && kv.canales.length > 0) {
         return responderCanales(request, url, kv.canales, kv.actualizado || null, 'kv');
       }
-    } catch (e) {
-      console.warn('Error leyendo KV, cayendo a canales.json:', e);
-    }
+    } catch (e) { console.warn('Error leyendo KV canales:', e); }
   }
 
   const urlRemota = env.CANALES_URL || CANALES_URL_DEFECTO;
-
   const cache = caches.default;
   const cacheKey = new Request(`${urlRemota}#__canales_cache`, { method: 'GET' });
 
@@ -337,28 +303,18 @@ async function manejarCanales(request, env) {
   if (!respuestaOrigen) {
     let origen;
     try {
-      origen = await fetch(urlRemota, {
-        cf: { cacheTtl: TTL_CANALES, cacheEverything: true },
-      });
+      origen = await fetch(urlRemota, { cf: { cacheTtl: TTL_CANALES, cacheEverything: true } });
     } catch (e) {
       return json({ error: 'No se pudo obtener canales.json', detalle: e.message }, 502);
     }
-    if (!origen.ok) {
-      return json({ error: `Origen devolvió HTTP ${origen.status}` }, origen.status);
-    }
+    if (!origen.ok) return json({ error: `Origen devolvió HTTP ${origen.status}` }, origen.status);
 
     const texto = await origen.text();
     const etag = await generarEtag(texto);
-
     respuestaOrigen = new Response(texto, {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'ETag': etag,
-        'Cache-Control': `public, max-age=${TTL_CANALES}`,
-      },
+      headers: { 'Content-Type': 'application/json; charset=utf-8', 'ETag': etag, 'Cache-Control': `public, max-age=${TTL_CANALES}` },
     });
-
     await cache.put(cacheKey, respuestaOrigen.clone());
   }
 
@@ -367,9 +323,7 @@ async function manejarCanales(request, env) {
   try {
     const datos = JSON.parse(cuerpo);
     canalesJson = Array.isArray(datos) ? datos : (datos.canales || []);
-  } catch {
-    canalesJson = [];
-  }
+  } catch { canalesJson = []; }
 
   return responderCanales(request, url, canalesJson, null, 'github');
 }
@@ -379,31 +333,19 @@ function responderCanales(request, url, canales, actualizado, fuente) {
   const tieneBusqueda = url.searchParams.has('q');
   const tieneGrupo = url.searchParams.has('grupo');
   const tienePais = url.searchParams.has('pais');
+  const incluirBaja = url.searchParams.get('incluirBaja') === 'true';
 
-  if (!tienePaginacion && !tieneBusqueda && !tieneGrupo && !tienePais) {
+  if (!tienePaginacion && !tieneBusqueda && !tieneGrupo && !tienePais && !incluirBaja) {
     const etag = `"${canales.length}-${actualizado || 'x'}"`;
     const ifNoneMatch = request.headers.get('If-None-Match');
-
     if (ifNoneMatch && ifNoneMatch === etag) {
       return new Response(null, {
         status: 304,
-        headers: {
-          'ETag': etag,
-          'Cache-Control': `public, max-age=${TTL_CANALES}`,
-          ...corsHeaders(),
-        },
+        headers: { 'ETag': etag, 'Cache-Control': `public, max-age=${TTL_CANALES}`, ...corsHeaders() },
       });
     }
-
-    return json({
-      ok: true,
-      fuente,
-      total: canales.length,
-      actualizado,
-      canales,
-    }, 200, {
-      'Cache-Control': `public, max-age=${TTL_CANALES}`,
-      'ETag': etag,
+    return json({ ok: true, fuente, total: canales.length, actualizado, canales }, 200, {
+      'Cache-Control': `public, max-age=${TTL_CANALES}`, 'ETag': etag,
     });
   }
 
@@ -421,14 +363,10 @@ function responderCanales(request, url, canales, actualizado, fuente) {
   }
 
   const grupo = url.searchParams.get('grupo') || '';
-  if (grupo) {
-    filtrados = filtrados.filter((c) => (c.grupo || c.group || '') === grupo);
-  }
+  if (grupo) filtrados = filtrados.filter((c) => (c.grupo || c.group || '') === grupo);
 
   const pais = url.searchParams.get('pais') || '';
-  if (pais) {
-    filtrados = filtrados.filter((c) => (c.pais || c.country || '').toUpperCase() === pais.toUpperCase());
-  }
+  if (pais) filtrados = filtrados.filter((c) => (c.pais || c.country || '').toUpperCase() === pais.toUpperCase());
 
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '75', 10), 500);
   const offset = Math.max(parseInt(url.searchParams.get('offset') || '0', 10), 0);
@@ -436,42 +374,26 @@ function responderCanales(request, url, canales, actualizado, fuente) {
   const total = filtrados.length;
   const pagina = filtrados.slice(offset, offset + limit);
 
-  return json({
-    ok: true,
-    fuente,
-    total,
-    offset,
-    limit,
-    actualizado,
-    canales: pagina,
-  }, 200, {
+  return json({ ok: true, fuente, total, offset, limit, actualizado, canales: pagina }, 200, {
     'Cache-Control': `public, max-age=${TTL_CANALES}`,
   });
 }
 
 // ============================================================
 //  RUTA: /estado-canales
-//  Devuelve el estado de los canales (KV con fallback a estado-canales.json).
 // ============================================================
 
 async function manejarEstadoCanales(request, env) {
-  const url = new URL(request.url);
-
-  // 1) Intenta leer del KV
   if (env.FAVORITOS) {
     try {
       const kv = await env.FAVORITOS.get(CLAVE_ESTADO_KV, 'json');
       if (kv && kv.canales && typeof kv.canales === 'object') {
         return responderEstado(request, kv, 'kv');
       }
-    } catch (e) {
-      console.warn('Error leyendo estado de KV, cayendo a estado-canales.json:', e);
-    }
+    } catch (e) { console.warn('Error leyendo estado de KV:', e); }
   }
 
-  // 2) Fallback: estado-canales.json del repo
   const urlRemota = env.CANALES_ESTADO_URL || CANALES_ESTADO_URL_DEFECTO;
-
   const cache = caches.default;
   const cacheKey = new Request(`${urlRemota}#__estado_cache`, { method: 'GET' });
 
@@ -479,42 +401,26 @@ async function manejarEstadoCanales(request, env) {
   if (!respuestaOrigen) {
     let origen;
     try {
-      origen = await fetch(urlRemota, {
-        cf: { cacheTtl: TTL_ESTADO, cacheEverything: true },
-      });
+      origen = await fetch(urlRemota, { cf: { cacheTtl: TTL_ESTADO, cacheEverything: true } });
     } catch (e) {
       return json({ error: 'No se pudo obtener estado-canales.json', detalle: e.message }, 502);
     }
-    if (!origen.ok) {
-      return json({ error: `Origen devolvió HTTP ${origen.status}` }, origen.status);
-    }
+    if (!origen.ok) return json({ error: `Origen devolvió HTTP ${origen.status}` }, origen.status);
 
     const texto = await origen.text();
     const etag = await generarEtag(texto);
-
     respuestaOrigen = new Response(texto, {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'ETag': etag,
-        'Cache-Control': `public, max-age=${TTL_ESTADO}`,
-      },
+      headers: { 'Content-Type': 'application/json; charset=utf-8', 'ETag': etag, 'Cache-Control': `public, max-age=${TTL_ESTADO}` },
     });
-
     await cache.put(cacheKey, respuestaOrigen.clone());
   }
 
   const cuerpo = await respuestaOrigen.text();
   let datos = null;
-  try {
-    datos = JSON.parse(cuerpo);
-  } catch {
-    datos = null;
-  }
+  try { datos = JSON.parse(cuerpo); } catch { datos = null; }
 
-  if (!datos || !datos.canales) {
-    return json({ error: 'estado-canales.json no tiene canales' }, 502);
-  }
+  if (!datos || !datos.canales) return json({ error: 'estado-canales.json no tiene canales' }, 502);
 
   return responderEstado(request, datos, 'github');
 }
@@ -526,11 +432,7 @@ function responderEstado(request, datos, fuente) {
   if (ifNoneMatch && ifNoneMatch === etag) {
     return new Response(null, {
       status: 304,
-      headers: {
-        'ETag': etag,
-        'Cache-Control': `public, max-age=${TTL_ESTADO}`,
-        ...corsHeaders(),
-      },
+      headers: { 'ETag': etag, 'Cache-Control': `public, max-age=${TTL_ESTADO}`, ...corsHeaders() },
     });
   }
 
@@ -552,38 +454,24 @@ function responderEstado(request, datos, fuente) {
 // ============================================================
 
 async function manejarFavoritos(request, env, syncId) {
-  if (!env.FAVORITOS) {
-    return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
-  }
-  if (!validarSyncId(syncId)) {
-    return json({ error: 'syncId inválido (8-64 chars alfanuméricos)' }, 400);
-  }
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
+  if (!validarSyncId(syncId)) return json({ error: 'syncId inválido (8-64 chars alfanuméricos)' }, 400);
 
   const key = `fav:${syncId}`;
 
   if (request.method === 'GET') {
     const valor = await env.FAVORITOS.get(key, 'json');
-    if (!valor) {
-      return json({ syncId, favoritos: [], vacio: true });
-    }
+    if (!valor) return json({ syncId, favoritos: [], vacio: true });
     return json({ syncId, favoritos: valor.favoritos || [], actualizado: valor.actualizado });
   }
 
   if (request.method === 'PUT') {
     let body;
-    try {
-      body = await request.json();
-    } catch {
-      return json({ error: 'Body JSON inválido' }, 400);
-    }
+    try { body = await request.json(); } catch { return json({ error: 'Body JSON inválido' }, 400); }
     const favoritos = Array.isArray(body.favoritos) ? body.favoritos : [];
-    if (favoritos.length > 5000) {
-      return json({ error: 'Demasiados favoritos (máx 5000)' }, 400);
-    }
+    if (favoritos.length > 5000) return json({ error: 'Demasiados favoritos (máx 5000)' }, 400);
     const valor = { favoritos, actualizado: new Date().toISOString() };
-    await env.FAVORITOS.put(key, JSON.stringify(valor), {
-      expirationTtl: 60 * 60 * 24 * 730,
-    });
+    await env.FAVORITOS.put(key, JSON.stringify(valor), { expirationTtl: 60 * 60 * 24 * 730 });
     return json({ ok: true, syncId, total: favoritos.length });
   }
 
@@ -600,16 +488,10 @@ async function manejarFavoritos(request, env, syncId) {
 // ============================================================
 
 async function manejarReporte(request, env) {
-  if (!env.FAVORITOS) {
-    return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
-  }
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
 
   let body;
-  try {
-    body = await request.json();
-  } catch {
-    return json({ error: 'Body JSON inválido' }, 400);
-  }
+  try { body = await request.json(); } catch { return json({ error: 'Body JSON inválido' }, 400); }
 
   const canalId = (body.canalId || '').toString().trim().slice(0, 128);
   const canalNombre = (body.canalNombre || '').toString().trim().slice(0, 200);
@@ -617,51 +499,28 @@ async function manejarReporte(request, env) {
   const motivo = (body.motivo || 'caido').toString().trim().slice(0, 64);
   const comentario = (body.comentario || '').toString().trim().slice(0, 500);
 
-  if (!canalId || !canalUrl) {
-    return json({ error: 'Faltan canalId o canalUrl' }, 400);
-  }
+  if (!canalId || !canalUrl) return json({ error: 'Faltan canalId o canalUrl' }, 400);
 
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   const ipHash = await hashString(ip);
   const rlKey = `rl:reporte:${ipHash}:${canalId}`;
   const yaExiste = await env.FAVORITOS.get(rlKey);
-  if (yaExiste) {
-    return json({ ok: true, duplicado: true, mensaje: 'Ya reportaste este canal hace poco' });
-  }
+  if (yaExiste) return json({ ok: true, duplicado: true, mensaje: 'Ya reportaste este canal hace poco' });
   await env.FAVORITOS.put(rlKey, '1', { expirationTtl: 3600 });
 
   const idReporte = `rep_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  const reporte = {
-    id: idReporte,
-    canalId,
-    canalNombre,
-    canalUrl,
-    motivo,
-    comentario,
-    ipHash,
-    userAgent: (request.headers.get('User-Agent') || '').slice(0, 200),
-    fecha: new Date().toISOString(),
-  };
+  const reporte = { id: idReporte, canalId, canalNombre, canalUrl, motivo, comentario, ipHash, userAgent: (request.headers.get('User-Agent') || '').slice(0, 200), fecha: new Date().toISOString() };
 
-  await env.FAVORITOS.put(`reporte:${idReporte}`, JSON.stringify(reporte), {
-    expirationTtl: 60 * 60 * 24 * 90,
-  });
+  await env.FAVORITOS.put(`reporte:${idReporte}`, JSON.stringify(reporte), { expirationTtl: 60 * 60 * 24 * 90 });
 
   const autoMarcado = await autoMarcarSiCorresponde(env, canalId, canalNombre, canalUrl);
 
-  return json({
-    ok: true,
-    id: idReporte,
-    autoMarcado,
-    umbralReportes: AUTO_MARCADO_UMBRAL_REPORTES,
-    ventanaHoras: AUTO_MARCADO_VENTANA_HORAS,
-  });
+  return json({ ok: true, id: idReporte, autoMarcado, umbralReportes: AUTO_MARCADO_UMBRAL_REPORTES, ventanaHoras: AUTO_MARCADO_VENTANA_HORAS });
 }
 
 async function contarReportesRecientes(env, canalId, horas) {
   const desdeMs = Date.now() - (horas * 60 * 60 * 1000);
   const lista = await env.FAVORITOS.list({ prefix: 'reporte:', limit: 1000 });
-
   let cuenta = 0;
   for (const key of lista.keys) {
     const valor = await env.FAVORITOS.get(key.name, 'json');
@@ -679,23 +538,15 @@ async function autoMarcarSiCorresponde(env, canalId, canalNombre, canalUrl) {
 
   const raw = await env.FAVORITOS.get(CLAVE_CAIDOS_KV, 'json');
   const datos = raw || {};
-
   if (datos[canalId] && datos[canalId].marcado) return false;
 
   datos[canalId] = {
-    marcado: true,
-    marcadoEn: new Date().toISOString(),
-    origen: 'auto',
+    marcado: true, marcadoEn: new Date().toISOString(), origen: 'auto',
     comentario: `Auto-marcado: ${cuenta} reportes en ${AUTO_MARCADO_VENTANA_HORAS}h`,
-    canalNombre: canalNombre || '',
-    canalUrl: canalUrl || '',
-    reportesRecientes: cuenta,
+    canalNombre: canalNombre || '', canalUrl: canalUrl || '', reportesRecientes: cuenta,
   };
 
-  await env.FAVORITOS.put(CLAVE_CAIDOS_KV, JSON.stringify(datos), {
-    expirationTtl: 60 * 60 * 24 * 365,
-  });
-
+  await env.FAVORITOS.put(CLAVE_CAIDOS_KV, JSON.stringify(datos), { expirationTtl: 60 * 60 * 24 * 365 });
   return true;
 }
 
@@ -704,9 +555,7 @@ async function autoMarcarSiCorresponde(env, canalId, canalNombre, canalUrl) {
 // ============================================================
 
 async function listarReportes(request, env, url) {
-  if (!env.FAVORITOS) {
-    return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
-  }
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
 
   const err = requiereAdmin(request, env, url);
   if (err) return json({ error: err.error }, err.status);
@@ -716,15 +565,13 @@ async function listarReportes(request, env, url) {
   const canalFiltro = url.searchParams.get('canal') || '';
 
   const lista = await env.FAVORITOS.list({ prefix: 'reporte:', limit: 1000 });
-
   const reportes = [];
+
   for (const key of lista.keys) {
     const valor = await env.FAVORITOS.get(key.name, 'json');
     if (!valor) continue;
-
     if (motivoFiltro && valor.motivo !== motivoFiltro) continue;
     if (canalFiltro && valor.canalId !== canalFiltro) continue;
-
     reportes.push(valor);
   }
 
@@ -735,23 +582,16 @@ async function listarReportes(request, env, url) {
     const id = r.canalId || 'desconocido';
     if (!porCanal[id]) {
       porCanal[id] = {
-        canalId: id,
-        canalNombre: r.canalNombre || 'Sin nombre',
-        canalUrl: r.canalUrl || '',
-        total: 0,
-        motivos: {},
-        ultimoReporte: r.fecha,
+        canalId: id, canalNombre: r.canalNombre || 'Sin nombre', canalUrl: r.canalUrl || '',
+        total: 0, motivos: {}, ultimoReporte: r.fecha,
       };
     }
     porCanal[id].total++;
     porCanal[id].motivos[r.motivo] = (porCanal[id].motivos[r.motivo] || 0) + 1;
-    if ((r.fecha || '') > (porCanal[id].ultimoReporte || '')) {
-      porCanal[id].ultimoReporte = r.fecha;
-    }
+    if ((r.fecha || '') > (porCanal[id].ultimoReporte || '')) porCanal[id].ultimoReporte = r.fecha;
   }
 
   const ranking = Object.values(porCanal).sort((a, b) => b.total - a.total);
-
   const caidosRaw = await env.FAVORITOS.get(CLAVE_CAIDOS_KV, 'json');
   const caidos = caidosRaw || {};
 
@@ -769,10 +609,7 @@ async function listarReportes(request, env, url) {
     mostrados: Math.min(reportes.length, limite),
     reportes: reportes.slice(0, limite),
     ranking,
-    config: {
-      umbralReportes: AUTO_MARCADO_UMBRAL_REPORTES,
-      ventanaHoras: AUTO_MARCADO_VENTANA_HORAS,
-    },
+    config: { umbralReportes: AUTO_MARCADO_UMBRAL_REPORTES, ventanaHoras: AUTO_MARCADO_VENTANA_HORAS },
   });
 }
 
@@ -781,25 +618,20 @@ async function listarReportes(request, env, url) {
 // ============================================================
 
 async function listarCaidos(request, env) {
-  if (!env.FAVORITOS) {
-    return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
-  }
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
 
   const raw = await env.FAVORITOS.get(CLAVE_CAIDOS_KV, 'json');
   const datos = raw || {};
-
   const caidos = {};
+
   for (const [canalId, info] of Object.entries(datos)) {
     if (info && info.marcado) {
       caidos[canalId] = {
-        marcado: true,
-        marcadoEn: info.marcadoEn || '',
-        origen: info.origen || 'admin',
-        comentario: info.comentario || '',
+        marcado: true, marcadoEn: info.marcadoEn || '',
+        origen: info.origen || 'admin', comentario: info.comentario || '',
       };
     }
   }
-
   return json({ ok: true, caidos });
 }
 
@@ -808,19 +640,13 @@ async function listarCaidos(request, env) {
 // ============================================================
 
 async function marcarCaido(request, env, url) {
-  if (!env.FAVORITOS) {
-    return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
-  }
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
 
   const err = requiereAdmin(request, env, url);
   if (err) return json({ error: err.error }, err.status);
 
   let body;
-  try {
-    body = await request.json();
-  } catch {
-    return json({ error: 'Body JSON inválido' }, 400);
-  }
+  try { body = await request.json(); } catch { return json({ error: 'Body JSON inválido' }, 400); }
 
   const canalId = (body.canalId || '').toString().trim().slice(0, 128);
   const canalNombre = (body.canalNombre || '').toString().trim().slice(0, 200);
@@ -828,30 +654,21 @@ async function marcarCaido(request, env, url) {
   const marcar = !!body.marcar;
   const comentario = (body.comentario || '').toString().trim().slice(0, 200);
 
-  if (!canalId) {
-    return json({ error: 'Falta canalId' }, 400);
-  }
+  if (!canalId) return json({ error: 'Falta canalId' }, 400);
 
   const raw = await env.FAVORITOS.get(CLAVE_CAIDOS_KV, 'json');
   const datos = raw || {};
 
   if (marcar) {
     datos[canalId] = {
-      marcado: true,
-      marcadoEn: new Date().toISOString(),
-      origen: 'admin',
-      comentario,
-      canalNombre,
-      canalUrl,
+      marcado: true, marcadoEn: new Date().toISOString(), origen: 'admin',
+      comentario, canalNombre, canalUrl,
     };
   } else {
     delete datos[canalId];
   }
 
-  await env.FAVORITOS.put(CLAVE_CAIDOS_KV, JSON.stringify(datos), {
-    expirationTtl: 60 * 60 * 24 * 365,
-  });
-
+  await env.FAVORITOS.put(CLAVE_CAIDOS_KV, JSON.stringify(datos), { expirationTtl: 60 * 60 * 24 * 365 });
   return json({ ok: true, canalId, marcado: marcar, total: Object.keys(datos).length });
 }
 
@@ -860,41 +677,27 @@ async function marcarCaido(request, env, url) {
 // ============================================================
 
 async function migrarCanales(request, env, url) {
-  if (!env.FAVORITOS) {
-    return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
-  }
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
 
   const err = requiereAdmin(request, env, url);
   if (err) return json({ error: err.error }, err.status);
 
   const urlRemota = env.CANALES_URL || CANALES_URL_DEFECTO;
-
   let resp;
   try {
     resp = await fetch(urlRemota, { cf: { cacheTtl: 0, cacheEverything: false } });
   } catch (e) {
     return json({ error: 'No se pudo descargar canales.json', detalle: e.message }, 502);
   }
-
-  if (!resp.ok) {
-    return json({ error: `canales.json devolvió HTTP ${resp.status}` }, resp.status);
-  }
+  if (!resp.ok) return json({ error: `canales.json devolvió HTTP ${resp.status}` }, resp.status);
 
   let datos;
-  try {
-    datos = await resp.json();
-  } catch {
-    return json({ error: 'canales.json no es un JSON válido' }, 400);
-  }
+  try { datos = await resp.json(); } catch { return json({ error: 'canales.json no es un JSON válido' }, 400); }
 
   const lista = Array.isArray(datos) ? datos : (datos.canales || []);
-  if (!Array.isArray(lista) || lista.length === 0) {
-    return json({ error: 'canales.json no tiene canales' }, 400);
-  }
+  if (!Array.isArray(lista) || lista.length === 0) return json({ error: 'canales.json no tiene canales' }, 400);
 
-  const canalesNormalizados = lista
-    .filter((c) => c && (c.url || c.stream))
-    .map((c, i) => normalizarCanal(c, i));
+  const canalesNormalizados = lista.filter((c) => c && (c.url || c.stream)).map((c, i) => normalizarCanal(c, i));
 
   const payload = {
     canales: canalesNormalizados,
@@ -904,47 +707,30 @@ async function migrarCanales(request, env, url) {
   };
 
   await env.FAVORITOS.put(CLAVE_CANALES_KV, JSON.stringify(payload));
-
-  return json({
-    ok: true,
-    total: canalesNormalizados.length,
-    actualizado: payload.actualizado,
-    fuente: urlRemota,
-  });
+  return json({ ok: true, total: canalesNormalizados.length, actualizado: payload.actualizado, fuente: urlRemota });
 }
 
 // ============================================================
 //  RUTA: POST /admin/migrar-estado
-//  Lee estado-canales.json del repo y lo guarda en KV.
 // ============================================================
 
 async function migrarEstado(request, env, url) {
-  if (!env.FAVORITOS) {
-    return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
-  }
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
 
   const err = requiereAdmin(request, env, url);
   if (err) return json({ error: err.error }, err.status);
 
   const urlRemota = env.CANALES_ESTADO_URL || CANALES_ESTADO_URL_DEFECTO;
-
   let resp;
   try {
     resp = await fetch(urlRemota, { cf: { cacheTtl: 0, cacheEverything: false } });
   } catch (e) {
     return json({ error: 'No se pudo descargar estado-canales.json', detalle: e.message }, 502);
   }
-
-  if (!resp.ok) {
-    return json({ error: `estado-canales.json devolvió HTTP ${resp.status}` }, resp.status);
-  }
+  if (!resp.ok) return json({ error: `estado-canales.json devolvió HTTP ${resp.status}` }, resp.status);
 
   let datos;
-  try {
-    datos = await resp.json();
-  } catch {
-    return json({ error: 'estado-canales.json no es un JSON válido' }, 400);
-  }
+  try { datos = await resp.json(); } catch { return json({ error: 'estado-canales.json no es un JSON válido' }, 400); }
 
   if (!datos || !datos.canales || typeof datos.canales !== 'object') {
     return json({ error: 'estado-canales.json no tiene el campo canales' }, 400);
@@ -960,14 +746,7 @@ async function migrarEstado(request, env, url) {
   };
 
   await env.FAVORITOS.put(CLAVE_ESTADO_KV, JSON.stringify(payload));
-
-  return json({
-    ok: true,
-    total: payload.total,
-    actualizado: payload.actualizado,
-    resumen: payload.resumen,
-    fuente: urlRemota,
-  });
+  return json({ ok: true, total: payload.total, actualizado: payload.actualizado, resumen: payload.resumen, fuente: urlRemota });
 }
 
 // ============================================================
@@ -975,17 +754,13 @@ async function migrarEstado(request, env, url) {
 // ============================================================
 
 async function adminListarCanales(request, env, url) {
-  if (!env.FAVORITOS) {
-    return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
-  }
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
 
   const err = requiereAdmin(request, env, url);
   if (err) return json({ error: err.error }, err.status);
 
   const kv = await env.FAVORITOS.get(CLAVE_CANALES_KV, 'json');
-  if (!kv || !Array.isArray(kv.canales)) {
-    return json({ ok: true, vacio: true, total: 0, canales: [] });
-  }
+  if (!kv || !Array.isArray(kv.canales)) return json({ ok: true, vacio: true, total: 0, canales: [] });
 
   const limite = Math.min(parseInt(url.searchParams.get('limite') || '50', 10), 500);
   const offset = Math.max(parseInt(url.searchParams.get('offset') || '0', 10), 0);
@@ -994,7 +769,6 @@ async function adminListarCanales(request, env, url) {
   const pais = url.searchParams.get('pais') || '';
 
   let filtrados = kv.canales;
-
   if (q) {
     filtrados = filtrados.filter((c) =>
       (c.nombre || '').toLowerCase().includes(q) ||
@@ -1003,26 +777,243 @@ async function adminListarCanales(request, env, url) {
       (c.pais || '').toLowerCase().includes(q)
     );
   }
-
-  if (grupo) {
-    filtrados = filtrados.filter((c) => c.grupo === grupo);
-  }
-
-  if (pais) {
-    filtrados = filtrados.filter((c) => c.pais === pais);
-  }
+  if (grupo) filtrados = filtrados.filter((c) => c.grupo === grupo);
+  if (pais) filtrados = filtrados.filter((c) => c.pais === pais);
 
   const total = filtrados.length;
   const slice = filtrados.slice(offset, offset + limite);
 
   return json({
-    ok: true,
-    total,
-    offset,
-    limite,
+    ok: true, total, offset, limite,
     actualizado: kv.actualizado || null,
     canales: slice,
   });
+}
+
+// ============================================================
+//  RUTA: GET /admin/estado
+//  Devuelve el estado de canales con paginación y filtros (requiere token).
+// ============================================================
+
+async function adminListarEstado(request, env, url) {
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
+
+  const err = requiereAdmin(request, env, url);
+  if (err) return json({ error: err.error }, err.status);
+
+  let datos = null;
+  try {
+    datos = await env.FAVORITOS.get(CLAVE_ESTADO_KV, 'json');
+  } catch (e) {
+    console.warn('Error leyendo estado de KV:', e);
+  }
+
+  // Fallback: leer del raw del repo si no está en KV
+  if (!datos || !datos.canales) {
+    const urlRemota = env.CANALES_ESTADO_URL || CANALES_ESTADO_URL_DEFECTO;
+    try {
+      const resp = await fetch(urlRemota, { cf: { cacheTtl: 0, cacheEverything: false } });
+      if (resp.ok) datos = await resp.json();
+    } catch (e) {
+      console.warn('Error leyendo estado del repo:', e);
+    }
+  }
+
+  if (!datos || !datos.canales) {
+    return json({ ok: true, vacio: true, total: 0, resumen: null, canales: [] });
+  }
+
+  // Preparar lista plana: cada item = { id, nombre, grupo, url, estado, ultimaVezOK, fallosConsecutivos, tiempoRespuestaMs, motivo, lento, dadoDeBaja }
+  const canalesKV = env.FAVORITOS
+    ? (await env.FAVORITOS.get(CLAVE_CANALES_KV, 'json'))
+    : null;
+
+  const mapaCanales = new Map();
+  if (canalesKV && Array.isArray(canalesKV.canales)) {
+    for (const c of canalesKV.canales) {
+      mapaCanales.set(c.id, c);
+    }
+  }
+
+  const listaPlana = [];
+  for (const [id, info] of Object.entries(datos.canales)) {
+    const canal = mapaCanales.get(id) || {};
+    listaPlana.push({
+      id,
+      nombre: canal.nombre || '(desconocido)',
+      grupo: canal.grupo || '',
+      url: canal.url || '',
+      estado: info.estado || '',
+      ultimaVezOK: info.ultimaVezOK || null,
+      fallosConsecutivos: info.fallosConsecutivos || 0,
+      ultimoChequeo: info.ultimoChequeo || null,
+      tiempoRespuestaMs: info.tiempoRespuestaMs || 0,
+      motivo: info.motivo || '',
+      lento: !!info.lento,
+      dadoDeBaja: !!info.dadoDeBaja,
+    });
+  }
+
+  // Filtros
+  const estadoFiltro = url.searchParams.get('estado') || '';
+  const q = (url.searchParams.get('q') || '').toLowerCase().trim();
+  const dadoDeBajaFiltro = url.searchParams.get('dadoDeBaja');
+
+  let filtrados = listaPlana;
+
+  if (estadoFiltro) {
+    filtrados = filtrados.filter((c) => {
+      if (estadoFiltro === 'lento') return c.estado === 'estable' && c.lento;
+      return c.estado === estadoFiltro;
+    });
+  }
+
+  if (dadoDeBajaFiltro === 'true') filtrados = filtrados.filter((c) => c.dadoDeBaja);
+  if (dadoDeBajaFiltro === 'false') filtrados = filtrados.filter((c) => !c.dadoDeBaja);
+
+  if (q) {
+    filtrados = filtrados.filter((c) =>
+      (c.nombre || '').toLowerCase().includes(q) ||
+      (c.grupo || '').toLowerCase().includes(q) ||
+      (c.url || '').toLowerCase().includes(q)
+    );
+  }
+
+  // Ordenar: caidos primero, después inestables, después lentos, después estables
+  const orden = { caido: 0, inestable: 1, estable: 2 };
+  filtrados.sort((a, b) => {
+    const oa = a.lento && a.estado === 'estable' ? 1.5 : (orden[a.estado] ?? 3);
+    const ob = b.lento && b.estado === 'estable' ? 1.5 : (orden[b.estado] ?? 3);
+    if (oa !== ob) return oa - ob;
+    return (b.fallosConsecutivos || 0) - (a.fallosConsecutivos || 0);
+  });
+
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 500);
+  const offset = Math.max(parseInt(url.searchParams.get('offset') || '0', 10), 0);
+
+  const total = filtrados.length;
+  const pagina = filtrados.slice(offset, offset + limit);
+
+  return json({
+    ok: true,
+    fuente: datos.fuente || 'kv',
+    actualizado: datos.actualizado || null,
+    migradoEn: datos.migradoEn || null,
+    total,
+    offset,
+    limit,
+    resumen: datos.resumen || null,
+    canales: pagina,
+  });
+}
+
+// ============================================================
+//  RUTAS: /admin/canal (crear / editar / borrar)
+// ============================================================
+
+async function adminCrearCanal(request, env, url) {
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
+
+  const err = requiereAdmin(request, env, url);
+  if (err) return json({ error: err.error }, err.status);
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Body JSON inválido' }, 400); }
+
+  const canalEntrada = limpiarCanalEntrada(body);
+  if (!canalEntrada.nombre || !canalEntrada.url) return json({ error: 'Faltan nombre o url' }, 400);
+
+  const kv = await env.FAVORITOS.get(CLAVE_CANALES_KV, 'json');
+  const canales = (kv && Array.isArray(kv.canales)) ? kv.canales : [];
+
+  const id = 'c_' + hashUrl(canalEntrada.url);
+  if (canales.some((c) => c.id === id)) return json({ error: 'Ya existe un canal con esa URL (mismo id)' }, 409);
+
+  const nuevo = {
+    id,
+    numero: canalEntrada.numero || String(canales.length + 1).padStart(2, '0'),
+    nombre: canalEntrada.nombre,
+    url: canalEntrada.url,
+    logo: canalEntrada.logo || '',
+    grupo: canalEntrada.grupo,
+    pais: canalEntrada.pais,
+    tvgId: canalEntrada.tvgId,
+    estado: canalEntrada.estado,
+    geobloqueado: canalEntrada.geobloqueado,
+    inestable: canalEntrada.inestable,
+    youtube: canalEntrada.youtube,
+  };
+
+  canales.push(nuevo);
+
+  const payload = {
+    canales,
+    actualizado: new Date().toISOString(),
+    version: 1,
+    fuente: (kv && kv.fuente) || 'manual',
+  };
+
+  await env.FAVORITOS.put(CLAVE_CANALES_KV, JSON.stringify(payload));
+  return json({ ok: true, canal: nuevo, total: canales.length });
+}
+
+async function adminEditarCanal(request, env, url, canalId) {
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
+
+  const err = requiereAdmin(request, env, url);
+  if (err) return json({ error: err.error }, err.status);
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Body JSON inválido' }, 400); }
+
+  const kv = await env.FAVORITOS.get(CLAVE_CANALES_KV, 'json');
+  if (!kv || !Array.isArray(kv.canales)) return json({ error: 'No hay canales en KV' }, 404);
+
+  const idx = kv.canales.findIndex((c) => c.id === canalId);
+  if (idx === -1) return json({ error: 'Canal no encontrado' }, 404);
+
+  const canalEntrada = limpiarCanalEntrada(body);
+  const actual = kv.canales[idx];
+
+  const actualizado = {
+    ...actual,
+    nombre: canalEntrada.nombre || actual.nombre,
+    url: canalEntrada.url || actual.url,
+    logo: canalEntrada.logo !== undefined ? canalEntrada.logo : actual.logo,
+    grupo: canalEntrada.grupo || actual.grupo,
+    pais: canalEntrada.pais !== undefined ? canalEntrada.pais : actual.pais,
+    tvgId: canalEntrada.tvgId !== undefined ? canalEntrada.tvgId : actual.tvgId,
+    estado: canalEntrada.estado !== undefined ? canalEntrada.estado : actual.estado,
+    geobloqueado: canalEntrada.geobloqueado,
+    inestable: canalEntrada.inestable,
+    youtube: canalEntrada.youtube,
+    numero: canalEntrada.numero || actual.numero,
+  };
+
+  kv.canales[idx] = actualizado;
+  kv.actualizado = new Date().toISOString();
+
+  await env.FAVORITOS.put(CLAVE_CANALES_KV, JSON.stringify(kv));
+  return json({ ok: true, canal: actualizado, total: kv.canales.length });
+}
+
+async function adminBorrarCanal(request, env, url, canalId) {
+  if (!env.FAVORITOS) return json({ error: 'Falta el binding KV FAVORITOS' }, 500);
+
+  const err = requiereAdmin(request, env, url);
+  if (err) return json({ error: err.error }, err.status);
+
+  const kv = await env.FAVORITOS.get(CLAVE_CANALES_KV, 'json');
+  if (!kv || !Array.isArray(kv.canales)) return json({ error: 'No hay canales en KV' }, 404);
+
+  const idx = kv.canales.findIndex((c) => c.id === canalId);
+  if (idx === -1) return json({ error: 'Canal no encontrado' }, 404);
+
+  const borrado = kv.canales.splice(idx, 1)[0];
+  kv.actualizado = new Date().toISOString();
+
+  await env.FAVORITOS.put(CLAVE_CANALES_KV, JSON.stringify(kv));
+  return json({ ok: true, canal: borrado, total: kv.canales.length });
 }
 
 // ============================================================
@@ -1037,54 +1028,31 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders() });
     }
 
-    if (url.pathname === '/health') {
-      return json({ ok: true, ts: new Date().toISOString() });
-    }
+    if (url.pathname === '/health') return json({ ok: true, ts: new Date().toISOString() });
+    if (url.pathname === '/proxy') return manejarProxy(request, url);
+    if (url.pathname === '/canales') return manejarCanales(request, env);
+    if (url.pathname === '/estado-canales') return manejarEstadoCanales(request, env);
 
-    if (url.pathname === '/proxy') {
-      return manejarProxy(request, url);
-    }
+    if (url.pathname === '/reportes' && request.method === 'POST') return manejarReporte(request, env);
+    if (url.pathname === '/reportes' && request.method === 'GET') return listarReportes(request, env, url);
+    if (url.pathname === '/caidos' && request.method === 'GET') return listarCaidos(request, env);
 
-    if (url.pathname === '/canales') {
-      return manejarCanales(request, env);
-    }
+    if (url.pathname === '/admin/marcar-caido' && request.method === 'POST') return marcarCaido(request, env, url);
+    if (url.pathname === '/admin/migrar-canales' && request.method === 'POST') return migrarCanales(request, env, url);
+    if (url.pathname === '/admin/migrar-estado' && request.method === 'POST') return migrarEstado(request, env, url);
+    if (url.pathname === '/admin/canales' && request.method === 'GET') return adminListarCanales(request, env, url);
+    if (url.pathname === '/admin/estado' && request.method === 'GET') return adminListarEstado(request, env, url);
+    if (url.pathname === '/admin/canal' && request.method === 'POST') return adminCrearCanal(request, env, url);
 
-    if (url.pathname === '/estado-canales') {
-      return manejarEstadoCanales(request, env);
-    }
-
-    if (url.pathname === '/reportes' && request.method === 'POST') {
-      return manejarReporte(request, env);
-    }
-
-    if (url.pathname === '/reportes' && request.method === 'GET') {
-      return listarReportes(request, env, url);
-    }
-
-    if (url.pathname === '/caidos' && request.method === 'GET') {
-      return listarCaidos(request, env);
-    }
-
-    if (url.pathname === '/admin/marcar-caido' && request.method === 'POST') {
-      return marcarCaido(request, env, url);
-    }
-
-    if (url.pathname === '/admin/migrar-canales' && request.method === 'POST') {
-      return migrarCanales(request, env, url);
-    }
-
-    if (url.pathname === '/admin/migrar-estado' && request.method === 'POST') {
-      return migrarEstado(request, env, url);
-    }
-
-    if (url.pathname === '/admin/canales' && request.method === 'GET') {
-      return adminListarCanales(request, env, url);
+    const mEditar = url.pathname.match(/^\/admin\/canal\/([^/]+)$/);
+    if (mEditar) {
+      const canalId = mEditar[1];
+      if (request.method === 'PUT') return adminEditarCanal(request, env, url, canalId);
+      if (request.method === 'DELETE') return adminBorrarCanal(request, env, url, canalId);
     }
 
     const m = url.pathname.match(/^\/fav\/([^/]+)$/);
-    if (m) {
-      return manejarFavoritos(request, env, m[1]);
-    }
+    if (m) return manejarFavoritos(request, env, m[1]);
 
     return json({
       error: 'Ruta no encontrada',
@@ -1101,6 +1069,10 @@ export default {
         'POST /admin/migrar-canales',
         'POST /admin/migrar-estado',
         'GET /admin/canales',
+        'GET /admin/estado',
+        'POST /admin/canal',
+        'PUT /admin/canal/:id',
+        'DELETE /admin/canal/:id',
       ],
     }, 404);
   },
