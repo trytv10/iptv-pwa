@@ -56,11 +56,25 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
           git add estado-canales.json canales.m3u8
           git commit -m "chore: chequeo automático de canales [skip ci]"
           git push
 
-      - name: Resumen
+      - name: Migrar estado a KV (automático)
+        if: steps.verificar.outputs.cambios == 'true'
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          WORKER_URL: https://iptv-proxy.eolivera119600.workers.dev
+        run: |
+          echo "Esperando 30s para que GitHub Pages/raw se actualice..."
+          sleep 30
+          curl -s -X POST "${WORKER_URL}/admin/migrar-estado?token=${ADMIN_TOKEN}" \
+            -H "Content-Type: application/json" | tee respuesta.json
+          echo ""
+          cat respuesta.json | python3 -c "import sys, json; d=json.load(sys.stdin); print('Total migrado:', d.get('total'), '| Resumen:', d.get('resumen'))" || true
+
+      - name: Resumen del run
         if: always()
         run: |
           echo "### Resultado del chequeo" >> $GITHUB_STEP_SUMMARY
