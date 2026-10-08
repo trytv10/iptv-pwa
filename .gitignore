@@ -1,0 +1,4 @@
+
+# Backups locales
+*.backup
+sync.log
