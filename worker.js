@@ -286,11 +286,14 @@ function reescribirManifiesto(texto, baseUrl) {
 async function manejarCanales(request, env) {
   const url = new URL(request.url);
 
+  // Cargar el estado de canales (para saber cuáles están dados de baja)
+  const estadoCanales = await cargarEstadoParaFiltro(env);
+
   if (env.FAVORITOS) {
     try {
       const kv = await env.FAVORITOS.get(CLAVE_CANALES_KV, 'json');
       if (kv && Array.isArray(kv.canales) && kv.canales.length > 0) {
-        return responderCanales(request, url, kv.canales, kv.actualizado || null, 'kv');
+        return responderCanales(request, url, kv.canales, kv.actualizado || null, 'kv', estadoCanales);
       }
     } catch (e) { console.warn('Error leyendo KV canales:', e); }
   }
@@ -325,15 +328,59 @@ async function manejarCanales(request, env) {
     canalesJson = Array.isArray(datos) ? datos : (datos.canales || []);
   } catch { canalesJson = []; }
 
-  return responderCanales(request, url, canalesJson, null, 'github');
+  return responderCanales(request, url, canalesJson, null, 'github', estadoCanales);
 }
 
-function responderCanales(request, url, canales, actualizado, fuente) {
+/**
+ * Carga el estado de canales desde KV (o desde el repo) para poder filtrar
+ * los "dados de baja" en /canales. Si falla, devuelve {} y no se filtra nada.
+ */
+async function cargarEstadoParaFiltro(env) {
+  if (env.FAVORITOS) {
+    try {
+      const kv = await env.FAVORITOS.get(CLAVE_ESTADO_KV, 'json');
+      if (kv && kv.canales && typeof kv.canales === 'object') {
+        return kv.canales;
+      }
+    } catch (e) { /* fallthrough */ }
+  }
+  const urlRemota = env.CANALES_ESTADO_URL || CANALES_ESTADO_URL_DEFECTO;
+  try {
+    const cache = caches.default;
+    const cacheKey = new Request(`${urlRemota}#__estado_filtro_cache`, { method: 'GET' });
+    let resp = await cache.match(cacheKey);
+    if (!resp) {
+      resp = await fetch(urlRemota, { cf: { cacheTtl: TTL_ESTADO, cacheEverything: true } });
+      if (resp.ok) await cache.put(cacheKey, resp.clone());
+    }
+    if (resp.ok) {
+      const datos = await resp.json();
+      if (datos && datos.canales && typeof datos.canales === 'object') return datos.canales;
+    }
+  } catch (e) { /* ignore */ }
+  return {};
+}
+
+function responderCanales(request, url, canales, actualizado, fuente, estadoCanales) {
   const tienePaginacion = url.searchParams.has('limit') || url.searchParams.has('offset');
   const tieneBusqueda = url.searchParams.has('q');
   const tieneGrupo = url.searchParams.has('grupo');
   const tienePais = url.searchParams.has('pais');
   const incluirBaja = url.searchParams.get('incluirBaja') === 'true';
+
+  // Filtrar los canales "dados de baja" (fallosConsecutivos >= 12)
+  // a menos que el cliente pida explícitamente ?incluirBaja=true
+  if (!incluirBaja && estadoCanales && typeof estadoCanales === 'object') {
+    const totalAntes = canales.length;
+    canales = canales.filter((c) => {
+      const info = estadoCanales[c.id];
+      return !(info && info.dadoDeBaja === true);
+    });
+    const excluidos = totalAntes - canales.length;
+    if (excluidos > 0) {
+      console.info(`[canales] Excluidos ${excluidos} canales dados de baja (de ${totalAntes})`);
+    }
+  }
 
   if (!tienePaginacion && !tieneBusqueda && !tieneGrupo && !tienePais && !incluirBaja) {
     const etag = `"${canales.length}-${actualizado || 'x'}"`;
