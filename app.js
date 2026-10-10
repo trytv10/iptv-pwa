@@ -513,6 +513,9 @@ const URL_WORKER = 'https://iptv-proxy.eolivera119600.workers.dev';
 
 const HISTORIAL_MAX = 30;
 
+// Delay para cargar el EPG en background (no bloquear arranque)
+const EPG_DELAY_MS = 5000;
+
 // --- Paginación server-side ---
 const PAGINA_TAMANO = 75;
 
@@ -4443,12 +4446,24 @@ async function iniciar() {
     }
   });
 
-  cargarProgramacion()
-    .then((programacion) => {
-      estado.programacion = programacion;
-      renderGuia();
-    })
-    .catch((e) => console.warn('No se pudo cargar la EPG', e));
+  // Diferir la carga del EPG para no bloquear el arranque.
+  // Se carga 5s después del arranque, o cuando el usuario hace scroll (lo que pase primero).
+  const cargarEpgDiferido = () => {
+    cargarProgramacion()
+      .then((programacion) => {
+        estado.programacion = programacion;
+        renderGuia();
+      })
+      .catch((e) => console.warn('No se pudo cargar la EPG', e));
+  };
+
+  setTimeout(cargarEpgDiferido, EPG_DELAY_MS);
+
+  // Fallback: si el usuario hace scroll antes de los 5s, adelantar la carga
+  window.addEventListener('scroll', function onScrollEpg() {
+    window.removeEventListener('scroll', onScrollEpg);
+    setTimeout(cargarEpgDiferido, 1000);
+  }, { once: true, passive: true });
 
   arrancarChequeoRecordatorios();
 }
