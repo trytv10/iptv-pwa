@@ -1,6 +1,57 @@
 'use strict';
 
 /* =======================================================
+   Carga diferida de librerías (hls.js, pako)
+   ======================================================= */
+
+const HLS_URL = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';
+const PAKO_URL = 'https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js';
+
+const _scriptsCargados = {};
+
+function cargarScript(url) {
+  if (_scriptsCargados[url]) return _scriptsCargados[url];
+
+  _scriptsCargados[url] = new Promise((resolve, reject) => {
+    // Si ya está cargada la librería, resolver de una
+    if (url.includes('hls') && window.Hls) return resolve();
+    if (url.includes('pako') && window.pako) return resolve();
+
+    const s = document.createElement('script');
+    s.src = url;
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('No se pudo cargar ' + url));
+    document.head.appendChild(s);
+  });
+
+  return _scriptsCargados[url];
+}
+
+async function asegurarHls() {
+  if (window.Hls) return true;
+  try {
+    await cargarScript(HLS_URL);
+    return !!window.Hls;
+  } catch (e) {
+    console.warn('No se pudo cargar hls.js:', e);
+    return false;
+  }
+}
+
+async function asegurarPako() {
+  if (window.pako) return true;
+  try {
+    await cargarScript(PAKO_URL);
+    return !!window.pako;
+  } catch (e) {
+    console.warn('No se pudo cargar pako:', e);
+    return false;
+  }
+}
+
+
+/* =======================================================
    Idiomas (i18n)
    ======================================================= */
 
@@ -2868,6 +2919,7 @@ async function obtenerTextoXMLTV(url) {
   }
 
   if (url.toLowerCase().endsWith('.gz')) {
+    await asegurarPako();
     if (!window.pako) throw new Error('Falta la libreria de descompresion (pako)');
     const buffer = await resp.arrayBuffer();
     const descomprimido = window.pako.ungzip(new Uint8Array(buffer));
@@ -3691,7 +3743,7 @@ function construirMenuCalidadHls(hls) {
     });
 }
 
-function cargarStream(canal, intentarProxy) {
+async function cargarStream(canal, intentarProxy) {
   detenerStream();
   ocultarMenusFlotantes();
   rp.seccion.classList.remove('con-error');
@@ -3724,6 +3776,15 @@ function cargarStream(canal, intentarProxy) {
       rp.seccion.classList.add('con-error');
     }
   };
+
+  // Cargar HLS.js bajo demanda (lazy) si no está ya cargado
+  if (!window.Hls) {
+    const ok = await asegurarHls();
+    if (!ok) {
+      manejarFalloStream();
+      return;
+    }
+  }
 
   if (window.Hls && Hls.isSupported()) {
     const hls = new Hls({ enableWorker: true });
