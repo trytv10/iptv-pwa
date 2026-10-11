@@ -175,6 +175,13 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
         <button class="boton-icono" id="boton-canal-siguiente" aria-label="Canal siguiente">&darr;</button>
         <button class="boton-icono" id="boton-favorito" aria-label="Marcar como favorito">&#9734;</button>
 
+        <div class="reproductor__volumen" title="Volumen">
+          <button class="boton-icono reproductor__volumen-mute" id="boton-mute" aria-label="Silenciar">
+            <span id="icono-volumen">&#128266;</span>
+          </button>
+          <input type="range" id="slider-volumen" min="0" max="100" step="1" value="100" aria-label="Volumen">
+        </div>
+
         <div class="menu-flotante-cont">
           <button class="boton-icono" id="boton-subtitulos" hidden data-i18n="subtitulos">Subtitulos</button>
           <div class="menu-flotante" id="menu-subtitulos" hidden></div>

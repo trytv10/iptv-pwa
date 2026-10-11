@@ -3586,6 +3586,9 @@ const rp = {
   programa: document.getElementById('rp-programa'),
   estadoTexto: document.getElementById('rp-estado'),
   botonFavorito: document.getElementById('boton-favorito'),
+  botonMute: document.getElementById('boton-mute'),
+  iconoVolumen: document.getElementById('icono-volumen'),
+  sliderVolumen: document.getElementById('slider-volumen'),
   botonSubtitulos: document.getElementById('boton-subtitulos'),
   menuSubtitulos: document.getElementById('menu-subtitulos'),
   botonCalidad: document.getElementById('boton-calidad'),
@@ -3597,6 +3600,105 @@ const rp = {
 };
 
 let temporizadorPrograma = null;
+
+/* =======================================================
+   Control de volumen
+   ======================================================= */
+
+const CLAVE_VOLUMEN = 'iptv:volumen';
+const CLAVE_MUTE = 'iptv:mute';
+
+function inicializarVolumen() {
+  const volGuardado = localStorage.getItem(CLAVE_VOLUMEN);
+  const muteGuardado = localStorage.getItem(CLAVE_MUTE) === '1';
+
+  const vol = volGuardado !== null ? Math.max(0, Math.min(1, parseFloat(volGuardado))) : 1;
+
+  rp.video.volume = vol;
+  rp.video.muted = muteGuardado;
+
+  if (rp.sliderVolumen) {
+    rp.sliderVolumen.value = Math.round(vol * 100);
+    actualizarFondoSlider(vol * 100);
+  }
+
+  actualizarIconoVolumen(vol, muteGuardado);
+}
+
+function actualizarFondoSlider(pct) {
+  if (rp.sliderVolumen) {
+    rp.sliderVolumen.style.setProperty('--porcentaje', pct + '%');
+  }
+}
+
+function actualizarIconoVolumen(vol, muted) {
+  if (!rp.iconoVolumen) return;
+  if (muted || vol === 0) rp.iconoVolumen.textContent = '\uD83D\uDD07'; // 🔇
+  else if (vol < 0.5) rp.iconoVolumen.textContent = '\uD83D\uDD08'; // 🔈
+  else rp.iconoVolumen.textContent = '\uD83D\uDD0A'; // 🔊
+}
+
+function aplicarVolumen(nuevoVol, guardar) {
+  const v = Math.max(0, Math.min(1, nuevoVol));
+  rp.video.volume = v;
+  if (v > 0 && rp.video.muted) rp.video.muted = false;
+
+  if (rp.sliderVolumen) {
+    rp.sliderVolumen.value = Math.round(v * 100);
+    actualizarFondoSlider(v * 100);
+  }
+
+  if (guardar) {
+    localStorage.setItem(CLAVE_VOLUMEN, String(v));
+    localStorage.setItem(CLAVE_MUTE, rp.video.muted ? '1' : '0');
+  }
+
+  actualizarIconoVolumen(v, rp.video.muted);
+}
+
+function alternarMute() {
+  rp.video.muted = !rp.video.muted;
+
+  // Si estamos desmuteando y el volumen está en 0, subirlo al 50%
+  if (!rp.video.muted && rp.video.volume === 0) {
+    rp.video.volume = 0.5;
+    if (rp.sliderVolumen) {
+      rp.sliderVolumen.value = 50;
+      actualizarFondoSlider(50);
+    }
+  }
+
+  localStorage.setItem(CLAVE_MUTE, rp.video.muted ? '1' : '0');
+  localStorage.setItem(CLAVE_VOLUMEN, String(rp.video.volume));
+  actualizarIconoVolumen(rp.video.volume, rp.video.muted);
+}
+
+function configurarEventosVolumen() {
+  if (rp.sliderVolumen) {
+    rp.sliderVolumen.addEventListener('input', (e) => {
+      const v = parseInt(e.target.value, 10) / 100;
+      aplicarVolumen(v, true);
+    });
+  }
+
+  if (rp.botonMute) {
+    rp.botonMute.addEventListener('click', alternarMute);
+  }
+
+  // Sincronizar cambios del volumen nativo (teclas del sistema)
+  rp.video.addEventListener('volumechange', () => {
+    const v = rp.video.volume;
+    if (rp.sliderVolumen) {
+      rp.sliderVolumen.value = Math.round(v * 100);
+      actualizarFondoSlider(v * 100);
+    }
+    actualizarIconoVolumen(v, rp.video.muted);
+    localStorage.setItem(CLAVE_VOLUMEN, String(v));
+    localStorage.setItem(CLAVE_MUTE, rp.video.muted ? '1' : '0');
+  });
+
+  inicializarVolumen();
+}
 
 function actualizarProgramaReproductor(tvgId) {
   const actual = programaActual(tvgId);
@@ -3855,6 +3957,9 @@ rp.botonFavorito.addEventListener('click', () => {
   alternarFavorito(canal.id);
   actualizarBotonFavoritoReproductor(canal.id);
 });
+
+// Inicializar control de volumen
+configurarEventosVolumen();
 
 rp.botonSubtitulos.addEventListener('click', () => {
   const abierto = !rp.menuSubtitulos.hidden;
