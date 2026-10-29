@@ -544,6 +544,7 @@ const estado = {
     caidosRemotos: {},
   estadoCanales: {},
   estadoCanalesResumen: null,
+  paisesDisponibles: null,
 
   perfiles: [],
   perfilActivoId: '',
@@ -1715,6 +1716,28 @@ async function cargarCaidosDelWorker() {
     return true;
   } catch (e) {
     console.warn('No se pudieron cargar los canales caídos del Worker:', e);
+    return false;
+  }
+}
+
+async function cargarPaisesDisponibles() {
+  if (estado.paisesDisponibles) return true;
+  try {
+    const resp = await fetch(`${URL_WORKER}/canales/paises`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const mapa = {};
+    for (const p of (data.paises || [])) {
+      mapa[p.codigo] = p.total;
+    }
+    estado.paisesDisponibles = mapa;
+    console.info(`[paises] Cargados ${Object.keys(mapa).length} paises`);
+    return true;
+  } catch (e) {
+    console.warn('No se pudieron cargar los paises:', e);
     return false;
   }
 }
@@ -3105,6 +3128,12 @@ function agrupacionEfectiva() {
 
 function gruposDisponibles() {
   if (agrupacionEfectiva() === 'pais') {
+    if (estado.paisesDisponibles) {
+      const codigos = Object.keys(estado.paisesDisponibles)
+        .filter((p) => p && p.length === 2)
+        .sort((a, b) => nombrePais(a).localeCompare(nombrePais(b), estado.idioma));
+      return codigos;
+    }
     const set = new Set(estado.canales.map((c) => c.pais || ''));
     const codigos = Array.from(set)
       .filter(Boolean)
@@ -4606,6 +4635,7 @@ async function iniciar() {
   Promise.all([
     cargarCaidosDelWorker(),
     cargarEstadoCanales(),
+    cargarPaisesDisponibles(),
   ]).then(() => renderGuia());
 
   detectarInvitacionSync().then(() => {

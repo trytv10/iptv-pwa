@@ -426,6 +426,71 @@ function responderCanales(request, url, canales, actualizado, fuente, estadoCana
   });
 }
 
+/**
+ * Devuelve la lista de países únicos del catálogo con su conteo.
+ * Cacheado 5 min en el edge.
+ */
+async function manejarPaises(request, env) {
+  // Cargar canales del KV o del repo
+  let canales = [];
+
+  if (env.FAVORITOS) {
+    try {
+      const kv = await env.FAVORITOS.get(CLAVE_CANALES_KV, 'json');
+      if (kv && Array.isArray(kv.canales) && kv.canales.length > 0) {
+        canales = kv.canales;
+      }
+    } catch (e) { /* fallthrough */ }
+  }
+
+  if (canales.length === 0) {
+    const urlRemota = env.CANALES_URL || CANALES_URL_DEFECTO;
+    const cache = caches.default;
+    const cacheKey = new Request(`${urlRemota}#__canales_cache_paises`, { method: 'GET' });
+    let respuestaOrigen = await cache.match(cacheKey);
+    if (!respuestaOrigen) {
+      try {
+        const origen = await fetch(urlRemota, { cf: { cacheTtl: TTL_CANALES, cacheEverything: true } });
+        if (origen.ok) {
+          const texto = await origen.text();
+          respuestaOrigen = new Response(texto, {
+            status: 200,
+            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+          });
+          await cache.put(cacheKey, respuestaOrigen.clone());
+        }
+      } catch (e) { /* ignore */ }
+    }
+    if (respuestaOrigen) {
+      try {
+        const datos = JSON.parse(await respuestaOrigen.text());
+        canales = Array.isArray(datos) ? datos : (datos.canales || []);
+      } catch { /* ignore */ }
+    }
+  }
+
+  // Contar canales por país
+  const conteo = {};
+  for (const c of canales) {
+    const pais = (c.pais || '').toUpperCase();
+    if (pais && pais.length === 2) {
+      conteo[pais] = (conteo[pais] || 0) + 1;
+    }
+  }
+
+  const paises = Object.entries(conteo)
+    .map(([codigo, total]) => ({ codigo, total }))
+    .sort((a, b) => b.total - a.total);
+
+  return json({
+    ok: true,
+    total: paises.length,
+    paises,
+  }, 200, {
+    'Cache-Control': `public, max-age=${TTL_CANALES}`,
+  });
+}
+
 // ============================================================
 //  RUTA: /estado-canales
 // ============================================================
@@ -1077,6 +1142,7 @@ export default {
 
     if (url.pathname === '/health') return json({ ok: true, ts: new Date().toISOString() });
     if (url.pathname === '/proxy') return manejarProxy(request, url);
+    if (url.pathname === '/canales/paises') return manejarPaises(request, env);
     if (url.pathname === '/canales') return manejarCanales(request, env);
     if (url.pathname === '/estado-canales') return manejarEstadoCanales(request, env);
 
