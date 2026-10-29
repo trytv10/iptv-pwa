@@ -568,6 +568,7 @@ const estado = {
     modoServidor: false, // true cuando se está usando paginación del Worker
     q: '',              // búsqueda actual en el servidor
     grupo: '',          // filtro de grupo en el servidor
+    pais: '',           // filtro de país en el servidor
   },
 
   // Timer para debounce del buscador
@@ -2618,6 +2619,61 @@ async function filtrarPorGrupoEnServidor(grupo) {
 }
 
 /**
+ * Aplica un filtro de país server-side. Reemplaza toda la lista actual.
+ */
+async function filtrarPorPaisEnServidor(pais) {
+  const p = estado.paginacion;
+
+  if (!p.modoServidor) return;
+
+  p.cargando = true;
+  p.pais = pais || '';
+  p.grupo = '';
+  p.q = '';
+  p.offset = 0;
+  estado.busqueda = '';
+
+  const inputBusqueda = document.getElementById('campo-busqueda');
+  if (inputBusqueda) inputBusqueda.value = '';
+
+  renderFiltros();
+  renderGuia();
+
+  try {
+    const params = new URLSearchParams();
+    params.set('limit', String(PAGINA_TAMANO));
+    params.set('offset', '0');
+    if (pais) params.set('pais', pais);
+
+    const resp = await fetch(`${URL_WORKER}/canales?${params.toString()}`, { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+    const datos = await resp.json();
+    const lista = Array.isArray(datos) ? datos : (datos.canales || []);
+
+    estado.canales = normalizarDesdeJSON(lista, 0);
+    p.offset = datos.offset || 0;
+    p.total = datos.total || estado.canales.length;
+    p.hayMas = estado.canales.length < p.total;
+
+    const listaActiva = estado.listasGuardadas.find(l => l.id === estado.listaActivaId);
+    if (listaActiva) {
+      listaActiva.canales = estado.canales;
+      guardarListasEnStorage();
+    }
+
+    renderFiltros();
+    renderGuia();
+  } catch (e) {
+    console.warn('Error en filtro por país:', e);
+    mostrarToastSimple('Error al filtrar por país');
+  } finally {
+    p.cargando = false;
+    actualizarBotonCargarMas();
+  }
+}
+
+/**
  * Resetea el estado de paginación y recarga la primera página.
  * Se usa al limpiar filtros o cambiar de lista.
  */
@@ -2628,6 +2684,7 @@ async function recargarDesdeElPrincipio() {
 
   p.q = '';
   p.grupo = '';
+  p.pais = '';
   p.offset = 0;
   p.total = 0;
   p.hayMas = true;
@@ -3125,8 +3182,12 @@ function renderFiltros() {
   chipTodos.tabIndex = 0;
   chipTodos.addEventListener('click', () => {
     // Si estamos en modo servidor, usamos el filtro server-side
-    if (estado.paginacion.modoServidor && estado.filtro !== 'Todos') {
-      filtrarPorGrupoEnServidor('');
+    if (estado.paginacion.modoServidor && (estado.filtro !== 'Todos' || estado.paginacion.pais || estado.paginacion.grupo)) {
+      if (agrupacionEfectiva() === 'pais') {
+        filtrarPorPaisEnServidor('');
+      } else {
+        filtrarPorGrupoEnServidor('');
+      }
     } else {
       estado.filtro = 'Todos';
       renderFiltros();
@@ -3143,7 +3204,11 @@ function renderFiltros() {
     b.addEventListener('click', () => {
       // Si estamos en modo servidor, filtramos server-side
       if (estado.paginacion.modoServidor) {
-        filtrarPorGrupoEnServidor(g);
+        if (agrupacionEfectiva() === 'pais') {
+          filtrarPorPaisEnServidor(g);
+        } else {
+          filtrarPorGrupoEnServidor(g);
+        }
       } else {
         estado.filtro = g;
         renderFiltros();
