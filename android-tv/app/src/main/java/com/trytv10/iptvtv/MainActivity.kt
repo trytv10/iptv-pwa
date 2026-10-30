@@ -17,7 +17,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 class MainActivity : AppCompatActivity() {
 
     // ⚠️ CAMBIÁ ESTA URL si tu PWA cambia de dominio
-    private val urlInicio = "https://trytv10.github.io/iptv-pwa/"
+    private val urlInicio = "https://trytv10.github.io/"
 
     private lateinit var webView: WebView
     private lateinit var progressBar: ProgressBar

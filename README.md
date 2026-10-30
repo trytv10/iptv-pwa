@@ -2,7 +2,7 @@
 
 Reproductor de señales `.m3u8` pensado para funcionar igual en celulares, tablets y televisores (Smart TV con navegador, Android TV, etc.), sin pasar por una tienda de aplicaciones.
 
-**Demo:** https://trytv10.github.io/iptv-pwa/
+**Demo:** https://trytv10.github.io/
 
 ---
 
