@@ -211,5 +211,91 @@ https://ejemplo.com/canal/index.m3u8"></textarea>
 <script src="app.js"></script>
 <script src="intro.js"></script>
 <!-- hls.js y pako ahora se cargan dinámicamente desde app.js (lazy) -->
+<!-- Botón "Instalar en TV" (se muestra solo si la PWA es instalable) -->
+<div id="banner-instalar" hidden style="
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: linear-gradient(135deg, #e50914 0%, #b80710 100%);
+  color: white;
+  padding: 14px 22px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(229, 9, 20, 0.5);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+">
+  <span style="font-size: 1.4rem;">📺</span>
+  <span>Instalar en esta TV</span>
+</div>
+
+<script>
+/* =======================================================
+   Instalación PWA (banner automático)
+   ======================================================= */
+
+(function() {
+  const banner = document.getElementById('banner-instalar');
+  if (!banner) return;
+
+  // ¿Ya está instalada? (corriendo en modo standalone)
+  if (window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true) {
+    return; // no mostrar nada
+  }
+
+  let promptDiferido = null;
+
+  // Chrome/Edge/Fire TV disparan este evento cuando la PWA es instalable
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    promptDiferido = e;
+    banner.hidden = false;
+  });
+
+  // Hover / tap
+  banner.addEventListener('mouseenter', () => {
+    banner.style.transform = 'translateY(-3px)';
+    banner.style.boxShadow = '0 12px 40px rgba(229, 9, 20, 0.7)';
+  });
+  banner.addEventListener('mouseleave', () => {
+    banner.style.transform = 'translateY(0)';
+    banner.style.boxShadow = '0 8px 30px rgba(229, 9, 20, 0.5)';
+  });
+
+  // Click en el banner
+  banner.addEventListener('click', async () => {
+    if (!promptDiferido) {
+      // Fallback: navegador no soporta prompt (Safari, Tizen, webOS)
+      alert('Para instalar en esta TV:\n\n' +
+        '1. Abrí el menú del navegador (⋮ o "Más")\n' +
+        '2. Elegí "Agregar a pantalla de inicio" o "Instalar app"\n' +
+        '3. Confirmá');
+      return;
+    }
+    promptDiferido.prompt();
+    const { outcome } = await promptDiferido.userChoice;
+    if (outcome === 'accepted') {
+      banner.hidden = true;
+      console.info('[PWA] App instalada por el usuario');
+    }
+    promptDiferido = null;
+  });
+
+  // Después de instalar, ocultar el banner
+  window.addEventListener('appinstalled', () => {
+    banner.hidden = true;
+    console.info('[PWA] App instalada');
+  });
+})();
+</script>
+
 </body>
 </html>
