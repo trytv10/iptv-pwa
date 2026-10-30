@@ -201,7 +201,42 @@ function parseM3U(m3uContent, fuente) {
       const groupTitle = (l.match(/group-title="([^"]*)"/) || [])[1] || '';
       const tvgId = (l.match(/tvg-id="([^"]*)"/) || [])[1] || '';
       const tvgCountry = (l.match(/tvg-country="([^"]*)"/) || [])[1] || '';
-      const nombre = l.split(',').slice(1).join(',').trim();
+
+      // Capturar headers inline del #EXTINF (algunos canales los tienen acá)
+      const uaInline = (l.match(/http-user-agent="([^"]*)"/) || [])[1] || '';
+      const refererInline = (l.match(/http-referrer="([^"]*)"/) || [])[1] || '';
+
+      // Extraer el nombre: todo lo que está DESPUÉS de la última coma
+      // que NO esté dentro de comillas. Usamos un parser manual.
+      let nombre = '';
+      let enComillas = false;
+      let ultimaComaFuera = -1;
+      for (let k = 0; k < l.length; k++) {
+        const c = l[k];
+        if (c === '"') enComillas = !enComillas;
+        else if (c === ',' && !enComillas) ultimaComaFuera = k;
+      }
+      if (ultimaComaFuera !== -1) {
+        nombre = l.slice(ultimaComaFuera + 1).trim();
+      } else {
+        // Fallback: usar el split por coma (comportamiento viejo)
+        nombre = l.split(',').slice(1).join(',').trim();
+      }
+
+      // Limpiar nombre de posibles headers pegados (por si acaso)
+      if (nombre.includes('group-title=')) {
+        const partes = nombre.split('group-title="');
+        if (partes.length > 1) {
+          const resto = partes[1];
+          const cierre = resto.indexOf('",');
+          if (cierre !== -1) {
+            nombre = resto.slice(cierre + 2).trim();
+          }
+        }
+      }
+      if (nombre.includes('"') && nombre.startsWith('"')) {
+        nombre = nombre.replace(/^"+|"+$/g, '').trim();
+      }
 
       canalActual = {
         name: nombre,
@@ -214,6 +249,10 @@ function parseM3U(m3uContent, fuente) {
         fuente: fuente,
       };
       headersPendientes = [];
+
+      // Agregar headers inline si existen
+      if (uaInline) headersPendientes.push({ key: 'http-user-agent', value: uaInline });
+      if (refererInline) headersPendientes.push({ key: 'http-referrer', value: refererInline });
     } else if (l.startsWith('#EXTVLCOPT:')) {
       const match = l.match(/#EXTVLCOPT:(http-[^=]+)=(.+)/);
       if (match) headersPendientes.push({ key: match[1], value: match[2] });
@@ -357,8 +396,25 @@ async function main() {
       // 2. Si no, inferirlo del tvg-id, group-title, nombre o URL.
       const paisFinal = c.tvgCountryExplicito || inferirPais(c.tvgId, c.group, c.name, c.url);
 
+      // Sanitizar nombre: eliminar headers pegados por error y caracteres raros
+      let nombreLimpio = (c.name || '').trim();
+      // Eliminar bloques tipo 'http-user-agent="..."' o 'group-title="..."' pegados
+      nombreLimpio = nombreLimpio.replace(/\s*http-user-agent="[^"]*"/gi, '');
+      nombreLimpio = nombreLimpio.replace(/\s*http-referrer="[^"]*"/gi, '');
+      nombreLimpio = nombreLimpio.replace(/\s*group-title="[^"]*"/gi, '');
+      nombreLimpio = nombreLimpio.replace(/\s*tvg-logo="[^"]*"/gi, '');
+      nombreLimpio = nombreLimpio.replace(/\s*tvg-id="[^"]*"/gi, '');
+      nombreLimpio = nombreLimpio.replace(/\s*tvg-country="[^"]*"/gi, '');
+      // Eliminar prefijos tipo "like Gecko) Chrome/XXX Safari/XXX"
+      nombreLimpio = nombreLimpio.replace(/^like Gecko\)[^,]*,\s*/i, '');
+      nombreLimpio = nombreLimpio.replace(/^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ]+/, '');
+      // Colapsar espacios múltiples
+      nombreLimpio = nombreLimpio.replace(/\s+/g, ' ').trim();
+      // Si quedó vacío o muy corto, descartar
+      if (nombreLimpio.length < 2) return null;
+
       const canalLimpio = {
-        name: c.name.trim().slice(0, 200),
+        name: nombreLimpio.slice(0, 200),
         logo: (c.logo || '').trim(),
         group: normalizarGrupo(c.group),
         url: c.url.trim(),
