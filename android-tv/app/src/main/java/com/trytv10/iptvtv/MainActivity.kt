@@ -1,7 +1,9 @@
 package com.trytv10.iptvtv
 
 import android.annotation.SuppressLint
+import android.content.ComponentCallbacks2
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
@@ -16,7 +18,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 
 class MainActivity : AppCompatActivity() {
 
-    // ⚠️ CAMBIÁ ESTA URL si tu PWA cambia de dominio
+    // URL de la PWA (dominio nuevo)
     private val urlInicio = "https://trytv10.github.io/"
 
     private lateinit var webView: WebView
@@ -58,6 +60,19 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun configurarWebView() {
+        // 1) Forzar renderizado por GPU (hardware acceleration)
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+        // 2) Deshabilitar overscroll y scrollbars (menos trabajo para la GPU)
+        webView.overScrollMode = View.OVER_SCROLL_NEVER
+        webView.isVerticalScrollBarEnabled = false
+        webView.isHorizontalScrollBarEnabled = false
+
+        // 3) Priorizar el renderizado del WebView (Android 8+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false)
+        }
+
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -70,6 +85,19 @@ class MainActivity : AppCompatActivity() {
             cacheMode = WebSettings.LOAD_DEFAULT
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
             userAgentString = "$userAgentString IPTVTV/1.0"
+
+            // 4) Deshabilitar zoom (no hay touch en TV)
+            setSupportZoom(false)
+            builtInZoomControls = false
+            displayZoomControls = false
+
+            // 5) Deshabilitar safe browsing (overhead innecesario para app cerrada)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                safeBrowsingEnabled = false
+            }
+
+            // 6) Text zoom al 100% (evita re-layout)
+            textZoom = 100
         }
 
         webView.setBackgroundColor(0xFF000000.toInt())
@@ -93,6 +121,22 @@ class MainActivity : AppCompatActivity() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 progressBar.progress = newProgress
                 progressBar.visibility = if (newProgress in 1..99) View.VISIBLE else View.GONE
+            }
+        }
+    }
+
+    /**
+     * Libera memoria cuando Android avisa que está bajo de RAM.
+     * En TVs con 1-1.5 GB de RAM, esto es crítico.
+     */
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
+            // clearCache(false) NO borra el cache del Service Worker, solo el del WebView
+            try {
+                webView.clearCache(false)
+            } catch (e: Exception) {
+                // Ignorar si falla
             }
         }
     }
