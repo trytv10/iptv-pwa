@@ -1,6 +1,27 @@
 'use strict';
 
 /* =======================================================
+   Detección de TV / dispositivo de bajo rendimiento
+   ======================================================= */
+
+const ES_TV = /Android TV|Google TV|SmartTV|Smart-TV|Tizen|Web0S|WebOS|BRAVIA|AFT[BSM]|Fire TV|FireTV|HbbTV|NetCast|Roku|Xbox|PlayStation/i.test(navigator.userAgent);
+
+// Detección extra: si la pantalla es grande y el pixel ratio es bajo, es probable que sea TV
+const PANTALLA_GRANDE = window.innerWidth >= 1280 && window.devicePixelRatio <= 1.5;
+
+const MODO_TV = ES_TV || PANTALLA_GRANDE;
+
+// Aplicar clase al body lo antes posible
+if (MODO_TV) {
+  document.documentElement.classList.add('es-tv');
+  console.info('[TV] Modo TV detectado. Aplicando optimizaciones.');
+}
+
+// Tamaño de página adaptado
+const PAGINA_TAMANO_TV = 50;
+const PAGINA_TAMANO_DEFECTO = 75;
+
+/* =======================================================
    Carga diferida de librerías (hls.js, pako)
    ======================================================= */
 
@@ -517,7 +538,7 @@ const HISTORIAL_MAX = 30;
 const EPG_DELAY_MS = 5000;
 
 // --- Paginación server-side ---
-const PAGINA_TAMANO = 75;
+const PAGINA_TAMANO = MODO_TV ? PAGINA_TAMANO_TV : PAGINA_TAMANO_DEFECTO;
 
 /* =======================================================
    Estado
@@ -3986,7 +4007,21 @@ async function cargarStream(canal, intentarProxy) {
   }
 
   if (window.Hls && Hls.isSupported()) {
-    const hls = new Hls({ enableWorker: true });
+    // Configuración adaptada: buffer chico en TV (menos RAM), default en otros
+    const hlsConfig = MODO_TV
+      ? {
+          enableWorker: true,
+          maxBufferLength: 15,
+          maxMaxBufferLength: 30,
+          maxBufferSize: 30 * 1000 * 1000, // 30 MB
+          maxBufferHole: 0.5,
+          lowLatencyMode: false,
+          backBufferLength: 10,
+        }
+      : {
+          enableWorker: true,
+        };
+    const hls = new Hls(hlsConfig);
     estado.hls = hls;
     hls.loadSource(urlEfectiva);
     hls.attachMedia(rp.video);
@@ -4669,3 +4704,15 @@ async function iniciar() {
 }
 
 iniciar();
+
+// En TV, precargar HLS.js en background a los 3s para que el primer canal
+// se abra más rápido (HLS.js tarda ~300-500ms en descargarse + parsear)
+if (MODO_TV) {
+  setTimeout(() => {
+    if (typeof asegurarHls === 'function') {
+      asegurarHls().then((ok) => {
+        if (ok) console.info('[TV] HLS.js precargado en background');
+      });
+    }
+  }, 3000);
+}

@@ -1212,3 +1212,70 @@ textarea:focus,
     padding-right: 6px;
   }
 }
+
+
+/* =======================================================
+   Modo TV: optimizaciones para hardware limitado
+   ======================================================= */
+
+/* Sin animaciones ni transiciones (menos trabajo para la GPU) */
+html.es-tv *,
+html.es-tv *::before,
+html.es-tv *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Sin hover (no hay mouse en TV) */
+html.es-tv .fila-canal:hover {
+  background-color: #111b21;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+html.es-tv .boton-ver-mas:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html.es-tv .filtro:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Fuentes del sistema (sin Google Fonts) para ahorrar red + renderizado */
+html.es-tv body,
+html.es-tv h1, html.es-tv h2, html.es-tv h3,
+html.es-tv button, html.es-tv input {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Reducir sombras (costosas para la GPU) */
+html.es-tv .fila-canal,
+html.es-tv .boton-ver-mas,
+html.es-tv .continuar,
+html.es-tv .reproductor__capa {
+  box-shadow: none !important;
+}
+
+/* Reducir la escala del foco (el transform: scale es costoso) */
+html.es-tv button:focus,
+html.es-tv .fila-canal:focus {
+  transform: none !important;
+  outline-width: 3px !important;
+}
+
+/* Imágenes: evitar decodificación costosa */
+html.es-tv img {
+  image-rendering: auto;
+}
+
+/* Deshabilitar el efecto de "ripple" en botones */
+html.es-tv .fila-canal__favorito,
+html.es-tv .filtro,
+html.es-tv .boton-icono {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Reducir la complejidad del gradiente del reproductor */
+html.es-tv .reproductor__capa {
+  background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.7) 100%);
+}
